@@ -380,67 +380,97 @@ td input{
   font-style: italic;
 }
 
-@media (max-width: 980px){
-  .menu-grid,
-  .row-2,
-  .row-3,
-  .row-4{
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 980px) {
+    .menu-grid {
+        grid-template-columns: 1fr;
+    }
 
-  .row-6{
-    grid-template-columns: repeat(2, 1fr);
-  }
+    .row-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
 
-  .logo{
-    font-size: 28px;
-  }
+    .row-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
 
-  .topbar{
-    flex-direction: column;
-    align-items: stretch;
-  }
+    .row-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
 
-  .list-item{
-    flex-direction: column;
-    align-items: stretch;
-  }
+    .row-6 {
+        grid-template-columns: repeat(6, 1fr);
+    }
 
-  .actions{
-    justify-content: flex-end;
-  }
+    .small-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .logo {
+        font-size: 28px;
+    }
+
+    .topbar {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .list-item {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .actions {
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
 }
 
-@media (max-width: 640px){
-  .screen{
-    padding: 14px;
-  }
+@media (max-width: 640px) {
+    .screen {
+        padding: 14px;
+    }
 
-  .sheet{
-    padding: 12px;
-  }
+    .sheet {
+        padding: 12px;
+    }
 
-  .menu-card{
-    min-height: auto;
-    padding: 20px;
-  }
+    .menu-card {
+        min-height: auto;
+        padding: 20px;
+    }
 
-  .menu-card h3{
-    font-size: 24px;
-  }
+        .menu-card h3 {
+            font-size: 24px;
+        }
 
-  .row-6{
-    grid-template-columns: repeat(2, 1fr);
-  }
+    .row-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
 
-  .pericia-item{
-    grid-template-columns: 1fr;
-  }
+    .row-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
 
-  .side-buttons{
-    right: 12px;
-    bottom: 12px;
-  }
+    .row-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .row-6 {
+        grid-template-columns: repeat(6, 1fr);
+    }
+
+    .small-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .pericia-item {
+        grid-template-columns: 1fr;
+    }
+
+    .side-buttons {
+        right: 12px;
+        bottom: 12px;
+    }
 }
 
 .pdf-toolbar{
