@@ -10,6 +10,133 @@ const PROFICIENCIAS_DISPONIVEIS = [
     "Armaduras pesadas",
     "Escudos"
 ];
+const GOLPE_PESSOAL_EFEITOS = [
+    {
+        codigo: "amplo",
+        nome: "Amplo",
+        custoPm: 3,
+        repetivel: false,
+        descricao: "Seu ataque atinge todas as criaturas em alcance curto (incluindo aliados, mas não você mesmo). Faça um único teste de ataque e compare com a Defesa de cada criatura."
+    },
+    {
+        codigo: "atordoante",
+        nome: "Atordoante",
+        custoPm: 2,
+        repetivel: false,
+        descricao: "Uma criatura que sofra dano do ataque fica atordoada por uma rodada (apenas uma vez por cena; Fortitude CD For anula)."
+    },
+    {
+        codigo: "brutal",
+        nome: "Brutal",
+        custoPm: 1,
+        repetivel: false,
+        descricao: "Fornece um dado extra de dano do mesmo tipo."
+    },
+    {
+        codigo: "conjurador",
+        nome: "Conjurador",
+        custoPm: 0,
+        repetivel: false,
+        exigeMagia: true,
+        descricao: "Escolha uma magia de 1º ou 2º círculos. Se acertar seu golpe, você lança a magia como ação livre."
+    },
+    {
+        codigo: "destruidor",
+        nome: "Destruidor",
+        custoPm: 2,
+        repetivel: false,
+        descricao: "Aumenta o multiplicador de crítico em +1."
+    },
+    {
+        codigo: "distante",
+        nome: "Distante",
+        custoPm: 1,
+        repetivel: false,
+        descricao: "Aumenta o alcance em um passo."
+    },
+    {
+        codigo: "elemental",
+        nome: "Elemental",
+        custoPm: 2,
+        repetivel: true,
+        exigeElemento: true,
+        descricao: "Causa +2d6 pontos de dano de ácido, eletricidade, fogo ou frio."
+    },
+    {
+        codigo: "impactante",
+        nome: "Impactante",
+        custoPm: 1,
+        repetivel: false,
+        descricao: "Empurra o alvo 1,5m para cada 10 pontos de dano causado (arredondado para baixo)."
+    },
+    {
+        codigo: "letal",
+        nome: "Letal",
+        custoPm: 2,
+        repetivel: true,
+        maxUsos: 2,
+        descricao: "Aumenta a margem de ameaça em +2. Você pode escolher este efeito duas vezes para aumentar a margem de ameaça em +5."
+    },
+    {
+        codigo: "penetrante",
+        nome: "Penetrante",
+        custoPm: 1,
+        repetivel: false,
+        descricao: "Ignora 10 pontos de RD."
+    },
+    {
+        codigo: "preciso",
+        nome: "Preciso",
+        custoPm: 1,
+        repetivel: false,
+        descricao: "Quando faz o teste de ataque, você rola dois dados e usa o melhor resultado."
+    },
+    {
+        codigo: "qualquer_arma",
+        nome: "Qualquer Arma",
+        custoPm: 1,
+        repetivel: false,
+        descricao: "Você pode usar seu Golpe Pessoal com qualquer tipo de arma."
+    },
+    {
+        codigo: "ricocheteante",
+        nome: "Ricocheteante",
+        custoPm: 1,
+        repetivel: false,
+        descricao: "A arma volta para você após o ataque."
+    },
+    {
+        codigo: "teleguiado",
+        nome: "Teleguiado",
+        custoPm: 1,
+        repetivel: false,
+        descricao: "Ignora penalidades por camuflagem ou cobertura leves."
+    },
+    {
+        codigo: "lento",
+        nome: "Lento",
+        custoPm: -2,
+        repetivel: false,
+        descricao: "Seu ataque exige uma ação completa para ser usado."
+    },
+    {
+        codigo: "perto_da_morte",
+        nome: "Perto da Morte",
+        custoPm: -2,
+        repetivel: false,
+        descricao: "O ataque só pode ser usado se você estiver com um quarto de seus PV ou menos."
+    },
+    {
+        codigo: "sacrificio",
+        nome: "Sacrifício",
+        custoPm: -2,
+        repetivel: false,
+        descricao: "Sempre que usa seu Golpe Pessoal, você perde 10 PV."
+    }
+];
+
+const GOLPE_PESSOAL_ELEMENTOS = ["ácido", "eletricidade", "fogo", "frio"];
+const GOLPE_PESSOAL_ATRIBUTOS_MENTAIS = ["inteligencia", "sabedoria", "carisma"];
 
 let RACAS_DB = [];
 let RACAS_DB_CARREGADO = false;
@@ -769,6 +896,11 @@ let state = {
   screen: "home",
   fichas: loadFichas(),
   fichaAtualId: null,
+    secoesFicha: {
+        poderes: true,
+        magias: true,
+        inventario: true
+    },
   modal: null,
   modalPayload: null,
   dados: {
@@ -803,6 +935,7 @@ let state = {
 
       poderClasseEscolhas: {},
       escolhaPoderClasseAbertaId: null,
+      golpePessoalModal: null,
 
       fluxoClasseAtivo: false,
       classeEvolucaoContexto: null,
@@ -832,6 +965,7 @@ let state = {
         classeSelecaoEvolucaoId: "",
         poderClasseEscolhas: {},
         escolhaPoderClasseAbertaId: null,
+        golpePessoalModal: null,
         divindadeEscolhaAberta: false,
         divindadeSelecionadaId: "",
         divindadePoderSelecionadoNome: ""
@@ -938,7 +1072,539 @@ function buscarRegistrosPorFiltro(colecao, filtro, opcoes = {}) {
 
     return resultados;
 }
+function getGolpePessoalStateAtual() {
+    return state.screen === "criacao"
+        ? state.criacao
+        : state.evolucao;
+}
 
+function isGolpePessoalOpcao(opcao) {
+    const nome = normalizarTextoRegra(opcao?.nomeCurto || opcao?.valor || opcao?.nome || "");
+    return nome === "golpe pessoal" || nome.startsWith("golpe pessoal:");
+}
+
+function criarConfigInicialGolpePessoal() {
+    return {
+        custoBase: 1,
+        efeitos: [],
+        conjurador: null
+    };
+}
+
+function abrirGolpePessoalModal() {
+    const origem = getEscolhaClasseSelecionadaQueAbriuPoder();
+    if (!origem?.opcao) return;
+
+    const ctx = getGolpePessoalStateAtual();
+    ctx.golpePessoalModal = {
+        escolhaClasseId: origem.escolhaId || "",
+        opcaoId: origem.opcao.id || "",
+        config: JSON.parse(JSON.stringify(origem.opcao.golpePessoalConfig || criarConfigInicialGolpePessoal()))
+    };
+
+    render();
+}
+
+function fecharGolpePessoalModal() {
+    const ctx = getGolpePessoalStateAtual();
+    if (ctx) {
+        ctx.golpePessoalModal = null;
+    }
+
+    if (state.screen === "criacao") {
+        state.criacao.escolhaPoderClasseAbertaId = null;
+    } else {
+        state.evolucao.escolhaPoderClasseAbertaId = null;
+    }
+
+    render();
+}
+
+function getGolpePessoalModalAtual() {
+    return getGolpePessoalStateAtual().golpePessoalModal || null;
+}
+
+function getGolpePessoalConfigAtual() {
+    return getGolpePessoalModalAtual()?.config || null;
+}
+
+function getDefinicaoGolpePessoal(codigo) {
+    return GOLPE_PESSOAL_EFEITOS.find(e => e.codigo === codigo) || null;
+}
+
+function contarEfeitoGolpePessoal(config, codigo) {
+    return (config?.efeitos || []).filter(e => e.codigo === codigo).length;
+}
+
+function podeAdicionarEfeitoGolpePessoal(config, codigo) {
+    const def = getDefinicaoGolpePessoal(codigo);
+    if (!def) return false;
+
+    const qtd = contarEfeitoGolpePessoal(config, codigo);
+
+    if (!def.repetivel && qtd > 0) return false;
+    if (def.maxUsos && qtd >= def.maxUsos) return false;
+
+    return true;
+}
+
+function calcularCustoGolpePessoal(config) {
+    let total = Number(config?.custoBase || 1);
+
+    for (const efeito of (config?.efeitos || [])) {
+        total += Number(efeito?.custoPm || 0);
+    }
+
+    if (config?.conjurador?.magiaNome) {
+        total += Number(config?.conjurador?.custoPmMagia || 0) + 1;
+    }
+
+    return Math.max(1, total);
+}
+
+function getResumoGolpePessoal(config) {
+    const partes = [];
+
+    for (const efeito of (config?.efeitos || [])) {
+        if (efeito.codigo === "elemental") {
+            partes.push(`Elemental (${efeito.elemento || "elemento"})`);
+            continue;
+        }
+
+        partes.push(efeito.nome || efeito.codigo);
+    }
+
+    if (config?.conjurador?.magiaNome) {
+        partes.push(`Conjurador (${config.conjurador.magiaNome})`);
+    }
+
+    return partes.join(", ");
+}
+
+function montarDescricaoGolpePessoal(config, descricaoBase = "") {
+    const linhas = [];
+
+    if (descricaoBase) {
+        linhas.push(descricaoBase.trim());
+    }
+
+    linhas.push(`Custo total: ${calcularCustoGolpePessoal(config)} PM`);
+
+    const efeitos = (config?.efeitos || []).map(efeito => {
+        if (efeito.codigo === "elemental") {
+            return `• ${efeito.nome} (${efeito.elemento || "elemento"}): ${efeito.descricao}`;
+        }
+        return `• ${efeito.nome}: ${efeito.descricao}`;
+    });
+
+    if (efeitos.length) {
+        linhas.push("Efeitos escolhidos:");
+        linhas.push(...efeitos);
+    }
+
+    if (config?.conjurador?.magiaNome) {
+        linhas.push("Conjurador:");
+        linhas.push(`• Magia: ${config.conjurador.magiaNome}`);
+        linhas.push(`• Círculo: ${config.conjurador.circulo || "?"}`);
+        linhas.push(`• Custo da magia: ${Number(config.conjurador.custoPmMagia) || 0} PM`);
+        linhas.push(`• Atributo-chave: ${config.conjurador.atributoMental || "inteligencia"}`);
+
+        if (config.conjurador.execucao) {
+            linhas.push(`• Execução: ${config.conjurador.execucao}`);
+        }
+        if (config.conjurador.alcance) {
+            linhas.push(`• Alcance: ${config.conjurador.alcance}`);
+        }
+        if (config.conjurador.area) {
+            linhas.push(`• Área: ${config.conjurador.area}`);
+        }
+        if (config.conjurador.duracao) {
+            linhas.push(`• Duração: ${config.conjurador.duracao}`);
+        }
+        if (config.conjurador.resistencia) {
+            linhas.push(`• Resistência: ${config.conjurador.resistencia}`);
+        }
+        if (config.conjurador.descricao) {
+            linhas.push(`• Descrição da magia: ${config.conjurador.descricao}`);
+        }
+    }
+
+    return linhas.filter(Boolean).join("\n");
+}
+
+function criarRegistroGolpePessoalParaFicha(opcao) {
+    const config = JSON.parse(JSON.stringify(opcao?.golpePessoalConfig || criarConfigInicialGolpePessoal()));
+    const custoCalculado = calcularCustoGolpePessoal(config);
+    const resumo = getResumoGolpePessoal(config) || "Configuração";
+
+    const resumoUso = config?.conjurador?.magiaNome
+        ? `Custo: ${Number(custoCalculado) || 0} PM • Conjurador: ${config.conjurador.magiaNome}`
+        : `Custo: ${Number(custoCalculado) || 0} PM`;
+
+    return {
+        id: uid(),
+        tipoRegistro: "poder",
+        nome: `Golpe Pessoal: ${resumo}`,
+        nomeCurto: `Golpe Pessoal: ${resumo}`,
+        descricao: montarDescricaoGolpePessoal(config, opcao?.descricaoBase || opcao?.descricao || ""),
+        custoPm: Number(custoCalculado) || 0,
+        custoVida: 0,
+        custoPmPermanente: 0,
+        custoVidaPermanente: 0,
+        resumoUso,
+        ativavel: true,
+        permiteIntensificar: false,
+        incrementos: [],
+        escolhas: [],
+        origemBase: "classe",
+        filtros: "poder|poder_classe|poder_guerreiro",
+        escolhaEspecial: "golpe_pessoal",
+        escolhaEspecialValor: resumo,
+        golpePessoalConfig: config
+    };
+}
+
+function getMagiasElegiveisConjuradorGolpePessoal(ficha) {
+    return (ficha?.magias || [])
+        .map(magia => {
+            const registro =
+                (magia?.registroId ? getRegistroPoderMagiaPorId(magia.registroId) : null) ||
+                getRegistroMagiaPorNome(magia?.nome || "");
+
+            const circulo = Number(magia?.circulo || registro?.circulo || 0);
+            if (circulo < 1 || circulo > 2) return null;
+
+            return {
+                id: magia?.registroId || registro?.id || uid(),
+                nome: magia?.nome || registro?.nome || "",
+                circulo,
+                custoPm: Number(magia?.custoPmBase ?? magia?.custoPm ?? registro?.custoPm) || 0,
+                registroId: magia?.registroId || registro?.id || "",
+                descricao: magia?.descricao || registro?.descricao || "",
+                execucao: magia?.execucao || registro?.execucao || "",
+                alcance: magia?.alcance || registro?.alcance || "",
+                area: magia?.area || registro?.area || "",
+                duracao: magia?.duracao || registro?.duracao || "",
+                resistencia: magia?.resistencia || registro?.resistencia || ""
+            };
+        })
+        .filter(Boolean)
+        .sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"));
+}
+function adicionarEfeitoGolpePessoal(codigo) {
+    const config = getGolpePessoalConfigAtual();
+    if (!config) return;
+
+    if (!podeAdicionarEfeitoGolpePessoal(config, codigo)) return;
+
+    const def = getDefinicaoGolpePessoal(codigo);
+    if (!def) return;
+
+    if (codigo === "conjurador") {
+        const ficha =
+            state.screen === "criacao"
+                ? getFichaCriacao?.()
+                : getFichaEvolucaoAtual?.() || getFichaAtual?.();
+
+        const magias = getMagiasElegiveisConjuradorGolpePessoal(ficha);
+        if (!magias.length) {
+            alert("Nenhuma magia de 1º ou 2º círculos disponível para Conjurador.");
+            return;
+        }
+
+        const magia = magias[0];
+
+        config.conjurador = {
+            magiaId: magia.id,
+            magiaNome: magia.nome,
+            custoPmMagia: Number(magia.custoPm) || 0,
+            circulo: Number(magia.circulo) || 1,
+            atributoMental: "inteligencia",
+            registroId: magia.registroId || "",
+            descricao: magia.descricao || "",
+            execucao: magia.execucao || "",
+            alcance: magia.alcance || "",
+            area: magia.area || "",
+            duracao: magia.duracao || "",
+            resistencia: magia.resistencia || ""
+        };
+
+        render();
+        return;
+    }
+
+    if (codigo === "elemental") {
+        config.efeitos.push({
+            codigo: def.codigo,
+            nome: def.nome,
+            custoPm: Number(def.custoPm) || 0,
+            descricao: def.descricao || "",
+            elemento: GOLPE_PESSOAL_ELEMENTOS[0]
+        });
+
+        render();
+        return;
+    }
+
+    config.efeitos.push({
+        codigo: def.codigo,
+        nome: def.nome,
+        custoPm: Number(def.custoPm) || 0,
+        descricao: def.descricao || ""
+    });
+
+    render();
+}
+function recalcularCdMagiasFichaAtual() {
+    const ficha = getFichaAtual();
+    if (!ficha) return;
+
+    atualizarCdMagiasNaFicha(ficha, true);
+    saveFichas();
+    render();
+}
+function removerEfeitoGolpePessoal(codigo, indice = -1) {
+    const config = getGolpePessoalConfigAtual();
+    if (!config) return;
+
+    if (codigo === "conjurador") {
+        config.conjurador = null;
+        render();
+        return;
+    }
+
+    const lista = config.efeitos || [];
+    if (!lista.length) return;
+
+    if (indice >= 0 && lista[indice]?.codigo === codigo) {
+        lista.splice(indice, 1);
+        render();
+        return;
+    }
+
+    const idx = lista.findIndex(e => e.codigo === codigo);
+    if (idx >= 0) {
+        lista.splice(idx, 1);
+        render();
+    }
+}
+
+function alterarElementoGolpePessoal(indice, valor) {
+    const config = getGolpePessoalConfigAtual();
+    const efeito = config?.efeitos?.[indice];
+    if (!efeito || efeito.codigo !== "elemental") return;
+
+    efeito.elemento = valor;
+    render();
+}
+
+function alterarMagiaConjuradorGolpePessoal(registroId) {
+    const config = getGolpePessoalConfigAtual();
+    if (!config?.conjurador) return;
+
+    const ficha =
+        state.screen === "criacao"
+            ? getFichaCriacao?.()
+            : getFichaEvolucaoAtual?.() || getFichaAtual?.();
+
+    const magia = getMagiasElegiveisConjuradorGolpePessoal(ficha)
+        .find(m => String(m.registroId || m.id) === String(registroId));
+
+    if (!magia) return;
+
+    config.conjurador.magiaId = magia.id;
+    config.conjurador.magiaNome = magia.nome;
+    config.conjurador.custoPmMagia = Number(magia.custoPm) || 0;
+    config.conjurador.circulo = Number(magia.circulo) || 1;
+    config.conjurador.registroId = magia.registroId || "";
+    config.conjurador.descricao = magia.descricao || "";
+    config.conjurador.execucao = magia.execucao || "";
+    config.conjurador.alcance = magia.alcance || "";
+    config.conjurador.area = magia.area || "";
+    config.conjurador.duracao = magia.duracao || "";
+    config.conjurador.resistencia = magia.resistencia || "";
+
+    render();
+}
+
+function alterarAtributoMentalConjuradorGolpePessoal(valor) {
+    const config = getGolpePessoalConfigAtual();
+    if (!config?.conjurador) return;
+
+    config.conjurador.atributoMental = valor;
+    render();
+}
+
+function confirmarGolpePessoalModal() {
+    const ficha = state.screen === "criacao"
+        ? (getFichaCriacao?.() || null)
+        : (getFichaEvolucaoAtual?.() || getFichaAtual?.() || null);
+
+    const classe = state.screen === "criacao"
+        ? (getClasseEvolucaoAtualCriacao?.() || getClasseSelecionadaCriacao?.() || null)
+        : (getClasseEvolucaoAtualFicha?.() || null);
+
+    if (!ficha || !classe) return;
+
+    const ctx = getGolpePessoalStateAtual();
+    const modal = ctx?.golpePessoalModal;
+    if (!modal) return;
+
+    const mapaClasse = state.screen === "criacao"
+        ? (state.criacao.classeEscolhas || {})
+        : (state.evolucao.classeEscolhas || {});
+
+    const lista = Array.isArray(mapaClasse[modal.escolhaClasseId]) ? mapaClasse[modal.escolhaClasseId] : [];
+    const opcao = lista.find(item => String(item.id || "") === String(modal.opcaoId || ""));
+    if (!opcao) return;
+
+    const config = JSON.parse(JSON.stringify(getGolpePessoalConfigAtual() || criarConfigInicialGolpePessoal()));
+    const custoFinal = calcularCustoGolpePessoal(config);
+    const resumo = getResumoGolpePessoal(config) || "Configuração";
+    const descricaoBaseBanco = opcao.descricao || "";
+
+    opcao.descricaoBase = descricaoBaseBanco;
+    opcao.label = `Poder de classe: Golpe Pessoal`;
+    opcao.valor = `Golpe Pessoal: ${resumo}`;
+    opcao.nomeCurto = `Golpe Pessoal: ${resumo}`;
+    opcao.escolhaEspecial = "golpe_pessoal";
+    opcao.escolhaEspecialValor = resumo;
+    opcao.golpePessoalConfig = config;
+    opcao.custoPm = custoFinal;
+    opcao.resumoUso = `Custo: ${custoFinal} PM`;
+    opcao.descricao = montarDescricaoGolpePessoal(config, descricaoBaseBanco);
+    opcao.escolhasConfirmadas = true;
+
+    aplicarEscolhasDoPoderClasseNaFichaImediatamente(ficha, classe, opcao);
+
+    ctx.golpePessoalModal = null;
+
+    if (state.screen === "criacao") {
+        state.criacao.escolhaPoderClasseAbertaId = null;
+        state.criacao.escolhaClasseAbertaId = null;
+    } else {
+        state.evolucao.escolhaPoderClasseAbertaId = null;
+        state.evolucao.escolhaClasseAbertaId = null;
+    }
+
+    saveFichas?.();
+    render();
+}
+function renderGolpePessoalModal() {
+    const modal = getGolpePessoalModalAtual();
+    const config = modal?.config;
+    if (!config) return "";
+
+    const ficha =
+        state.screen === "criacao"
+            ? getFichaCriacao?.()
+            : getFichaEvolucaoAtual?.() || getFichaAtual?.();
+
+    const magiasConjurador = getMagiasElegiveisConjuradorGolpePessoal(ficha);
+    const custoTotal = calcularCustoGolpePessoal(config);
+
+    setTimeout(() => {
+        document.body.classList.add("modal-open");
+    }, 0);
+
+    return `
+      <div class="overlay" onclick="fecharGolpePessoalModal()">
+        <div class="overlay-card" onclick="event.stopPropagation()" style="max-width:920px;">
+          <div class="overlay-header">
+            <div>
+              <div class="overlay-title">Golpe Pessoal</div>
+              <div class="overlay-subtitle">Monte os efeitos do golpe. Custo atual: <strong>${escapeHtml(String(custoTotal))} PM</strong></div>
+            </div>
+
+            <div class="actions" style="justify-content:flex-end; align-items:center;">
+              <button class="btn primary" onclick="confirmarGolpePessoalModal()">Confirmar</button>
+              <button class="btn ghost" onclick="fecharGolpePessoalModal()">Fechar</button>
+            </div>
+          </div>
+
+          <div class="overlay-body">
+            <div class="list">
+              ${GOLPE_PESSOAL_EFEITOS.map(def => {
+        const qtd = def.codigo === "conjurador"
+            ? (config?.conjurador ? 1 : 0)
+            : contarEfeitoGolpePessoal(config, def.codigo);
+
+        const podeAdd = podeAdicionarEfeitoGolpePessoal(config, def.codigo);
+        const custoLabel = def.custoPm >= 0 ? `+${def.custoPm}` : `${def.custoPm}`;
+
+        return `
+                    <div class="list-item" style="display:block;">
+                      <div style="display:flex; gap:12px; justify-content:space-between; align-items:flex-start;">
+                        <div class="choice-main" style="flex:1;">
+                          <div class="list-item-title">${escapeHtml(def.nome)} (${escapeHtml(String(custoLabel))} PM)</div>
+                          <div class="list-item-subtitle">${escapeHtml(def.descricao)}</div>
+                          ${qtd > 0 ? `<div class="muted" style="margin-top:6px;">Selecionado${qtd > 1 ? ` ${qtd}x` : ""}</div>` : ""}
+                        </div>
+
+                        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+                          <button class="btn small" ${podeAdd ? "" : "disabled"} onclick="adicionarEfeitoGolpePessoal('${escapeAttr(def.codigo)}')">Adicionar</button>
+                          <button class="btn ghost small" ${qtd > 0 ? "" : "disabled"} onclick="removerEfeitoGolpePessoal('${escapeAttr(def.codigo)}')">Remover</button>
+                        </div>
+                      </div>
+
+                      ${def.codigo === "conjurador" && config?.conjurador ? `
+                        <div class="panel" style="margin-top:10px;">
+                          <div class="field">
+                            <label>Magia</label>
+                            <select onchange="alterarMagiaConjuradorGolpePessoal(this.value)">
+                              ${magiasConjurador.map(magia => `
+                                <option
+                                  value="${escapeAttr(String(magia.registroId || magia.id))}"
+                                  ${(String(config.conjurador.registroId || config.conjurador.magiaId) === String(magia.registroId || magia.id)) ? "selected" : ""}
+                                >
+                                  ${escapeHtml(`${magia.nome} (${magia.circulo}º círculo, ${magia.custoPm} PM)`)}
+                                </option>
+                              `).join("")}
+                            </select>
+                          </div>
+
+                          <div class="field" style="margin-top:10px;">
+                            <label>Atributo mental</label>
+                            <select onchange="alterarAtributoMentalConjuradorGolpePessoal(this.value)">
+                              ${GOLPE_PESSOAL_ATRIBUTOS_MENTAIS.map(attr => `
+                                <option value="${escapeAttr(attr)}" ${config.conjurador.atributoMental === attr ? "selected" : ""}>
+                                  ${escapeHtml(attr)}
+                                </option>
+                              `).join("")}
+                            </select>
+                          </div>
+                        </div>
+                      ` : ""}
+
+                      ${def.codigo === "elemental" ? (config.efeitos || []).map((efeito, indice) => {
+            if (efeito.codigo !== "elemental") return "";
+            return `
+                            <div class="panel" style="margin-top:10px;">
+                              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                                <div class="field" style="min-width:220px; margin:0;">
+                                  <label>Elemento</label>
+                                  <select onchange="alterarElementoGolpePessoal(${indice}, this.value)">
+                                    ${GOLPE_PESSOAL_ELEMENTOS.map(elemento => `
+                                      <option value="${escapeAttr(elemento)}" ${efeito.elemento === elemento ? "selected" : ""}>
+                                        ${escapeHtml(elemento)}
+                                      </option>
+                                    `).join("")}
+                                  </select>
+                                </div>
+                                <button class="btn ghost small" onclick="removerEfeitoGolpePessoal('elemental', ${indice})">Remover esta instância</button>
+                              </div>
+                            </div>
+                          `;
+        }).join("") : ""}
+                    </div>
+                  `;
+    }).join("")}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+}
 function buscarPoderesMagiasPorFiltro(filtro, opcoes = {}) {
     return buscarRegistrosPorFiltro(PODERES_MAGIAS_DB.registros || [], filtro, opcoes);
 }
@@ -1597,7 +2263,7 @@ function renderWidgetDinheiroFlutuante() {
     const valor = getDinheiroFicha(ficha);
 
     return `
-      <div style="position:fixed; left:16px; bottom:20px; z-index:1200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
+      <div style="position:fixed; right:25px; bottom:70px; z-index:1200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
         <button class="btn" onclick="togglePainelDinheiro()">
           T$ ${escapeHtml(String(valor))}
         </button>
@@ -2275,23 +2941,32 @@ function renderInventarioSimples(ficha) {
 
     return `
       <div class="panel">
-        <div class="panel-title">Inventário</div>
-        <div class="panel-body">
-          <div class="actions" style="margin-bottom:12px;">
-            <button class="btn" onclick="abrirModalAdicionarItemInventario()">Adicionar item</button>
-          </div>
+        <div
+          class="panel-title"
+          style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+          onclick="toggleSecaoFicha('inventario')"
+        >
+          <span>Inventário</span>
+          <span>${secaoFichaEstaAberta('inventario') ? "▲" : "▼"}</span>
+        </div>
 
-          ${!itens.length
-            ? `<div class="empty">Nenhum item no inventário.</div>`
-            : `
-              <div class="list">
-                ${itens.map(item => {
-                const base = getBaseItemDaEntrada(item);
-                const nome = base?.nome || item.nomeManual || "Item";
-                const qtd = Math.max(1, Number(item.quantidade) || 1);
-                const titulo = `${qtd} x ${nome}`;
+        ${secaoFichaEstaAberta('inventario') ? `
+          <div class="panel-body">
+            <div class="actions" style="margin-bottom:12px;">
+              <button class="btn" onclick="abrirModalAdicionarItemInventario()">Adicionar item</button>
+            </div>
 
-                return `
+            ${!itens.length
+                ? `<div class="empty">Nenhum item no inventário.</div>`
+                : `
+                <div class="list">
+                  ${itens.map(item => {
+                    const base = getBaseItemDaEntrada(item);
+                    const nome = base?.nome || item.nomeManual || "Item";
+                    const qtd = Math.max(1, Number(item.quantidade) || 1);
+                    const titulo = `${qtd} x ${nome}`;
+
+                    return `
                       <div class="list-item" style="align-items:center; gap:12px;">
                         <div style="flex:1; min-width:0;">
                           <button
@@ -2319,10 +2994,11 @@ function renderInventarioSimples(ficha) {
                         </div>
                       </div>
                     `;
-            }).join("")}
-              </div>
-            `}
-        </div>
+                }).join("")}
+                </div>
+              `}
+          </div>
+        ` : ""}
       </div>
     `;
 }
@@ -2420,7 +3096,214 @@ function getCaminhoClassePorNome(classeId, nome) {
         normalizarTextoRegra(c.nome) === alvo
     ) || null;
 }
+function normalizarNomeEscolaMagia(valor) {
+    return normalizarTextoRegra(valor || "");
+}
+function getEscolasDruidaNoContexto(ficha) {
+    const vistos = new Set();
+    const escolas = [];
 
+    const adicionar = (nome) => {
+        const chave = normalizarNomeEscolaMagia(nome);
+        if (!chave || vistos.has(chave)) return;
+        vistos.add(chave);
+        escolas.push(String(nome).trim());
+    };
+
+    (ficha?.druidaEscolas || []).forEach(adicionar);
+
+    (ficha?.escolhasClasseResolvidas || [])
+        .filter(reg => String(reg?.escolhaId || "") === "esc_druida_escolas")
+        .forEach(reg => {
+            (reg?.selecionadas || []).forEach(op => adicionar(op?.valor || op?.nomeCurto || ""));
+        });
+
+    (state.criacao?.classeEscolhas?.["esc_druida_escolas"] || []).forEach(op =>
+        adicionar(op?.valor || op?.nomeCurto || "")
+    );
+
+    (state.evolucao?.classeEscolhas?.["esc_druida_escolas"] || []).forEach(op =>
+        adicionar(op?.valor || op?.nomeCurto || "")
+    );
+
+    return escolas;
+}
+
+function druidaJaEscolheuEscolas(ficha) {
+    return getEscolasDruidaNoContexto(ficha).length >= 3;
+}
+
+function filtrarMagiasPorEscolasDoDruida(registros, ficha) {
+    const escolas = getEscolasDruidaNoContexto(ficha)
+        .map(normalizarNomeEscolaMagia);
+
+    if (!escolas.length) return [];
+
+    return (registros || []).filter(registro =>
+        escolas.includes(normalizarNomeEscolaMagia(registro?.escola || ""))
+    );
+}
+
+function getMagiasDruidaNoContexto(ficha) {
+    const circuloMaximo = getCirculoMaximoPorClasseNoContexto(ficha, "druida") || 1;
+    const registros = [];
+
+    for (let c = 1; c <= circuloMaximo; c++) {
+        registros.push(...buscarMagiasPorFiltro(`magia_divina_${c}`));
+    }
+
+    const unicos = registros.reduce((acc, registro) => {
+        if (!acc.some(r => String(r.id) === String(registro.id))) {
+            acc.push(registro);
+        }
+        return acc;
+    }, []);
+
+    return filtrarForaMagiasJaConhecidas(
+        filtrarMagiasPorEscolasDoDruida(unicos, ficha),
+        ficha
+    )
+        .sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"))
+        .map(montarOpcaoDeRegistroBanco)
+        .filter(Boolean);
+}
+
+function getMagiasDruidaSegredosNatureza(ficha) {
+    const circuloMaximo = getCirculoMaximoPorClasseNoContexto(ficha, "druida") || 1;
+    const registros = [];
+
+    for (let c = 1; c <= circuloMaximo; c++) {
+        registros.push(...buscarMagiasPorFiltro(`magia_arcana_${c}`));
+        registros.push(...buscarMagiasPorFiltro(`magia_divina_${c}`));
+        registros.push(...buscarMagiasPorFiltro(`magia_universal_${c}`));
+    }
+
+    const unicos = registros.reduce((acc, registro) => {
+        if (!acc.some(r => String(r.id) === String(registro.id))) {
+            acc.push(registro);
+        }
+        return acc;
+    }, []);
+
+    return filtrarForaMagiasJaConhecidas(
+        filtrarMagiasPorEscolasDoDruida(unicos, ficha),
+        ficha
+    )
+        .sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"))
+        .map(montarOpcaoDeRegistroBanco)
+        .filter(Boolean);
+}
+function getEscolasBardoNoContexto(ficha) {
+    const vistos = new Set();
+    const escolas = [];
+
+    const adicionar = (nome) => {
+        const chave = normalizarNomeEscolaMagia(nome);
+        if (!chave || vistos.has(chave)) return;
+        vistos.add(chave);
+        escolas.push(String(nome).trim());
+    };
+
+    (ficha?.bardoEscolas || []).forEach(adicionar);
+
+    (ficha?.escolhasClasseResolvidas || [])
+        .filter(reg => String(reg?.escolhaId || "") === "esc_bardo_escolas")
+        .forEach(reg => {
+            (reg?.selecionadas || []).forEach(op => adicionar(op?.valor || op?.nomeCurto || ""));
+        });
+
+    (state.criacao?.classeEscolhas?.["esc_bardo_escolas"] || []).forEach(op =>
+        adicionar(op?.valor || op?.nomeCurto || "")
+    );
+
+    (state.evolucao?.classeEscolhas?.["esc_bardo_escolas"] || []).forEach(op =>
+        adicionar(op?.valor || op?.nomeCurto || "")
+    );
+
+    return escolas;
+}
+
+function bardoJaEscolheuEscolas(ficha) {
+    return getEscolasBardoNoContexto(ficha).length >= 3;
+}
+
+function filtrarMagiasPorEscolasDoBardo(registros, ficha) {
+    const escolas = getEscolasBardoNoContexto(ficha)
+        .map(normalizarNomeEscolaMagia);
+
+    if (!escolas.length) return [];
+
+    return (registros || []).filter(registro =>
+        escolas.includes(normalizarNomeEscolaMagia(registro?.escola || ""))
+    );
+}
+function getMagiasArcanistaConhecimentoMagico(ficha) {
+    const circuloMaximo = getCirculoMaximoPorClasseNoContexto(ficha, "arcanista") || 1;
+    const registros = [];
+
+    for (let c = 1; c <= circuloMaximo; c++) {
+        registros.push(...buscarMagiasPorFiltro(`magia_arcana_${c}`));
+        registros.push(...buscarMagiasPorFiltro(`magia_universal_${c}`));
+    }
+
+    const unicos = registros.reduce((acc, registro) => {
+        if (!acc.some(r => String(r.id) === String(registro.id))) {
+            acc.push(registro);
+        }
+        return acc;
+    }, []);
+
+    return filtrarForaMagiasJaConhecidas(unicos, ficha)
+        .sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"))
+        .map(montarOpcaoDeRegistroBanco)
+        .filter(Boolean);
+}
+function getMagiasClerigoConhecimentoMagico(ficha) {
+    const circuloMaximo = getCirculoMaximoPorClasseNoContexto(ficha, "clerigo") || 1;
+    const registros = [];
+
+    for (let c = 1; c <= circuloMaximo; c++) {
+        registros.push(...buscarMagiasPorFiltro(`magia_divina_${c}`));
+        registros.push(...buscarMagiasPorFiltro(`magia_universal_${c}`));
+    }
+
+    const unicos = registros.reduce((acc, registro) => {
+        if (!acc.some(r => String(r.id) === String(registro.id))) {
+            acc.push(registro);
+        }
+        return acc;
+    }, []);
+
+    return filtrarForaMagiasJaConhecidas(unicos, ficha)
+        .sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"))
+        .map(montarOpcaoDeRegistroBanco)
+        .filter(Boolean);
+}
+function getMagiasBardoAumentarRepertorio(ficha) {
+    const circuloMaximo = getCirculoMaximoPorClasseNoContexto(ficha, "bardo") || 1;
+    const registros = [];
+
+    for (let c = 1; c <= circuloMaximo; c++) {
+        registros.push(...buscarMagiasPorFiltro(`magia_arcana_${c}`));
+        registros.push(...buscarMagiasPorFiltro(`magia_divina_${c}`));
+        registros.push(...buscarMagiasPorFiltro(`magia_universal_${c}`));
+    }
+
+    const unicos = registros.reduce((acc, registro) => {
+        if (!acc.some(r => String(r.id) === String(registro.id))) {
+            acc.push(registro);
+        }
+        return acc;
+    }, []);
+
+    return filtrarForaMagiasJaConhecidas(
+        filtrarMagiasPorEscolasDoBardo(unicos, ficha),
+        ficha
+    )
+        .sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"))
+        .map(montarOpcaoDeRegistroBanco)
+        .filter(Boolean);
+}
 function getCaminhoArcanistaDaFicha(ficha) {
     if (!ficha) return null;
 
@@ -2898,20 +3781,362 @@ function toggleEscolhaPoderClasseValor(escolhaId, opcao, quantidadeMaxima) {
     }
 
     const lista = mapa[escolhaId];
+    const limite = Number(quantidadeMaxima) || 0;
     const idx = lista.findIndex(item => item.id === opcao.id);
 
     if (idx >= 0) {
         lista.splice(idx, 1);
     } else {
+        if (opcao.escolhaBloqueada) return;
+
         if (opcao.ehAumentoAtributo) {
-            const ficha = getFichaCriacao();
+            const ficha = state.screen === "criacao" ? getFichaCriacao() : getFichaEvolucaoAtual();
             const atributo = opcao.atributoEscolhido || opcao.valor;
 
             if (!podeEscolherAumentoDeAtributo(ficha, atributo)) return;
         }
 
-        if (lista.length >= quantidadeMaxima) return;
+        if (limite > 0 && lista.length >= limite) return;
         lista.push(opcao);
+    }
+
+    renderMantendoScrollEscolha();
+}
+function poderClassePodeSerEscolhidoMaisDeUmaVez(nomePoder) {
+    const nome = normalizarNomeHabilidade(nomePoder || "");
+    return [
+        "aumentar repertorio",
+        "orar",
+        "truque magico",
+        "segredos da natureza",
+        "companheiro animal",
+        "inimigo de (criatura)",
+        "arcanista: conhecimento magico",
+        "clerigo: conhecimento magico",
+        "proficiencia",
+        "treinamento em pericia",
+        "especializacao em arma",
+        "foco em pericia"
+    ].includes(nome);
+}
+function montarEscolhaEspecialPoderTreinamentoPericia(opcaoBase, ficha) {
+    const opcoes = (ficha?.pericias || []).map(p => p.nome).filter(Boolean);
+
+    return [{
+        id: `poder_especial:${opcaoBase.registroId}:treinamento_pericia`,
+        registro_id: String(opcaoBase.registroId || ""),
+        ordem: 1,
+        tipo: "pericia_treinada",
+        titulo: "Escolha uma perícia",
+        descricao: "Escolha uma perícia para se tornar treinado nela.",
+        quantidade: 1,
+        filtro: "lista",
+        opcoesTexto: opcoes.join("|"),
+        regrasGrupo: "",
+        dependeDe: ""
+    }];
+}
+function montarEscolhaEspecialPoderProficiencia(opcaoBase, ficha) {
+    const opcoes = [
+        "Armas marciais",
+        "Armas de fogo",
+        "Armaduras pesadas",
+        "Escudos"
+    ];
+
+    if (fichaTemProficiencia(ficha, "Armas marciais")) {
+        opcoes.splice(2, 0, "Armas exóticas");
+    }
+
+    return [{
+        id: `poder_especial:${opcaoBase.registroId}:proficiencia`,
+        registro_id: String(opcaoBase.registroId || ""),
+        ordem: 1,
+        tipo: "proficiencia",
+        titulo: "Escolha uma proficiência",
+        descricao: "Escolha uma proficiência para receber com este poder.",
+        quantidade: 1,
+        filtro: "lista",
+        opcoesTexto: opcoes.join("|"),
+        regrasGrupo: "",
+        dependeDe: ""
+    }];
+}
+function getEscolhaClasseSelecionadaQueAbriuPoder() {
+    const classeEscolhas = state.screen === "criacao"
+        ? (state.criacao?.classeEscolhas || {})
+        : (state.evolucao?.classeEscolhas || {});
+
+    const escolhaPoderClasseAbertaId = getEscolhaPoderClasseAbertaId();
+    if (!escolhaPoderClasseAbertaId) return null;
+
+    for (const [escolhaId, opcoes] of Object.entries(classeEscolhas)) {
+        const encontrada = (opcoes || []).find(op =>
+            Array.isArray(op?.escolhas) &&
+            op.escolhas.some(e => String(e.id) === String(escolhaPoderClasseAbertaId))
+        );
+
+        if (encontrada) {
+            return {
+                escolhaId,
+                opcao: encontrada
+            };
+        }
+    }
+
+    return null;
+}
+
+function aplicarEscolhasDoPoderClasseNaFichaImediatamente(ficha, classe, opcaoComEscolhas) {
+    if (!ficha || !classe || !opcaoComEscolhas) return;
+
+    const nomeBase = normalizarTextoRegra(opcaoComEscolhas.nomeCurto || opcaoComEscolhas.valor || "");
+
+    if (opcaoComEscolhas.escolhaEspecial === "golpe_pessoal") {
+        const registro = criarRegistroGolpePessoalParaFicha(opcaoComEscolhas);
+
+        adicionarHabilidadeNaFicha(
+            ficha,
+            {
+                nome: registro.nome,
+                descricao: registro.descricao || "",
+                custoPm: Number(registro.custoPm) || 0,
+                custoVida: 0,
+                custoPmPermanente: 0,
+                custoVidaPermanente: 0,
+                resumoUso: registro.resumoUso || "",
+                registroId: "",
+                ativavel: true,
+                permiteIntensificar: false,
+                incrementos: [],
+                escolhas: [],
+                nomeCurto: registro.nomeCurto || registro.nome || "",
+                tipoRegistro: "poder",
+                origemBase: "classe",
+                filtros: registro.filtros || "",
+                escolhaEspecial: "golpe_pessoal",
+                escolhaEspecialValor: registro.escolhaEspecialValor || "",
+                golpePessoalConfig: registro.golpePessoalConfig || null
+            },
+            "Classe",
+            classe.nome
+        );
+
+        const habilidadeAdicionada = ficha.habilidades?.[ficha.habilidades.length - 1];
+        if (habilidadeAdicionada) {
+            habilidadeAdicionada.registroId = "";
+            habilidadeAdicionada.idPersonalizado = registro.id || "";
+            habilidadeAdicionada.nome = registro.nome || habilidadeAdicionada.nome || "";
+            habilidadeAdicionada.nomeCurto = registro.nomeCurto || registro.nome || "";
+            habilidadeAdicionada.descricao = registro.descricao || habilidadeAdicionada.descricao || "";
+            habilidadeAdicionada.custoPm = Number(registro.custoPm) || 0;
+            habilidadeAdicionada.custoVida = 0;
+            habilidadeAdicionada.custoPmPermanente = 0;
+            habilidadeAdicionada.custoVidaPermanente = 0;
+            habilidadeAdicionada.resumoUso = registro.resumoUso || "";
+            habilidadeAdicionada.ativavel = true;
+            habilidadeAdicionada.permiteIntensificar = false;
+            habilidadeAdicionada.incrementos = [];
+            habilidadeAdicionada.escolhas = [];
+            habilidadeAdicionada.tipoRegistro = "poder";
+            habilidadeAdicionada.origemBase = "classe";
+            habilidadeAdicionada.filtros = registro.filtros || "";
+            habilidadeAdicionada.escolhaEspecial = "golpe_pessoal";
+            habilidadeAdicionada.escolhaEspecialValor = registro.escolhaEspecialValor || "";
+            habilidadeAdicionada.golpePessoalConfig = registro.golpePessoalConfig || null;
+        }
+
+        return;
+    }
+
+    if (nomeBase === "foco em pericia" && opcaoComEscolhas.escolhaEspecialValor) {
+        adicionarHabilidadeNaFicha(
+            ficha,
+            {
+                nome: `Foco em Perícia: ${opcaoComEscolhas.escolhaEspecialValor}`,
+                descricao: opcaoComEscolhas.descricao || "",
+                custoPm: 0,
+                custoVida: 0,
+                custoPmPermanente: 0,
+                custoVidaPermanente: 0,
+                resumoUso: "",
+                registroId: opcaoComEscolhas.registroId || "",
+                ativavel: false,
+                permiteIntensificar: false,
+                incrementos: [],
+                escolhas: []
+            },
+            "Classe",
+            classe.nome
+        );
+    }
+
+    const escolhasResolvidas = Array.isArray(opcaoComEscolhas.escolhasResolvidas)
+        ? opcaoComEscolhas.escolhasResolvidas
+        : [];
+
+    escolhasResolvidas.forEach(bloco => {
+        (bloco?.selecionadas || []).forEach(opcao => {
+            if (opcao.tipoAplicacao === "magia_adicionar") {
+                adicionarOuAtualizarMagiaNaFicha(
+                    ficha,
+                    {
+                        registroId: opcao.registroId || "",
+                        nome: opcao.valor || "",
+                        nomeAdicionado: opcao.nomeAdicionado || ""
+                    },
+                    "Classe",
+                    classe.nome
+                );
+            }
+
+            if (opcao.tipoAplicacao === "pericia_treinada") {
+                const pericia = (ficha.pericias || []).find(p =>
+                    normalizarTextoRegra(p.nome) === normalizarTextoRegra(opcao.valor)
+                );
+
+                if (pericia) {
+                    pericia.treinada = true;
+                }
+            }
+
+            if (opcao.tipoAplicacao === "proficiencia_adicionar") {
+                ficha.proficiencias = Array.isArray(ficha.proficiencias) ? ficha.proficiencias : [];
+
+                if (!fichaTemProficiencia(ficha, opcao.valor)) {
+                    ficha.proficiencias.push(opcao.valor || "");
+                }
+            }
+        });
+    });
+}
+function confirmarEscolhaPoderClasseModal() {
+    const escolhaId = getEscolhaPoderClasseAbertaId();
+    if (!escolhaId) return;
+
+    const ficha = state.screen === "criacao" ? getFichaCriacao() : getFichaEvolucaoAtual();
+    const classe = state.screen === "criacao"
+        ? (getClasseEvolucaoAtualCriacao() || getClasseSelecionadaCriacao())
+        : getClasseEvolucaoAtualFicha?.();
+
+    if (!ficha || !classe) return;
+
+    const origem = getEscolhaClasseSelecionadaQueAbriuPoder();
+    if (!origem?.opcao) return;
+
+    const poderBanco = (classe.poderes || []).find(p =>
+        (p.escolhas || []).some(e => String(e.id) === String(escolhaId))
+    );
+
+    const escolha =
+        (origem.opcao.escolhas || []).find(e => String(e.id) === String(escolhaId)) ||
+        (poderBanco?.escolhas || []).find(e => String(e.id) === String(escolhaId));
+
+    if (!escolha) return;
+
+    const selecionados = getEscolhaPoderClasseValores(escolha.id);
+    const quantidade = Number(escolha.quantidade) || 0;
+
+    if (selecionados.length !== quantidade) return;
+
+    origem.opcao.escolhasResolvidas = origem.opcao.escolhasResolvidas || [];
+
+    const existente = origem.opcao.escolhasResolvidas.find(e =>
+        String(e.escolhaId) === String(escolha.id)
+    );
+
+    const payload = {
+        escolhaId: escolha.id,
+        selecionadas: JSON.parse(JSON.stringify(selecionados))
+    };
+
+    if (existente) {
+        existente.selecionadas = payload.selecionadas;
+    } else {
+        origem.opcao.escolhasResolvidas.push(payload);
+    }
+    const nomeBasePoder = normalizarTextoRegra(origem.opcao.nomeCurto || origem.opcao.valor || "");
+
+    // PASSO 7: intercepta Golpe Pessoal antes do fluxo dos focos
+    if (isGolpePessoalOpcao(origem.opcao)) {
+        abrirGolpePessoalModal();
+        return;
+    }
+
+    if (
+        (nomeBasePoder === "foco em arma" ||
+            nomeBasePoder === "foco em magia" ||
+            nomeBasePoder === "foco em pericia") &&
+        selecionados.length === 1
+    ) {
+        const selecionada = selecionados[0];
+
+        origem.opcao.label = selecionada.label || origem.opcao.label;
+        origem.opcao.valor = selecionada.valor || origem.opcao.valor;
+        origem.opcao.nomeCurto = selecionada.nomeCurto || selecionada.valor || origem.opcao.nomeCurto;
+        origem.opcao.escolhaEspecial = selecionada.escolhaEspecial || origem.opcao.escolhaEspecial;
+        origem.opcao.escolhaEspecialValor = selecionada.escolhaEspecialValor || origem.opcao.escolhaEspecialValor;
+        origem.opcao.itemBaseId = selecionada.itemBaseId || origem.opcao.itemBaseId || "";
+        origem.opcao.magiaNome = selecionada.magiaNome || origem.opcao.magiaNome || "";
+        origem.opcao.periciaNome = selecionada.periciaNome || origem.opcao.periciaNome || "";
+    }
+
+    origem.opcao.escolhasConfirmadas = true;
+
+    aplicarEscolhasDoPoderClasseNaFichaImediatamente(ficha, classe, origem.opcao);
+
+    if (state.screen === "criacao") {
+        state.criacao.escolhaPoderClasseAbertaId = null;
+        state.criacao.escolhaClasseAbertaId = null;
+    } else {
+        state.evolucao.escolhaPoderClasseAbertaId = null;
+        state.evolucao.escolhaClasseAbertaId = null;
+    }
+
+    saveFichas?.();
+    render();
+}
+function fecharEscolhaPoderClasseModal() {
+    const origem = getEscolhaClasseSelecionadaQueAbriuPoder();
+
+    // PASSO 9: limpa o estado temporário do Golpe Pessoal
+    const ctxGolpe = getGolpePessoalStateAtual();
+    if (ctxGolpe) {
+        ctxGolpe.golpePessoalModal = null;
+    }
+
+    if (origem?.opcao && !origem.opcao.escolhasConfirmadas) {
+        const escolhaClasseId = origem.escolhaId;
+        const opcaoId = origem.opcao.id;
+
+        const mapaClasse = state.screen === "criacao"
+            ? (state.criacao.classeEscolhas || {})
+            : (state.evolucao.classeEscolhas || {});
+
+        const lista = Array.isArray(mapaClasse[escolhaClasseId]) ? mapaClasse[escolhaClasseId] : [];
+        const idx = lista.findIndex(item => item.id === opcaoId);
+
+        if (idx >= 0) {
+            const removida = lista[idx];
+            lista.splice(idx, 1);
+
+            const mapaPoder = state.screen === "criacao"
+                ? (state.criacao.poderClasseEscolhas || {})
+                : (state.evolucao.poderClasseEscolhas || {});
+
+            (removida?.escolhas || []).forEach(escolhaInterna => {
+                delete mapaPoder[String(escolhaInterna.id || "")];
+            });
+
+            removida.escolhasResolvidas = [];
+            removida.escolhasConfirmadas = false;
+        }
+    }
+
+    if (state.screen === "criacao") {
+        state.criacao.escolhaPoderClasseAbertaId = null;
+    } else {
+        state.evolucao.escolhaPoderClasseAbertaId = null;
     }
 
     render();
@@ -2925,50 +4150,96 @@ function renderEscolhaPoderClasseModal() {
         ? (getClasseEvolucaoAtualCriacao() || getClasseSelecionadaCriacao())
         : getClasseEvolucaoAtualFicha?.();
 
-    if (!classe) return "";
+    if (!ficha || !classe) return "";
 
-    const poder = (classe.poderes || []).find(p =>
+    if (escolhaId === "__golpe_pessoal__") {
+        return renderGolpePessoalModal();
+    }
+
+    const origem = getEscolhaClasseSelecionadaQueAbriuPoder();
+    if (!origem?.opcao) return "";
+
+    if (isGolpePessoalOpcao(origem.opcao)) {
+        const ctx = getGolpePessoalStateAtual();
+        if (!ctx.golpePessoalModal) {
+            abrirGolpePessoalModal();
+        }
+        return renderGolpePessoalModal();
+    }
+
+    const poderBanco = (classe.poderes || []).find(p =>
         (p.escolhas || []).some(e => String(e.id) === String(escolhaId))
     );
 
-    const escolha = (poder?.escolhas || []).find(e => String(e.id) === String(escolhaId));
+    const escolha =
+        (origem.opcao.escolhas || []).find(e => String(e.id) === String(escolhaId)) ||
+        (poderBanco?.escolhas || []).find(e => String(e.id) === String(escolhaId));
+
     if (!escolha) return "";
 
-    const opcoes = getOpcoesEscolha(escolha, ficha);
+    const quantidade = Number(escolha.quantidade) || 0;
     const selecionados = getEscolhaPoderClasseValores(escolha.id);
+    const opcoesBase = getOpcoesEscolha(escolha, ficha);
+
+    const opcoes = ordenarOpcoesParaExibicao(opcoesBase, (opcao) => {
+        const checked = selecionados.some(item => item.id === opcao.id);
+        const bloqueada = !!opcao.escolhaBloqueada;
+        return checked || (!bloqueada && (quantidade <= 0 || selecionados.length < quantidade));
+    });
+
+    setTimeout(() => {
+        document.body.classList.add("modal-open");
+    }, 0);
 
     return `
-      <div class="overlay" onclick="setEscolhaPoderClasseAbertaId(null); render();">
+      <div class="overlay">
         <div class="overlay-card" onclick="event.stopPropagation()">
           <div class="overlay-header">
             <div>
               <div class="overlay-title">${escapeHtml(escolha.titulo || "Escolha")}</div>
-              <div class="overlay-subtitle">${escapeHtml(escolha.descricao || "")}</div>
+              <div class="subtitle">
+                ${escapeHtml(escolha.descricao || "")}
+                ${escolha.descricao ? " • " : ""}
+                Selecionados: ${selecionados.length} / ${quantidade}
+              </div>
             </div>
-            <button class="btn ghost" onclick="setEscolhaPoderClasseAbertaId(null); render();">Fechar</button>
+
+            <div class="actions" style="justify-content:flex-end; align-items:center;">
+              <button
+                class="btn primary"
+                onclick="confirmarEscolhaPoderClasseModal()"
+                ${selecionados.length !== quantidade ? "disabled" : ""}
+              >
+                Confirmar
+              </button>
+              <button class="btn ghost" onclick="fecharEscolhaPoderClasseModal()">Fechar</button>
+            </div>
           </div>
 
           <div class="overlay-body">
             <div class="list">
               ${opcoes.map(opcao => {
-        const marcado = selecionados.some(s => s.id === opcao.id);
+        const checked = selecionados.some(item => item.id === opcao.id);
+        const bloqueada = !!opcao.escolhaBloqueada;
+        const disabled = bloqueada || (!checked && quantidade > 0 && selecionados.length >= quantidade);
 
         return `
-                  <label class="list-item" style="cursor:pointer;">
-                    <div style="display:flex; align-items:flex-start; gap:10px; flex:1;">
-                      <input
-                        type="${Number(escolha.quantidade) === 1 ? "radio" : "checkbox"}"
-                        name="escolha-poder-${escapeAttr(escolha.id)}"
-                        ${marcado ? "checked" : ""}
-                        onchange="toggleEscolhaPoderClasseValor('${escolha.id}', ${JSON.stringify(opcao).replace(/"/g, '&quot;')}, ${Number(escolha.quantidade) || 1})"
-                      >
-                      <div>
-                        <div class="list-item-title">${escapeHtml(opcao.label || opcao.nomeCurto || opcao.valor || "")}</div>
-                        ${opcao.descricao ? `<div class="list-item-sub">${escapeHtml(opcao.descricao)}</div>` : ``}
+                    <label class="list-item ${disabled ? "disabled" : ""}" style="cursor:${disabled ? "not-allowed" : "pointer"};">
+                      <div class="choice-main">
+                        <div class="list-item-title">${escapeHtml(opcao.label || opcao.valor || "")}</div>
+                        ${opcao.preRequisitos ? `<div class="list-item-sub">${escapeHtml(opcao.preRequisitos)}</div>` : ""}
                       </div>
-                    </div>
-                  </label>
-                `;
+
+                      <input
+                        class="choice-checkbox"
+                        type="checkbox"
+                        ${checked ? "checked" : ""}
+                        ${disabled ? "disabled" : ""}
+                        onclick="event.stopPropagation()"
+                        onchange='toggleEscolhaPoderClasseValor("${escapeAttr(escolha.id)}", ${JSON.stringify(opcao).replace(/'/g, "&apos;")}, ${quantidade})'
+                      >
+                    </label>
+                  `;
     }).join("")}
             </div>
           </div>
@@ -3008,7 +4279,7 @@ function montarContextoPreRequisitos(ficha) {
         periciasTreinadas: getNomesPericiasTreinadasNoContexto(ficha),
         habilidades: getNomesHabilidadesNoContexto(ficha),
         poderesTormenta: getTotalPoderesTormentaParaPreRequisito(ficha),
-        circuloMaximo: getCirculoMaximoNoContexto(ficha),
+        circuloMaximo: getCirculoMaximoPorClasseNoContexto(ficha),
         nivelPersonagem: getNivelTotalFicha(ficha) || 1,
         proficiencias: new Set((ficha?.proficiencias || []).map(p => normalizarTextoRegra(p))),
         podeLancarMagias: personagemPodeLancarMagiasNoContexto(ficha),
@@ -3084,49 +4355,59 @@ function personagemPodeLancarMagiasNoContexto(ficha) {
         return nome === "magias" || nome.startsWith("magias (");
     });
 }
+function getCirculoPorClasseENivel(classeId, nivel) {
+    const id = normalizarTextoRegra(classeId || "");
+    const n = Number(nivel) || 0;
 
-function getCirculoMaximoNoContexto(ficha) {
-    const habilidades = [
-        ...(ficha?.habilidades || []),
-        ...Object.values(state.criacao?.classeEscolhas || {}).flat(),
-        ...Object.values(state.criacao?.racaEscolhas || {}).flat()
-    ];
-
-    // adicionar também habilidades automáticas da classe no nível atual da criação
-    const classeCriacao = getClasseEvolucaoAtualCriacao?.() || getClasseSelecionadaCriacao?.();
-    const ctxCriacao = state.criacao?.classeEvolucaoContexto;
-
-    if (classeCriacao && ctxCriacao?.nivelAlvo) {
-        const habilidadesClasse = getHabilidadesClasseDisponiveisNoNivel(
-            classeCriacao,
-            Number(ctxCriacao.nivelAlvo) || 1
-        );
-
-        habilidades.push(...habilidadesClasse);
+    if (id === "arcanista" || id === "clerigo" || id === "druida") {
+        if (n >= 17) return 5;
+        if (n >= 13) return 4;
+        if (n >= 9) return 3;
+        if (n >= 5) return 2;
+        if (n >= 1) return 1;
+        return 0;
     }
 
-    // adicionar também no contexto da evolução da ficha pronta
-    const classeEvolucao = getClasseEvolucaoAtualFicha?.();
-    const ctxEvolucao = state.evolucao?.classeEvolucaoContexto;
-
-    if (classeEvolucao && ctxEvolucao?.nivelAlvo) {
-        const habilidadesClasse = getHabilidadesClasseDisponiveisNoNivel(
-            classeEvolucao,
-            Number(ctxEvolucao.nivelAlvo) || 1
-        );
-
-        habilidades.push(...habilidadesClasse);
+    if (id === "bardo") {
+        if (n >= 14) return 4;
+        if (n >= 10) return 3;
+        if (n >= 6) return 2;
+        if (n >= 1) return 1;
+        return 0;
     }
+
+    return 0;
+}
+function getCirculoMaximoPorClasseNoContexto(ficha, classeId) {
+    const id = normalizarTextoRegra(classeId || "");
+    if (!id) return 0;
 
     let max = 0;
 
-    habilidades.forEach(h => {
-        const nome = normalizarTextoRegra(h?.nome || h?.valor || "");
-        const m = nome.match(/^magias \((\d+).*circulo\)$/);
-        if (m) {
-            max = Math.max(max, Number(m[1]) || 0);
-        }
+    (ficha?.classesPersonagem || []).forEach(cp => {
+        if (normalizarTextoRegra(cp?.classeId || "") !== id) return;
+        max = Math.max(max, getCirculoPorClasseENivel(cp.classeId, cp.niveis));
     });
+
+    const ctxCriacao = state?.criacao?.classeEvolucaoContexto;
+    const classeCriacao = getClasseEvolucaoAtualCriacao?.() || getClasseSelecionadaCriacao?.();
+    if (
+        classeCriacao?.id &&
+        normalizarTextoRegra(classeCriacao.id) === id &&
+        ctxCriacao?.nivelAlvo
+    ) {
+        max = Math.max(max, getCirculoPorClasseENivel(classeCriacao.id, ctxCriacao.nivelAlvo));
+    }
+
+    const ctxEvolucao = state?.evolucao?.classeEvolucaoContexto;
+    const classeEvolucao = getClasseEvolucaoAtualFicha?.();
+    if (
+        classeEvolucao?.id &&
+        normalizarTextoRegra(classeEvolucao.id) === id &&
+        ctxEvolucao?.nivelAlvo
+    ) {
+        max = Math.max(max, getCirculoPorClasseENivel(classeEvolucao.id, ctxEvolucao.nivelAlvo));
+    }
 
     return max;
 }
@@ -3304,42 +4585,60 @@ function podeSelecionarOpcaoClasse(escolha, opcao) {
     const selecionados = getEscolhaClasseValores(escolha.id);
     const quantidade = Number(escolha.quantidade) || 0;
 
+    const selecionadoExistente = selecionados.find(item => item.id === opcao.id);
+    if (selecionadoExistente?.escolhasConfirmadas) return false;
+
     if (selecionados.some(item => item.id === opcao.id)) return true;
     if (!escolhaClasseDesbloqueada(escolha)) return false;
+
+    const existeOutroConfirmado = selecionados.some(item =>
+        item.id !== opcao.id && item.escolhasConfirmadas
+    );
+    if (existeOutroConfirmado) return false;
+
     if (selecionados.length >= quantidade) return false;
 
     if (opcaoPericiaIndisponivelPorTreinoGlobal(opcao, escolha.id, "classe")) return false;
 
     const ficha = getFichaCriacao();
+
+    if (escolha.tipo === "magia" && opcao?.tipoAplicacao === "magia_adicionar") {
+        return true;
+    }
+
     if (getPreRequisitoNaoAtendidoOpcao(opcao, ficha)) return false;
 
     if (opcao.tipoAplicacao === "habilidade_adicionar" && !opcao.ehAumentoAtributo) {
-        const ficha = getFichaCriacao();
         const nomeOpcao = opcao.valor || "";
+        const podeRepetirPorExcecao = poderClassePodeSerEscolhidoMaisDeUmaVez(nomeOpcao);
 
-        const jaTemNaoRacial = fichaTemHabilidadeNaoRacial(ficha, nomeOpcao);
+        if (!podeRepetirPorExcecao) {
+            const jaTemNaoRacial = fichaTemHabilidadeNaoRacial(ficha, nomeOpcao);
 
-        const jaEscolhidaEmOutraEscolha = Object.entries(state.criacao.classeEscolhas || {}).some(([outraEscolhaId, lista]) => {
-            if (outraEscolhaId === escolha.id) return false;
-            return (lista || []).some(item =>
-                item.tipoAplicacao === "habilidade_adicionar" &&
-                !item.ehAumentoAtributo &&
-                normalizarNomeHabilidade(item.valor) === normalizarNomeHabilidade(nomeOpcao)
-            );
-        });
+            const jaEscolhidaEmOutraEscolha = Object.entries(state.criacao.classeEscolhas || {}).some(([outraEscolhaId, lista]) => {
+                if (outraEscolhaId === escolha.id) return false;
+                return (lista || []).some(item =>
+                    item.tipoAplicacao === "habilidade_adicionar" &&
+                    !item.ehAumentoAtributo &&
+                    normalizarNomeHabilidade(item.valor) === normalizarNomeHabilidade(nomeOpcao)
+                );
+            });
 
-        if (jaTemNaoRacial || jaEscolhidaEmOutraEscolha) {
-            return false;
+            if (jaTemNaoRacial || jaEscolhidaEmOutraEscolha) {
+                return false;
+            }
         }
     }
 
     if (opcao.ehAumentoAtributo) {
-        const ficha = getFichaCriacao();
         const atributo = opcao.atributoEscolhido || opcao.valor;
 
         if (!podeEscolherAumentoDeAtributo(ficha, atributo)) {
             return false;
         }
+    }
+    if (opcao.tipoAplicacao === "proficiencia_adicionar") {
+        if (opcao.escolhaBloqueada) return false;
     }
 
     return true;
@@ -3348,8 +4647,17 @@ function podeSelecionarOpcaoClasseEvolucao(escolha, opcao) {
     const selecionados = getEscolhaClasseValoresEvolucao(escolha.id);
     const quantidade = Number(escolha.quantidade) || 0;
 
+    const selecionadoExistente = selecionados.find(item => item.id === opcao.id);
+    if (selecionadoExistente?.escolhasConfirmadas) return false;
+
     if (selecionados.some(item => item.id === opcao.id)) return true;
     if (!escolhaClasseDesbloqueada(escolha)) return false;
+
+    const existeOutroConfirmado = selecionados.some(item =>
+        item.id !== opcao.id && item.escolhasConfirmadas
+    );
+    if (existeOutroConfirmado) return false;
+
     if (selecionados.length >= quantidade) return false;
 
     if (opcaoPericiaIndisponivelPorTreinoGlobal(opcao, escolha.id, "classe")) return false;
@@ -3357,17 +4665,27 @@ function podeSelecionarOpcaoClasseEvolucao(escolha, opcao) {
     const ficha = getFichaEvolucaoAtual();
     if (!ficha) return false;
 
+    if (escolha.tipo === "magia" && opcao?.tipoAplicacao === "magia_adicionar") {
+        return true;
+    }
+
     if (getPreRequisitoNaoAtendidoOpcao(opcao, ficha)) return false;
 
     if (opcao.tipoAplicacao === "habilidade_adicionar" && !opcao.ehAumentoAtributo) {
         const nomeOpcao = opcao.valor || "";
-        const jaTem = (ficha.habilidades || []).some(h =>
-            normalizarTextoRegra(h.nome) === normalizarTextoRegra(nomeOpcao)
-        );
+        const podeRepetirPorExcecao = poderClassePodeSerEscolhidoMaisDeUmaVez(nomeOpcao);
 
-        if (jaTem) return false;
+        if (!podeRepetirPorExcecao) {
+            const jaTem = (ficha.habilidades || []).some(h =>
+                normalizarTextoRegra(h.nome) === normalizarTextoRegra(nomeOpcao)
+            );
+
+            if (jaTem) return false;
+        }
     }
-
+    if (opcao.tipoAplicacao === "proficiencia_adicionar") {
+        if (opcao.escolhaBloqueada) return false;
+    }
     return true;
 }
 function podeSelecionarOpcaoRacial(escolha, opcao) {
@@ -3934,6 +5252,8 @@ function finalizarConclusaoNivelClasseCriacao() {
     state.criacao.classeEvolucaoContexto = null;
     state.criacao.classeEscolhas = {};
     state.criacao.escolhaClasseAbertaId = null;
+    state.criacao.poderClasseEscolhas = {};
+    state.criacao.escolhaPoderClasseAbertaId = null;
 
     if (Number(state.criacao.etapa) < 4) {
         state.criacao.etapa = 4;
@@ -4129,6 +5449,7 @@ function concluirCriacaoFicha() {
 
     atualizarNivelTotalFicha(ficha);
     reaplicarProgressaoClasses(ficha);
+    atualizarCdMagiasNaFicha(ficha, true);
 
     state.fichas.unshift(ficha);
     state.fichaAtualId = ficha.id;
@@ -4322,6 +5643,8 @@ function fichaVazia() {
     raca: "",
       classesPersonagem: [],
       arcanistaCaminho: "",
+      bardoEscolas: [],
+      druidaEscolas: [],
       nivelTotal: 0,
       escolhasClasseResolvidas: [],
       inventario: [],
@@ -4371,6 +5694,8 @@ modRacialAtributos: {
       defesa: 10,
       defesaOutros: 0,
       penalidadeArmadura: 0,
+      atributoChaveMagias: "",
+      cdMagias: 0,
       ataques: [
           {
               id: uid(),
@@ -4594,6 +5919,8 @@ function limparEfeitosClasseFicha(ficha) {
     ficha.pvAtual = 0;
     ficha.pmMax = 0;
     ficha.pmAtual = 0;
+    ficha.atributoChaveMagias = "";
+    ficha.cdMagias = 0;
 }
 
 function getClasseDoBanco(classeId) {
@@ -4746,16 +6073,36 @@ function getEscolhasMagiasPorHabilidadeClasse(classe, nivelClasse, ficha) {
                 quantidade = 1;
             }
         } else if (nomeClasse === "bardo") {
-            filtroMagia = "magia_arcana_1";
-            quantidade = 2;
-        } else if (nomeClasse === "clerigo") {
-            filtroMagia = "magia_divina_1";
-            quantidade = (nivelClasse === 1) ? 3 : 1;
-        } else if (nomeClasse === "druida") {
-            filtroMagia = "magia_divina_1";
+            const circulo = getCirculoMaximoPorClasseNoContexto(ficha, classe.id) || 1;
+            filtroMagia = `magia_arcana_${circulo}`;
 
             if (nivelClasse === 1) {
                 quantidade = 2;
+            } else if (nivelClasse % 2 === 0) {
+                quantidade = 1;
+            } else {
+                quantidade = 0;
+            }
+        } else if (nomeClasse === "clerigo") {
+            const circulo = getCirculoMaximoPorClasseNoContexto(ficha, classe.id) || 1;
+            filtroMagia = `magia_divina_${circulo}`;
+            quantidade = (nivelClasse === 1) ? 3 : 1;
+        } else if (nomeClasse === "druida") {
+            filtroMagia = "magia_druida_repertorio";
+
+            if (nivelClasse === 1) {
+                quantidade = 2;
+            } else if (nivelClasse % 2 === 0) {
+                quantidade = 1;
+            } else {
+                quantidade = 0;
+            }
+        } else if (nomeClasse === "arcanista") {
+            const circulo = getCirculoMaximoPorClasseNoContexto(ficha, classe.id) || 1;
+            filtroMagia = `magia_arcana_${circulo}`;
+
+            if (nivelClasse === 1) {
+                quantidade = 3;
             } else if (nivelClasse % 2 === 0) {
                 quantidade = 1;
             } else {
@@ -4771,9 +6118,16 @@ function getEscolhasMagiasPorHabilidadeClasse(classe, nivelClasse, ficha) {
                 descricao: `Selecione ${quantidade} magia(s) disponíveis para este nível.`,
                 quantidade,
                 filtro: filtroMagia,
+                usarMagiasAteCirculo: true,
+                classeIdOrigem: classe.id,
                 opcoesTexto: "",
                 regrasGrupo: "",
-                dependeDe: "",
+                dependeDe:
+                    nomeClasse === "bardo" && nivelClasse === 1
+                        ? "esc_bardo_escolas"
+                        : nomeClasse === "druida" && nivelClasse === 1
+                            ? "esc_druida_escolas"
+                            : "",
                 habilidade_id: h.id
             });
         }
@@ -4852,6 +6206,7 @@ function aplicarEscolhasClasseResolvidasNaFicha(ficha) {
                 if (opcao.ehDivindade) {
                     aplicarDivindadeEscolhidaDeClasseNaFicha(ficha, classe, opcao);
                 }
+
                 if (opcao.ehAumentoAtributo) {
                     const ok = aplicarAumentoDeAtributoNaFicha(ficha, opcao.valor);
 
@@ -4903,17 +6258,100 @@ function aplicarEscolhasClasseResolvidasNaFicha(ficha) {
                         alvo: opcao.valor
                     });
                 }
+                if (classe.id === "bardo" && registro.escolhaId === "esc_bardo_escolas") {
+                    ficha.bardoEscolas = ficha.bardoEscolas || [];
+
+                    const nomeEscola = String(opcao.valor || "").trim();
+                    if (nomeEscola && !ficha.bardoEscolas.some(e =>
+                        normalizarNomeEscolaMagia(e) === normalizarNomeEscolaMagia(nomeEscola)
+                    )) {
+                        ficha.bardoEscolas.push(nomeEscola);
+                    }
+
+                    ficha.efeitosAplicados.push({
+                        id: uid(),
+                        origemTipo: "Classe",
+                        origemNome: classe.nome,
+                        tipo: "escola_magia",
+                        alvo: opcao.valor
+                    });
+                }
             }
 
             if (opcao.tipoAplicacao === "habilidade_adicionar") {
+                if (opcao.escolhaEspecial === "golpe_pessoal") {
+                    const registroGolpe = criarRegistroGolpePessoalParaFicha(opcao);
+
+                    adicionarHabilidadeNaFicha(
+                        ficha,
+                        {
+                            nome: registroGolpe.nome,
+                            descricao: registroGolpe.descricao || "",
+                            custoPm: Number(registroGolpe.custoPm) || 0,
+                            custoVida: 0,
+                            custoPmPermanente: 0,
+                            custoVidaPermanente: 0,
+                            resumoUso: registroGolpe.resumoUso || "",
+                            registroId: "",
+                            ativavel: true,
+                            permiteIntensificar: false,
+                            incrementos: [],
+                            escolhas: [],
+                            nomeCurto: registroGolpe.nomeCurto || registroGolpe.nome || "",
+                            tipoRegistro: "poder",
+                            origemBase: "classe",
+                            filtros: registroGolpe.filtros || "",
+                            escolhaEspecial: "golpe_pessoal",
+                            escolhaEspecialValor: registroGolpe.escolhaEspecialValor || "",
+                            golpePessoalConfig: registroGolpe.golpePessoalConfig || null
+                        },
+                        "Classe",
+                        classe.nome
+                    );
+
+                    const habilidadeAdicionada = ficha.habilidades?.[ficha.habilidades.length - 1];
+                    if (habilidadeAdicionada) {
+                        habilidadeAdicionada.registroId = "";
+                        habilidadeAdicionada.idPersonalizado = registroGolpe.id || "";
+                        habilidadeAdicionada.nome = registroGolpe.nome || habilidadeAdicionada.nome || "";
+                        habilidadeAdicionada.nomeCurto = registroGolpe.nomeCurto || registroGolpe.nome || "";
+                        habilidadeAdicionada.descricao = registroGolpe.descricao || habilidadeAdicionada.descricao || "";
+                        habilidadeAdicionada.custoPm = Number(registroGolpe.custoPm) || 0;
+                        habilidadeAdicionada.custoVida = 0;
+                        habilidadeAdicionada.custoPmPermanente = 0;
+                        habilidadeAdicionada.custoVidaPermanente = 0;
+                        habilidadeAdicionada.resumoUso = registroGolpe.resumoUso || "";
+                        habilidadeAdicionada.ativavel = true;
+                        habilidadeAdicionada.permiteIntensificar = false;
+                        habilidadeAdicionada.incrementos = [];
+                        habilidadeAdicionada.escolhas = [];
+                        habilidadeAdicionada.tipoRegistro = "poder";
+                        habilidadeAdicionada.origemBase = "classe";
+                        habilidadeAdicionada.filtros = registroGolpe.filtros || "";
+                        habilidadeAdicionada.escolhaEspecial = "golpe_pessoal";
+                        habilidadeAdicionada.escolhaEspecialValor = registroGolpe.escolhaEspecialValor || "";
+                        habilidadeAdicionada.golpePessoalConfig = registroGolpe.golpePessoalConfig || null;
+                    }
+
+                    ficha.efeitosAplicados.push({
+                        id: uid(),
+                        origemTipo: "Classe",
+                        origemNome: classe.nome,
+                        tipo: "habilidade_adicionar",
+                        alvo: registroGolpe.nome || "Golpe Pessoal"
+                    });
+
+                    return;
+                }
+
                 let registroHabilidade = null;
 
                 if (opcao.registroId) {
                     registroHabilidade = getPoderClassePorId(classe.id, opcao.registroId);
+                }
 
-                    if (!registroHabilidade) {
-                        registroHabilidade = getRegistroPoderMagiaPorId(opcao.registroId);
-                    }
+                if (!registroHabilidade && opcao.valor) {
+                    registroHabilidade = getPoderClassePorNome(classe.id, opcao.valor);
                 }
 
                 const nomeHabilidade =
@@ -4921,6 +6359,7 @@ function aplicarEscolhasClasseResolvidasNaFicha(ficha) {
                     registroHabilidade?.nome ||
                     opcao.valor ||
                     "";
+
                 const ehEmpatiaSelvagem = normalizarNomeHabilidade(nomeHabilidade) === "empatia selvagem";
                 const temEmpatiaRacial = fichaTemHabilidadeComOrigem(ficha, "Empatia Selvagem", "Raça");
 
@@ -4948,6 +6387,91 @@ function aplicarEscolhasClasseResolvidasNaFicha(ficha) {
                     );
                 }
 
+                ficha.efeitosAplicados.push({
+                    id: uid(),
+                    origemTipo: "Classe",
+                    origemNome: classe.nome,
+                    tipo: "habilidade_adicionar",
+                    alvo: nomeHabilidade
+                });
+
+                if (Array.isArray(opcao.escolhasResolvidas)) {
+                    opcao.escolhasResolvidas.forEach(bloco => {
+                        (bloco?.selecionadas || []).forEach(subopcao => {
+                            const nomeBaseOpcao = normalizarTextoRegra(opcao.nomeCurto || opcao.valor || "");
+
+                            if (nomeBaseOpcao === "foco em pericia" && opcao.escolhaEspecialValor) {
+                                adicionarHabilidadeNaFicha(
+                                    ficha,
+                                    {
+                                        nome: `Foco em Perícia: ${opcao.escolhaEspecialValor}`,
+                                        descricao: opcao.descricao || "",
+                                        custoPm: 0,
+                                        custoVida: 0,
+                                        custoPmPermanente: 0,
+                                        custoVidaPermanente: 0,
+                                        resumoUso: "",
+                                        registroId: opcao.registroId || "",
+                                        ativavel: false,
+                                        permiteIntensificar: false,
+                                        incrementos: [],
+                                        escolhas: []
+                                    },
+                                    "Classe",
+                                    classe.nome
+                                );
+
+                                ficha.efeitosAplicados.push({
+                                    id: uid(),
+                                    origemTipo: "Classe",
+                                    origemNome: classe.nome,
+                                    tipo: "habilidade_adicionar",
+                                    alvo: `Foco em Perícia: ${opcao.escolhaEspecialValor}`
+                                });
+                            }
+
+                            if (subopcao.tipoAplicacao === "magia_adicionar") {
+                                adicionarOuAtualizarMagiaNaFicha(
+                                    ficha,
+                                    {
+                                        registroId: subopcao.registroId || "",
+                                        nome: subopcao.valor || "",
+                                        nomeAdicionado: subopcao.nomeAdicionado || ""
+                                    },
+                                    "Classe",
+                                    classe.nome
+                                );
+
+                                ficha.efeitosAplicados.push({
+                                    id: uid(),
+                                    origemTipo: "Classe",
+                                    origemNome: classe.nome,
+                                    tipo: "magia_adicionar",
+                                    alvo: subopcao.valor
+                                });
+                            }
+
+                            if (subopcao.tipoAplicacao === "pericia_treinada") {
+                                const pericia = (ficha.pericias || []).find(p =>
+                                    normalizarTextoRegra(p.nome) === normalizarTextoRegra(subopcao.valor)
+                                );
+
+                                if (pericia) {
+                                    pericia.treinada = true;
+                                }
+
+                                ficha.efeitosAplicados.push({
+                                    id: uid(),
+                                    origemTipo: "Classe",
+                                    origemNome: classe.nome,
+                                    tipo: "pericia_treinada",
+                                    alvo: subopcao.valor
+                                });
+                            }
+                        });
+                    });
+                }
+
                 if (opcao.ehAumentoAtributo && opcao.atributoEscolhido) {
                     const ok = aplicarAumentoDeAtributoNaFicha(ficha, opcao.atributoEscolhido);
 
@@ -4962,8 +6486,14 @@ function aplicarEscolhasClasseResolvidasNaFicha(ficha) {
                     }
                 }
             }
+
+            if (opcao.tipoAplicacao === "proficiencia_adicionar") {
+                adicionarProficienciaNaFicha(ficha, opcao.valor);
+            }
         });
     });
+
+    return true;
 }
 
 function calcularPVTotalFicha(ficha) {
@@ -5072,6 +6602,7 @@ function reaplicarProgressaoClasses(ficha) {
     ficha.pvMax += getNivelTotalFicha(ficha) * getAtributoFinal(ficha, "constituicao");
 
     aplicarEscolhasClasseResolvidasNaFicha(ficha);
+    atualizarCdMagiasNaFicha(ficha, true);
 
     ficha.pvAtual = ficha.pvMax;
     ficha.pmAtual = ficha.pmMax;
@@ -5103,6 +6634,8 @@ function prepararNivelClasseCriacao(classeId) {
 
     state.criacao.classeEscolhas = {};
     state.criacao.escolhaClasseAbertaId = null;
+    state.criacao.poderClasseEscolhas = {};
+    state.criacao.escolhaPoderClasseAbertaId = null;
     state.criacao.classeSelecaoEvolucaoId = classe.id;
 
     render();
@@ -5112,6 +6645,8 @@ function abrirSelecaoProximoNivelClasse() {
     state.criacao.classeEvolucaoContexto = null;
     state.criacao.classeEscolhas = {};
     state.criacao.escolhaClasseAbertaId = null;
+    state.criacao.poderClasseEscolhas = {};
+    state.criacao.escolhaPoderClasseAbertaId = null;
     render();
 }
 
@@ -5258,6 +6793,8 @@ function prepararNivelClasseEvolucao(classeId) {
 
     state.evolucao.classeEscolhas = {};
     state.evolucao.escolhaClasseAbertaId = null;
+    state.evolucao.poderClasseEscolhas = {};
+    state.evolucao.escolhaPoderClasseAbertaId = null;
     state.evolucao.classeSelecaoEvolucaoId = classe.id;
 
     render();
@@ -5311,14 +6848,51 @@ function toggleEscolhaClasseValorEvolucao(escolhaId, opcao, quantidadeMaxima) {
     const idx = lista.findIndex(item => item.id === opcao.id);
 
     if (idx >= 0) {
+        const removida = lista[idx];
         lista.splice(idx, 1);
+
+        if (Array.isArray(removida?.escolhas)) {
+            state.evolucao.poderClasseEscolhas = state.evolucao.poderClasseEscolhas || {};
+            removida.escolhas.forEach(escolhaInterna => {
+                delete state.evolucao.poderClasseEscolhas[String(escolhaInterna.id || "")];
+            });
+
+            if (removida.escolhas.some(e => String(e.id || "") === String(state.evolucao.escolhaPoderClasseAbertaId || ""))) {
+                state.evolucao.escolhaPoderClasseAbertaId = null;
+            }
+        }
+
+        const ctxGolpe = getGolpePessoalStateAtual();
+        if (ctxGolpe?.golpePessoalModal && String(ctxGolpe.golpePessoalModal.opcaoId || "") === String(opcao.id || "")) {
+            ctxGolpe.golpePessoalModal = null;
+        }
     } else {
         if (!podeSelecionarOpcaoClasseEvolucao(escolha, opcao)) return;
         if (limite > 0 && lista.length >= limite) return;
+
         lista.push(opcao);
+
+        if (isGolpePessoalOpcao(opcao)) {
+            state.evolucao.escolhaClasseAbertaId = escolhaId;
+            state.evolucao.escolhaPoderClasseAbertaId = "__golpe_pessoal__";
+
+            state.evolucao.golpePessoalModal = {
+                escolhaClasseId: escolhaId,
+                opcaoId: opcao?.id || "",
+                config: JSON.parse(JSON.stringify(opcao?.golpePessoalConfig || criarConfigInicialGolpePessoal()))
+            };
+
+            render();
+            return;
+        }
+
+        if (Array.isArray(opcao.escolhas) && opcao.escolhas.length > 0) {
+            state.evolucao.poderClasseEscolhas = state.evolucao.poderClasseEscolhas || {};
+            state.evolucao.escolhaPoderClasseAbertaId = String(opcao.escolhas[0].id || "");
+        }
     }
 
-    renderMantendoScrollEscolha();
+    render();
 }
 function classeNivelAtualValidoEvolucao() {
     const classe = getClasseEvolucaoAtualFicha();
@@ -5670,6 +7244,13 @@ function adicionarProficienciaNaFicha(ficha, nome) {
     }
 }
 function getArmasElegiveisParaFoco(ficha) {
+    const jaTemFoco = new Set(
+        (ficha?.habilidades || [])
+            .map(h => String(h?.nome || ""))
+            .filter(nome => normalizarTextoRegra(nome).startsWith("foco em arma:"))
+            .map(nome => normalizarTextoRegra(nome.split(":").slice(1).join(":").trim()))
+    );
+
     return (ITENS_EQUIPAMENTOS_DB.registros || [])
         .filter(item => String(item.categoria || "").toLowerCase() === "arma")
         .filter(item => String(item.nome || "").trim())
@@ -5677,10 +7258,18 @@ function getArmasElegiveisParaFoco(ficha) {
             const prof = String(item.proficienciaNecessaria || "").trim();
             return !prof || fichaTemProficiencia(ficha, prof);
         })
+        .filter(item => !jaTemFoco.has(normalizarTextoRegra(item.nome || "")))
         .sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"));
 }
 
 function getMagiasElegiveisParaFoco(ficha) {
+    const jaTemFoco = new Set(
+        (ficha?.habilidades || [])
+            .map(h => String(h?.nome || ""))
+            .filter(nome => normalizarTextoRegra(nome).startsWith("foco em magia:"))
+            .map(nome => normalizarTextoRegra(nome.split(":").slice(1).join(":").trim()))
+    );
+
     return (ficha?.magias || [])
         .filter(m => String(m?.nome || "").trim())
         .reduce((acc, magia) => {
@@ -5690,37 +7279,106 @@ function getMagiasElegiveisParaFoco(ficha) {
             }
             return acc;
         }, [])
+        .filter(magia => !jaTemFoco.has(normalizarTextoRegra(magia.nome || "")))
         .sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"));
 }
+function getArmasElegiveisParaEspecializacao(ficha) {
+    const jaTemEspecializacao = new Set(
+        (ficha?.habilidades || [])
+            .map(h => String(h?.nome || ""))
+            .filter(nome => normalizarTextoRegra(nome).startsWith("especializacao em arma:"))
+            .map(nome => normalizarTextoRegra(nome.split(":").slice(1).join(":").trim()))
+    );
 
-function montarOpcoesFocoEmArma(opcaoBase, ficha) {
-    return getArmasElegiveisParaFoco(ficha).map(item => ({
+    return (ITENS_EQUIPAMENTOS_DB.registros || [])
+        .filter(item => String(item.categoria || "").toLowerCase() === "arma")
+        .filter(item => String(item.nome || "").trim())
+        .filter(item => {
+            const prof = String(item.proficienciaNecessaria || "").trim();
+            return !prof || fichaTemProficiencia(ficha, prof);
+        })
+        .filter(item => !jaTemEspecializacao.has(normalizarTextoRegra(item.nome || "")))
+        .sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"));
+}
+function montarOpcoesEspecializacaoEmArma(opcaoBase, ficha) {
+    return getArmasElegiveisParaEspecializacao(ficha).map(item => ({
         ...opcaoBase,
-        id: `habilidade:${opcaoBase.registroId}:arma:${item.id}`,
-        label: `Foco em Arma: ${item.nome}`,
-        valor: `Foco em Arma: ${item.nome}`,
-        nomeCurto: `Foco em Arma: ${item.nome}`,
-        escolhaEspecial: "foco_em_arma",
+        id: `habilidade:${opcaoBase.registroId}:especializacao_arma:${item.id}`,
+        label: `Especialização em Arma: ${item.nome}`,
+        valor: `Especialização em Arma: ${item.nome}`,
+        nomeCurto: `Especialização em Arma: ${item.nome}`,
+        escolhaEspecial: "especializacao_em_arma",
         escolhaEspecialValor: item.nome,
         itemBaseId: item.id,
         preRequisitos: ""
     }));
 }
-
-function montarOpcoesFocoEmMagia(opcaoBase, ficha) {
-    return getMagiasElegiveisParaFoco(ficha).map(magia => ({
-        ...opcaoBase,
-        id: `habilidade:${opcaoBase.registroId}:magia:${normalizarTextoRegra(magia.nome)}`,
-        label: `Foco em Magia: ${magia.nome}`,
-        valor: `Foco em Magia: ${magia.nome}`,
-        nomeCurto: `Foco em Magia: ${magia.nome}`,
-        escolhaEspecial: "foco_em_magia",
-        escolhaEspecialValor: magia.nome,
-        magiaNome: magia.nome,
-        preRequisitos: ""
-    }));
+function montarEscolhaEspecialPoderFocoEmArma(opcaoBase) {
+    return [{
+        id: `poder_especial:${opcaoBase.registroId}:foco_em_arma`,
+        registro_id: String(opcaoBase.registroId || ""),
+        ordem: 1,
+        tipo: "foco_em_arma",
+        titulo: "Escolha uma arma",
+        descricao: "Escolha a arma para o poder Foco em Arma.",
+        quantidade: 1,
+        filtro: "especial",
+        opcoesTexto: "",
+        regrasGrupo: "",
+        dependeDe: ""
+    }];
 }
 
+function montarEscolhaEspecialPoderFocoEmMagia(opcaoBase) {
+    return [{
+        id: `poder_especial:${opcaoBase.registroId}:foco_em_magia`,
+        registro_id: String(opcaoBase.registroId || ""),
+        ordem: 1,
+        tipo: "foco_em_magia",
+        titulo: "Escolha uma magia",
+        descricao: "Escolha a magia para o poder Foco em Magia.",
+        quantidade: 1,
+        filtro: "especial",
+        opcoesTexto: "",
+        regrasGrupo: "",
+        dependeDe: ""
+    }];
+}
+function getPericiasElegiveisParaFoco(ficha) {
+    const jaTemFoco = new Set(
+        (ficha?.habilidades || [])
+            .map(h => String(h?.nome || ""))
+            .filter(nome => normalizarTextoRegra(nome).startsWith("foco em pericia:"))
+            .map(nome => normalizarTextoRegra(nome.split(":").slice(1).join(":").trim()))
+    );
+
+    const proibidas = new Set([
+        "luta",
+        "pontaria"
+    ]);
+
+    return (ficha?.pericias || [])
+        .filter(p => String(p?.nome || "").trim())
+        .filter(p => p?.treinada === true)
+        .filter(p => !proibidas.has(normalizarTextoRegra(p.nome || "")))
+        .filter(p => !jaTemFoco.has(normalizarTextoRegra(p.nome || "")))
+        .sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"));
+}
+function montarEscolhaEspecialPoderFocoEmPericia(opcaoBase) {
+    return [{
+        id: `poder_especial:${opcaoBase.registroId}:foco_em_pericia`,
+        registro_id: String(opcaoBase.registroId || ""),
+        ordem: 1,
+        tipo: "foco_em_pericia",
+        titulo: "Escolha uma perícia",
+        descricao: "Escolha a perícia para o poder Foco em Perícia.",
+        quantidade: 1,
+        filtro: "especial",
+        opcoesTexto: "",
+        regrasGrupo: "",
+        dependeDe: ""
+    }];
+}
 function expandirOpcoesEspeciaisDePoder(opcoesBase, ficha) {
     const resultado = [];
 
@@ -5728,12 +7386,50 @@ function expandirOpcoesEspeciaisDePoder(opcoesBase, ficha) {
         const nome = normalizarTextoRegra(opcao?.nomeCurto || opcao?.valor || "");
 
         if (nome === "foco em arma") {
-            resultado.push(...montarOpcoesFocoEmArma(opcao, ficha));
+            resultado.push({
+                ...opcao,
+                preRequisitos: "",
+                escolhas: montarEscolhaEspecialPoderFocoEmArma(opcao)
+            });
+            return;
+        }
+
+        if (nome === "especializacao em arma") {
+            resultado.push(...montarOpcoesEspecializacaoEmArma(opcao, ficha));
             return;
         }
 
         if (nome === "foco em magia") {
-            resultado.push(...montarOpcoesFocoEmMagia(opcao, ficha));
+            if (!getMagiasElegiveisParaFoco(ficha).length) {
+                return;
+            }
+
+            resultado.push({
+                ...opcao,
+                preRequisitos: "",
+                escolhas: montarEscolhaEspecialPoderFocoEmMagia(opcao)
+            });
+            return;
+        }
+
+        if (nome === "foco em pericia") {
+            if (!getPericiasElegiveisParaFoco(ficha).length) {
+                return;
+            }
+
+            resultado.push({
+                ...opcao,
+                preRequisitos: "",
+                escolhas: montarEscolhaEspecialPoderFocoEmPericia(opcao)
+            });
+            return;
+        }
+
+        if (nome === "proficiencia") {
+            resultado.push({
+                ...opcao,
+                escolhas: montarEscolhaEspecialPoderProficiencia(opcao, ficha)
+            });
             return;
         }
 
@@ -5764,6 +7460,14 @@ function expandirOpcoesEspeciaisDePoder(opcoesBase, ficha) {
                 });
                 return;
             }
+        }
+
+        if (nome === "treinamento em pericia") {
+            resultado.push({
+                ...opcao,
+                escolhas: montarEscolhaEspecialPoderTreinamentoPericia(opcao, ficha)
+            });
+            return;
         }
 
         resultado.push(opcao);
@@ -5896,7 +7600,30 @@ function getOpcoesBancoPorFiltro(tipoEscolha, filtro) {
 
     return [];
 }
+function getOpcoesMagiasAteOCirculo(prefixo, circuloMaximo) {
+    const max = Math.max(1, Number(circuloMaximo) || 1);
+    const registros = [];
 
+    for (let c = 1; c <= max; c++) {
+        registros.push(...buscarMagiasPorFiltro(`${prefixo}_${c}`));
+
+        if (prefixo === "magia_arcana" || prefixo === "magia_divina") {
+            registros.push(...buscarMagiasPorFiltro(`magia_universal_${c}`));
+        }
+    }
+
+    const vistos = new Set();
+
+    return registros
+        .filter(registro => {
+            const chave = String(registro?.id || registro?.nome || "");
+            if (!chave || vistos.has(chave)) return false;
+            vistos.add(chave);
+            return true;
+        })
+        .map(montarOpcaoDeRegistroBanco)
+        .filter(Boolean);
+}
 function montarOpcaoPericiaBonus(nomePericia, valor = 2) {
     return {
         id: `pericia:${nomePericia}:bonus`,
@@ -6143,12 +7870,22 @@ function getOpcoesEscolha(escolha, ficha) {
                 .filter(Boolean);
         }
 
-        return opcoes.map(nome => ({
-            id: `pericia:${nome}`,
-            tipoAplicacao: "pericia_treinada",
-            label: `Perícia: ${nome}`,
-            valor: nome
-        }));
+        return opcoes.map(nome => {
+            const opcao = {
+                id: `pericia:${nome}`,
+                tipoAplicacao: "pericia_treinada",
+                label: `Perícia: ${nome}`,
+                valor: nome
+            };
+
+            const bloqueada = opcaoPericiaIndisponivelPorTreinoGlobal(opcao, escolha.id, "classe");
+
+            return {
+                ...opcao,
+                preRequisitos: bloqueada ? "Perícia já treinada" : "",
+                escolhaBloqueada: bloqueada
+            };
+        });
     }
 
     if (escolha.tipo === "proficiencia") {
@@ -6157,21 +7894,127 @@ function getOpcoesEscolha(escolha, ficha) {
             .map(v => v.trim())
             .filter(Boolean);
 
-        return opcoes.map(nome => ({
-            id: `proficiencia:${nome}`,
-            tipoAplicacao: "proficiencia_adicionar",
-            label: `Proficiência: ${nome}`,
-            valor: nome
+        return opcoes.map(nome => {
+            const jaPossui = fichaTemProficiencia(ficha, nome);
+
+            return {
+                id: `proficiencia:${nome}`,
+                tipoAplicacao: "proficiencia_adicionar",
+                label: `Proficiência: ${nome}`,
+                valor: nome,
+                preRequisitos: jaPossui ? "Proficiência já conhecida" : "",
+                escolhaBloqueada: jaPossui
+            };
+        });
+    }
+    if (escolha.tipo === "foco_em_arma") {
+        return getArmasElegiveisParaFoco(ficha).map(item => ({
+            id: `foco_arma:${item.id}`,
+            tipoAplicacao: "foco_em_arma_definir",
+            label: `Foco em Arma: ${item.nome}`,
+            valor: `Foco em Arma: ${item.nome}`,
+            nomeCurto: `Foco em Arma: ${item.nome}`,
+            escolhaEspecial: "foco_em_arma",
+            escolhaEspecialValor: item.nome,
+            itemBaseId: item.id,
+            preRequisitos: ""
         }));
     }
 
+    if (escolha.tipo === "foco_em_magia") {
+        return getMagiasElegiveisParaFoco(ficha).map(magia => ({
+            id: `foco_magia:${normalizarTextoRegra(magia.nome)}`,
+            tipoAplicacao: "foco_em_magia_definir",
+            label: `Foco em Magia: ${magia.nome}`,
+            valor: `Foco em Magia: ${magia.nome}`,
+            nomeCurto: `Foco em Magia: ${magia.nome}`,
+            escolhaEspecial: "foco_em_magia",
+            escolhaEspecialValor: magia.nome,
+            magiaNome: magia.nome,
+            preRequisitos: ""
+        }));
+    }
+    if (escolha.tipo === "foco_em_pericia") {
+        return getPericiasElegiveisParaFoco(ficha).map(pericia => ({
+            id: `foco_pericia:${normalizarTextoRegra(pericia.nome)}`,
+            tipoAplicacao: "foco_em_pericia_definir",
+            label: `Foco em Perícia: ${pericia.nome}`,
+            valor: `Foco em Perícia: ${pericia.nome}`,
+            nomeCurto: `Foco em Perícia: ${pericia.nome}`,
+            escolhaEspecial: "foco_em_pericia",
+            escolhaEspecialValor: pericia.nome,
+            periciaNome: pericia.nome,
+            preRequisitos: ""
+        }));
+    }
     if (escolha.tipo === "magia") {
+        if (escolha.filtro === "magia_bardo_repertorio") {
+            return getMagiasBardoAumentarRepertorio(ficha);
+        }
+        if (escolha.filtro === "magia_druida_repertorio") {
+            return getMagiasDruidaNoContexto(ficha);
+        }
+        if (escolha.filtro === "magia_druida_segredos") {
+            return getMagiasDruidaSegredosNatureza(ficha);
+        }
+        if (escolha.filtro === "magia_arcanista_conhecimento") {
+            return getMagiasArcanistaConhecimentoMagico(ficha);
+        }
+        if (escolha.filtro === "magia_clerigo_conhecimento") {
+            return getMagiasClerigoConhecimentoMagico(ficha);
+        }
         if (escolha.filtro && escolha.filtro !== "lista") {
             const filtros = normalizarListaFiltros(escolha.filtro);
+            let registros = [];
 
-            const registros = filtros.length <= 1
-                ? buscarMagiasPorFiltro(filtros[0] || escolha.filtro)
-                : filtros.flatMap(filtro => buscarMagiasPorFiltro(filtro));
+            if (escolha.usarMagiasAteCirculo) {
+                const circuloMaximo = getCirculoMaximoPorClasseNoContexto(ficha, escolha.classeIdOrigem) || 1;
+
+                filtros.forEach(filtroBase => {
+                    const filtro = String(filtroBase || "").trim();
+
+                    if (filtro.startsWith("magia_divina_")) {
+                        registros.push(...getOpcoesMagiasAteOCirculo("magia_divina", circuloMaximo)
+                            .map(op => getRegistroPoderMagiaPorId(op.registroId))
+                            .filter(Boolean));
+                        return;
+                    }
+
+                    if (filtro.startsWith("magia_arcana_")) {
+                        registros.push(...getOpcoesMagiasAteOCirculo("magia_arcana", circuloMaximo)
+                            .map(op => getRegistroPoderMagiaPorId(op.registroId))
+                            .filter(Boolean));
+                        return;
+                    }
+
+                    if (filtro.startsWith("magia_universal_")) {
+                        registros.push(...getOpcoesMagiasAteOCirculo("magia_universal", circuloMaximo)
+                            .map(op => getRegistroPoderMagiaPorId(op.registroId))
+                            .filter(Boolean));
+                        return;
+                    }
+
+                    registros.push(...buscarMagiasPorFiltro(filtro));
+                });
+            } else {
+                const filtrosExpandidos = [];
+
+                filtros.forEach(filtroBase => {
+                    const filtro = String(filtroBase || "").trim();
+
+                    filtrosExpandidos.push(filtro);
+
+                    if (filtro.startsWith("magia_arcana_")) {
+                        filtrosExpandidos.push(filtro.replace(/^magia_arcana_/, "magia_universal_"));
+                    }
+
+                    if (filtro.startsWith("magia_divina_")) {
+                        filtrosExpandidos.push(filtro.replace(/^magia_divina_/, "magia_universal_"));
+                    }
+                });
+
+                registros = filtrosExpandidos.flatMap(filtro => buscarMagiasPorFiltro(filtro));
+            }
 
             const unicos = registros.reduce((acc, registro) => {
                 if (!acc.some(r => String(r.id) === String(registro.id))) {
@@ -6180,7 +8023,13 @@ function getOpcoesEscolha(escolha, ficha) {
                 return acc;
             }, []);
 
-            return filtrarForaMagiasJaConhecidas(unicos, ficha)
+            let registrosFiltrados = filtrarForaMagiasJaConhecidas(unicos, ficha);
+
+            if (normalizarTextoRegra(escolha.classeIdOrigem || "") === "bardo") {
+                registrosFiltrados = filtrarMagiasPorEscolasDoBardo(registrosFiltrados, ficha);
+            }
+
+            return registrosFiltrados
                 .sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"))
                 .map(montarOpcaoDeRegistroBanco)
                 .filter(Boolean);
@@ -6224,7 +8073,8 @@ function getOpcoesEscolha(escolha, ficha) {
                 escolhas: registro.escolhas || []
             }));
 
-            const poderesClasse = expandirOpcoesEspeciaisDePoder(poderesClasseBase, ficha);
+            const poderesClasseExpandido = expandirOpcoesEspeciaisDePoder(poderesClasseBase, ficha);
+            const poderesClasse = poderesClasseExpandido.length ? poderesClasseExpandido : poderesClasseBase;
 
             const filtrosSubstituicao = [];
             buscarPoderesDaClassePorFiltroFlexivel(classeContexto.id, escolha.filtro).forEach(p => {
@@ -7421,7 +9271,67 @@ function getOutrosPericia(p) {
         (Number(p?.outros) || 0)
     );
 }
+function getValorAtributoChaveMagias(ficha, chave) {
+    if (!ficha) return 0;
 
+    switch (normalizarTextoRegra(chave || "")) {
+        case "inteligencia":
+            return getAtributoFinal(ficha, "inteligencia");
+        case "sabedoria":
+            return getAtributoFinal(ficha, "sabedoria");
+        case "carisma":
+            return getAtributoFinal(ficha, "carisma");
+        default:
+            return 0;
+    }
+}
+
+function getAtributoChaveMagiasDaFicha(ficha) {
+    if (!ficha) return "";
+
+    const classes = ficha.classesPersonagem || [];
+    const temClasse = (id) => classes.some(c => normalizarTextoRegra(c?.classeId || "") === id);
+
+    if (temClasse("clerigo")) return "sabedoria";
+    if (temClasse("druida")) return "sabedoria";
+    if (temClasse("bardo")) return "carisma";
+    if (temClasse("paladino")) return "carisma";
+
+    if (temClasse("arcanista")) {
+        const caminho = normalizarTextoRegra(ficha.arcanistaCaminho || "");
+
+        if (caminho === "bruxo") return "inteligencia";
+        if (caminho === "mago") return "inteligencia";
+        if (caminho === "feiticeiro") return "carisma";
+    }
+
+    return "";
+}
+
+function calcularCdMagiasBase(ficha) {
+    if (!ficha) return 0;
+
+    const chave = getAtributoChaveMagiasDaFicha(ficha);
+    if (!chave) return 0;
+
+    const metadeNivel = getMetadeNivel(ficha);
+    const atributo = getValorAtributoChaveMagias(ficha, chave);
+
+    return 10 + metadeNivel + atributo;
+}
+
+function atualizarCdMagiasNaFicha(ficha, forcarSobrescrever = false) {
+    if (!ficha) return;
+
+    const chave = getAtributoChaveMagiasDaFicha(ficha);
+    ficha.atributoChaveMagias = chave || "";
+
+    const cdBase = calcularCdMagiasBase(ficha);
+
+    if (forcarSobrescrever || !Number.isFinite(Number(ficha.cdMagias)) || Number(ficha.cdMagias) <= 0) {
+        ficha.cdMagias = cdBase;
+    }
+}
 function normalizarNomeHabilidade(valor) {
     return normalizarTextoRegra(valor || "");
 }
@@ -7555,16 +9465,10 @@ function renderHome() {
         <button class="menu-card" onclick="go('personagens')">
           <h3>Personagem</h3>
           <p>Criar, abrir e editar fichas salvas neste navegador.</p>
-        </button>
-
-        <button class="menu-card" onclick="go('livro')">
-          <h3>Livro</h3>
-          <p>Área reservada para o PDF do livro. Vamos ligar isso na próxima etapa.</p>
-        </button>
+        </button>        
 
         <button class="menu-card" onclick="go('dados')">
           <h3>Dados</h3>
-          <p>Área reservada para rolagem de dados. Vamos montar depois.</p>
         </button>
       </div>
     </div>
@@ -7788,16 +9692,61 @@ function toggleEscolhaClasseValor(escolhaId, opcao, quantidadeMaxima) {
     const idx = lista.findIndex(item => item.id === opcao.id);
 
     if (idx >= 0) {
+        const removida = lista[idx];
         lista.splice(idx, 1);
+
+        if (Array.isArray(removida?.escolhas)) {
+            state.criacao.poderClasseEscolhas = state.criacao.poderClasseEscolhas || {};
+            removida.escolhas.forEach(escolhaInterna => {
+                delete state.criacao.poderClasseEscolhas[String(escolhaInterna.id || "")];
+            });
+
+            if (removida.escolhas.some(e => String(e.id || "") === String(state.criacao.escolhaPoderClasseAbertaId || ""))) {
+                state.criacao.escolhaPoderClasseAbertaId = null;
+            }
+        }
+
+        const ctxGolpe = getGolpePessoalStateAtual();
+        if (ctxGolpe?.golpePessoalModal && String(ctxGolpe.golpePessoalModal.opcaoId || "") === String(opcao.id || "")) {
+            ctxGolpe.golpePessoalModal = null;
+        }
     } else {
         if (!podeSelecionarOpcaoClasse(escolha, opcao)) return;
         if (limite > 0 && lista.length >= limite) return;
+
         lista.push(opcao);
+
+        if (isGolpePessoalOpcao(opcao)) {
+            state.criacao.escolhaClasseAbertaId = escolhaId;
+            state.criacao.escolhaPoderClasseAbertaId = "__golpe_pessoal__";
+
+            state.criacao.golpePessoalModal = {
+                escolhaClasseId: escolhaId,
+                opcaoId: opcao?.id || "",
+                config: JSON.parse(JSON.stringify(opcao?.golpePessoalConfig || criarConfigInicialGolpePessoal()))
+            };
+
+            renderMantendoScrollEscolha();
+            return;
+        }
+
+        if (Array.isArray(opcao.escolhas) && opcao.escolhas.length > 0) {
+            state.criacao.poderClasseEscolhas = state.criacao.poderClasseEscolhas || {};
+            state.criacao.escolhaPoderClasseAbertaId = String(opcao.escolhas[0].id || "");
+        }
     }
 
     renderMantendoScrollEscolha();
 }
+function escolhaClasseTemOpcaoConfirmada(escolhaId) {
+    const lista = state.criacao?.classeEscolhas?.[escolhaId] || [];
+    return lista.some(item => item?.escolhasConfirmadas);
+}
 
+function escolhaClasseTemOpcaoConfirmadaEvolucao(escolhaId) {
+    const lista = state.evolucao?.classeEscolhas?.[escolhaId] || [];
+    return lista.some(item => item?.escolhasConfirmadas);
+}
 function escolhaClassePreenchida(escolha) {
     const valores = getEscolhaClasseValores(escolha.id);
     return valores.length === (Number(escolha.quantidade) || 0);
@@ -8647,8 +10596,11 @@ function aplicarOrigemNaFichaCriacao() {
     for (const escolha of escolhas) {
         const selecionadas = getEscolhaOrigemValores(escolha.id);
         const quantidade = getQuantidadeEscolhaOrigem(escolha);
+        const opcoes = getOpcoesEscolhaOrigem(escolha, ficha);
+        const habilitadas = opcoes.filter(opcao => !opcaoPericiaIndisponivelNaOrigem(opcao, ficha)).length;
+        const necessario = Math.min(quantidade, habilitadas);
 
-        if (selecionadas.length !== quantidade) return false;
+        if (selecionadas.length !== necessario) return false;
 
         selecionadas.forEach(opcao => {
             if (opcao.tipoAplicacao === "pericia_treinada") {
@@ -8729,12 +10681,20 @@ function origemCriacaoValida() {
     const origem = getOrigemSelecionadaCriacao();
     if (!origem) return false;
 
+    const ficha = getFichaCriacao();
+    if (!ficha) return false;
+
     const escolhas = getEscolhasOrigemDisponiveis(origem);
+
     return escolhas.every(escolha => {
         const valores = getEscolhaOrigemValores(escolha.id);
         const quantidade = getQuantidadeEscolhaOrigem(escolha);
+        const opcoes = getOpcoesEscolhaOrigem(escolha, ficha);
 
-        return valores.length === quantidade;
+        const habilitadas = opcoes.filter(opcao => !opcaoPericiaIndisponivelNaOrigem(opcao, ficha)).length;
+        const necessario = Math.min(quantidade, habilitadas);
+
+        return valores.length === necessario;
     });
 }
 function renderEscolhaOrigemCriacaoModal() {
@@ -8747,9 +10707,17 @@ function renderEscolhaOrigemCriacaoModal() {
     const escolha = getEscolhasOrigemDisponiveis(origem).find(e => e.id === escolhaId);
     if (!escolha) return "";
 
-    const opcoes = getOpcoesEscolhaOrigem(escolha, f);
+    const opcoesBase = getOpcoesEscolhaOrigem(escolha, f);
     const selecionados = getEscolhaOrigemValores(escolha.id);
     const quantidade = getQuantidadeEscolhaOrigem(escolha);
+    const habilitadas = opcoesBase.filter(opcao => !opcaoPericiaIndisponivelNaOrigem(opcao, f)).length;
+    const necessario = Math.min(quantidade, habilitadas);
+
+    const opcoes = ordenarOpcoesParaExibicao(opcoesBase, (opcao) => {
+        const checked = selecionados.some(item => item.id === opcao.id);
+        const indisponivel = opcaoPericiaIndisponivelNaOrigem(opcao, f);
+        return checked || (!indisponivel && (necessario <= 0 || selecionados.length < necessario));
+    });
 
     document.body.classList.add("modal-open");
 
@@ -8759,37 +10727,54 @@ function renderEscolhaOrigemCriacaoModal() {
           <div class="overlay-header">
             <div>
               <div class="overlay-title">${escapeHtml(escolha.titulo || "Escolha de origem")}</div>
-              <div class="overlay-subtitle">${escapeHtml(escolha.descricao || "")}</div>
+              <div class="subtitle">
+                ${escapeHtml(escolha.descricao || "")}
+                ${escolha.descricao ? " • " : ""}
+                Selecionados: ${selecionados.length} / ${necessario}
+              </div>
             </div>
             <button class="btn ghost" onclick="fecharEscolhaOrigemCriacao()">Fechar</button>
           </div>
 
           <div class="overlay-body">
-            <div class="notice">
-              Selecionados: <strong>${selecionados.length} / ${quantidade}</strong>
-            </div>
-
-            <div style="height:12px"></div>
-
             <div class="list">
               ${opcoes.map(opcao => {
-            const checked = selecionados.some(item => item.id === opcao.id);
-            const indisponivel = opcaoPericiaIndisponivelNaOrigem(opcao, f);
-            const disabled = !checked && (indisponivel || selecionados.length >= quantidade);
+        const checked = selecionados.some(item => item.id === opcao.id);
+        const indisponivel = opcaoPericiaIndisponivelNaOrigem(opcao, f);
+        const disabled = indisponivel || (!checked && necessario > 0 && selecionados.length >= necessario);
+        const expandida = opcaoEscolhaEstaExpandida("origem", escolha.id, opcao.id);
 
         return `
-                    <div class="list-item" style="align-items:flex-start; gap:12px; ${disabled ? "opacity:.65;" : ""}">
-                      <div style="flex:1;">
-                        <div class="list-item-title">${escapeHtml(getTituloOpcaoEscolha(opcao))}</div>
-                        ${opcao.descricao ? `<div class="list-item-sub">${escapeHtml(opcao.descricao)}</div>` : ``}
-                        ${indisponivel ? `<div class="list-item-sub">Você já é treinado nesta perícia.</div>` : ``}
-                      </div>
+                    <div class="list-item ${disabled ? "disabled" : ""}" style="align-items:flex-start; gap:12px; ${disabled ? "opacity:.65;" : ""}">
+                      <button
+                        type="button"
+                        class="choice-main"
+                        onclick="toggleExpansaoOpcaoEscolha('origem', '${escapeAttr(escolha.id)}', '${escapeAttr(opcao.id)}')"
+                        style="all:unset; cursor:pointer; display:block; flex:1;"
+                        ${disabled ? "disabled" : ""}
+                      >
+                        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+                          <div style="flex:1;">
+                            <div class="list-item-title">${escapeHtml(opcao.label || opcao.valor || "")}</div>
+                            ${indisponivel ? `<div class="list-item-sub">Você já possui este benefício.</div>` : ""}
+                          </div>
+                          <div style="font-size:12px; opacity:.75;">${expandida ? "▲" : "▼"}</div>
+                        </div>
+
+                        ${expandida && opcao.descricao ? `
+                          <div class="list-item-sub" style="margin-top:8px;">
+                            ${escapeHtml(opcao.descricao)}
+                          </div>
+                        ` : ""}
+                      </button>
 
                       <input
+                        class="choice-checkbox"
                         type="checkbox"
                         ${checked ? "checked" : ""}
                         ${disabled ? "disabled" : ""}
-                        onchange='toggleEscolhaOrigemValor("${escolha.id}", ${JSON.stringify(opcao).replace(/'/g, "&apos;")}, ${quantidade})'
+                        onclick="event.stopPropagation()"
+                        onchange='toggleEscolhaOrigemValor("${escapeAttr(escolha.id)}", ${JSON.stringify(opcao).replace(/'/g, "&apos;")}, ${necessario})'
                       >
                     </div>
                   `;
@@ -9026,11 +11011,12 @@ function aplicarEscolhasClasseNaFicha(ficha, classe) {
                     alvo: opcao.valor
                 });
             }
-           
+
             if (opcao.tipoAplicacao === "grupo_escolha") {
                 if (opcao.ehDivindade) {
                     aplicarDivindadeEscolhidaDeClasseNaFicha(ficha, classe, opcao);
                 }
+
                 if (opcao.ehAumentoAtributo) {
                     const ok = aplicarAumentoDeAtributoNaFicha(ficha, opcao.valor);
 
@@ -9082,17 +11068,100 @@ function aplicarEscolhasClasseNaFicha(ficha, classe) {
                         alvo: opcao.valor
                     });
                 }
+                if (classe.id === "bardo" && escolha.id === "esc_bardo_escolas") {
+                    ficha.bardoEscolas = ficha.bardoEscolas || [];
+
+                    const nomeEscola = String(opcao.valor || "").trim();
+                    if (nomeEscola && !ficha.bardoEscolas.some(e =>
+                        normalizarNomeEscolaMagia(e) === normalizarNomeEscolaMagia(nomeEscola)
+                    )) {
+                        ficha.bardoEscolas.push(nomeEscola);
+                    }
+
+                    ficha.efeitosAplicados.push({
+                        id: uid(),
+                        origemTipo: "Classe",
+                        origemNome: classe.nome,
+                        tipo: "escola_magia",
+                        alvo: opcao.valor
+                    });
+                }
             }
 
             if (opcao.tipoAplicacao === "habilidade_adicionar") {
+                if (opcao.escolhaEspecial === "golpe_pessoal") {
+                    const registroGolpe = criarRegistroGolpePessoalParaFicha(opcao);
+
+                    adicionarHabilidadeNaFicha(
+                        ficha,
+                        {
+                            nome: registroGolpe.nome,
+                            descricao: registroGolpe.descricao || "",
+                            custoPm: Number(registroGolpe.custoPm) || 0,
+                            custoVida: 0,
+                            custoPmPermanente: 0,
+                            custoVidaPermanente: 0,
+                            resumoUso: registroGolpe.resumoUso || "",
+                            registroId: "",
+                            ativavel: true,
+                            permiteIntensificar: false,
+                            incrementos: [],
+                            escolhas: [],
+                            nomeCurto: registroGolpe.nomeCurto || registroGolpe.nome || "",
+                            tipoRegistro: "poder",
+                            origemBase: "classe",
+                            filtros: registroGolpe.filtros || "",
+                            escolhaEspecial: "golpe_pessoal",
+                            escolhaEspecialValor: registroGolpe.escolhaEspecialValor || "",
+                            golpePessoalConfig: registroGolpe.golpePessoalConfig || null
+                        },
+                        "Classe",
+                        classe.nome
+                    );
+
+                    const habilidadeAdicionada = ficha.habilidades?.[ficha.habilidades.length - 1];
+                    if (habilidadeAdicionada) {
+                        habilidadeAdicionada.registroId = "";
+                        habilidadeAdicionada.idPersonalizado = registroGolpe.id || "";
+                        habilidadeAdicionada.nome = registroGolpe.nome || habilidadeAdicionada.nome || "";
+                        habilidadeAdicionada.nomeCurto = registroGolpe.nomeCurto || registroGolpe.nome || "";
+                        habilidadeAdicionada.descricao = registroGolpe.descricao || habilidadeAdicionada.descricao || "";
+                        habilidadeAdicionada.custoPm = Number(registroGolpe.custoPm) || 0;
+                        habilidadeAdicionada.custoVida = 0;
+                        habilidadeAdicionada.custoPmPermanente = 0;
+                        habilidadeAdicionada.custoVidaPermanente = 0;
+                        habilidadeAdicionada.resumoUso = registroGolpe.resumoUso || "";
+                        habilidadeAdicionada.ativavel = true;
+                        habilidadeAdicionada.permiteIntensificar = false;
+                        habilidadeAdicionada.incrementos = [];
+                        habilidadeAdicionada.escolhas = [];
+                        habilidadeAdicionada.tipoRegistro = "poder";
+                        habilidadeAdicionada.origemBase = "classe";
+                        habilidadeAdicionada.filtros = registroGolpe.filtros || "";
+                        habilidadeAdicionada.escolhaEspecial = "golpe_pessoal";
+                        habilidadeAdicionada.escolhaEspecialValor = registroGolpe.escolhaEspecialValor || "";
+                        habilidadeAdicionada.golpePessoalConfig = registroGolpe.golpePessoalConfig || null;
+                    }
+
+                    ficha.efeitosAplicados.push({
+                        id: uid(),
+                        origemTipo: "Classe",
+                        origemNome: classe.nome,
+                        tipo: "habilidade_adicionar",
+                        alvo: registroGolpe.nome || "Golpe Pessoal"
+                    });
+
+                    return;
+                }
+
                 let registroHabilidade = null;
 
                 if (opcao.registroId) {
-                    registroHabilidade = getRegistroPoderMagiaPorId(opcao.registroId);
+                    registroHabilidade = getPoderClassePorId(classe.id, opcao.registroId);
+                }
 
-                    if (!registroHabilidade) {
-                        registroHabilidade = getPoderClassePorId(classe.id, opcao.registroId);
-                    }
+                if (!registroHabilidade && opcao.valor) {
+                    registroHabilidade = getPoderClassePorNome(classe.id, opcao.valor);
                 }
 
                 const nomeHabilidade =
@@ -9100,6 +11169,7 @@ function aplicarEscolhasClasseNaFicha(ficha, classe) {
                     registroHabilidade?.nome ||
                     opcao.valor ||
                     "";
+
                 const ehEmpatiaSelvagem = normalizarNomeHabilidade(nomeHabilidade) === "empatia selvagem";
                 const temEmpatiaRacial = fichaTemHabilidadeComOrigem(ficha, "Empatia Selvagem", "Raça");
 
@@ -9134,6 +11204,84 @@ function aplicarEscolhasClasseNaFicha(ficha, classe) {
                     tipo: "habilidade_adicionar",
                     alvo: nomeHabilidade
                 });
+
+                if (Array.isArray(opcao.escolhasResolvidas)) {
+                    opcao.escolhasResolvidas.forEach(bloco => {
+                        (bloco?.selecionadas || []).forEach(subopcao => {
+                            const nomeBaseOpcao = normalizarTextoRegra(opcao.nomeCurto || opcao.valor || "");
+
+                            if (nomeBaseOpcao === "foco em pericia" && opcao.escolhaEspecialValor) {
+                                adicionarHabilidadeNaFicha(
+                                    ficha,
+                                    {
+                                        nome: `Foco em Perícia: ${opcao.escolhaEspecialValor}`,
+                                        descricao: opcao.descricao || "",
+                                        custoPm: 0,
+                                        custoVida: 0,
+                                        custoPmPermanente: 0,
+                                        custoVidaPermanente: 0,
+                                        resumoUso: "",
+                                        registroId: opcao.registroId || "",
+                                        ativavel: false,
+                                        permiteIntensificar: false,
+                                        incrementos: [],
+                                        escolhas: []
+                                    },
+                                    "Classe",
+                                    classe.nome
+                                );
+
+                                ficha.efeitosAplicados.push({
+                                    id: uid(),
+                                    origemTipo: "Classe",
+                                    origemNome: classe.nome,
+                                    tipo: "habilidade_adicionar",
+                                    alvo: `Foco em Perícia: ${opcao.escolhaEspecialValor}`
+                                });
+                            }
+
+                            if (subopcao.tipoAplicacao === "magia_adicionar") {
+                                adicionarOuAtualizarMagiaNaFicha(
+                                    ficha,
+                                    {
+                                        registroId: subopcao.registroId || "",
+                                        nome: subopcao.valor || "",
+                                        nomeAdicionado: subopcao.nomeAdicionado || ""
+                                    },
+                                    "Classe",
+                                    classe.nome
+                                );
+
+                                ficha.efeitosAplicados.push({
+                                    id: uid(),
+                                    origemTipo: "Classe",
+                                    origemNome: classe.nome,
+                                    tipo: "magia_adicionar",
+                                    alvo: subopcao.valor
+                                });
+                            }
+
+                            if (subopcao.tipoAplicacao === "pericia_treinada") {
+                                const pericia = (ficha.pericias || []).find(p =>
+                                    normalizarTextoRegra(p.nome) === normalizarTextoRegra(subopcao.valor)
+                                );
+
+                                if (pericia) {
+                                    pericia.treinada = true;
+                                }
+
+                                ficha.efeitosAplicados.push({
+                                    id: uid(),
+                                    origemTipo: "Classe",
+                                    origemNome: classe.nome,
+                                    tipo: "pericia_treinada",
+                                    alvo: subopcao.valor
+                                });
+                            }
+                        });
+                    });
+                }
+
                 if (opcao.ehAumentoAtributo && opcao.atributoEscolhido) {
                     const ok = aplicarAumentoDeAtributoNaFicha(ficha, opcao.atributoEscolhido);
 
@@ -9706,6 +11854,7 @@ function renderConteudoEtapaCriacao() {
                     const quantidade = Number(escolha.quantidade) || 0;
                     const preenchida = selecionados.length === quantidade;
                     const desbloqueada = escolhaClasseDesbloqueada(escolha);
+                    const travada = escolhaClasseTemOpcaoConfirmada(escolha.id);
 
                     return `
                     <div class="list-item">
@@ -9715,15 +11864,15 @@ function renderConteudoEtapaCriacao() {
                           ${escapeHtml(escolha.descricao || "")}
                           ${escolha.descricao ? "<br>" : ""}
                           Selecionados: ${selecionados.length} / ${quantidade}
-                        </div>
+                            </div>
                       </div>
 
                       <div class="actions">
-                        <button class="btn" onclick="abrirEscolhaClasseCriacao('${escolha.id}')" ${!desbloqueada ? "disabled" : ""}>
-                          Escolher
+                        <button class="btn" onclick="abrirEscolhaClasseCriacao('${escolha.id}')" ${(!desbloqueada || travada) ? "disabled" : ""}>
+                          ${travada ? "Completo" : "Escolher"}
                         </button>
-                        <span style="font-weight:bold; color:${!desbloqueada ? "#9a6a00" : preenchida ? "#1d6f3a" : "#b00020"};">
-                          ${!desbloqueada ? "Pendente" : preenchida ? "Completo" : "Pendente"}
+                        <span style="font-weight:bold; color:${(!desbloqueada || travada) ? "#1d6f3a" : preenchida ? "#1d6f3a" : "#b00020"};">
+                          ${(!desbloqueada || travada) ? "Completo" : preenchida ? "Completo" : "Pendente"}
                         </span>
                       </div>
                     </div>
@@ -9886,9 +12035,12 @@ ${habilidadesFixasOrigem.length ? `
                     : `
                           <div class="list">
                             ${escolhasOrigemDisponiveis.map(escolha => {
-                        const selecionados = getEscolhaOrigemValores(escolha.id);
-                        const quantidade = getQuantidadeEscolhaOrigem(escolha);
-                        const preenchida = selecionados.length === quantidade;
+                            const selecionados = getEscolhaOrigemValores(escolha.id);
+                            const quantidade = getQuantidadeEscolhaOrigem(escolha);
+                            const opcoes = getOpcoesEscolhaOrigem(escolha, f);
+                            const habilitadas = opcoes.filter(opcao => !opcaoPericiaIndisponivelNaOrigem(opcao, f)).length;
+                            const necessario = Math.min(quantidade, habilitadas);
+                            const preenchida = selecionados.length === necessario;
 
                         return `
                                   <div class="list-item">
@@ -9897,7 +12049,7 @@ ${habilidadesFixasOrigem.length ? `
                                       <div class="list-item-sub">
                                         ${escapeHtml(escolha.descricao || "")}
                                         ${escolha.descricao ? "<br>" : ""}
-                                        Selecionados: ${selecionados.length} / ${quantidade}
+                                        Selecionados: ${selecionados.length} / ${necessario}
                                       </div>
                                     </div>
 
@@ -10325,6 +12477,7 @@ ${renderModalPericiasInteligenciaCriacao()}
 ${renderModalAdicionarItemInventario()}
 ${renderModalDetalhesItemInventario()}
 ${renderEscolhaOrigemCriacaoModal()}
+${renderEscolhaPoderClasseModal()}
     </div>
   `;
 }
@@ -10545,6 +12698,7 @@ function renderEvolucao() {
                 const quantidade = Number(escolha.quantidade) || 0;
                 const preenchida = selecionados.length === quantidade;
                 const desbloqueada = escolhaClasseDesbloqueada(escolha);
+                const travada = escolhaClasseTemOpcaoConfirmadaEvolucao(escolha.id);
 
                 return `
                         <div class="list-item">
@@ -10561,9 +12715,9 @@ function renderEvolucao() {
                             <button
                               class="btn ${preenchida ? "ok" : "ghost"}"
                               onclick="abrirEscolhaClasseEvolucao('${escolha.id}')"
-                              ${!desbloqueada ? "disabled" : ""}
+                              ${(!desbloqueada || travada) ? "disabled" : ""}
                             >
-                              ${preenchida ? "Escolhido" : "Escolher"}
+                              ${travada ? "Completo" : (preenchida ? "Escolhido" : "Escolher")}
                             </button>
 
                             <span style="font-weight:bold; color:${preenchida ? "#1d6f3a" : "#b00020"};">
@@ -10590,58 +12744,9 @@ function renderEvolucao() {
 
       ${renderEscolhaClasseEvolucaoModal()}
       ${renderEscolhaDivindadeEvolucaoModal()}
+      ${renderEscolhaPoderClasseModal()}
     </div>
   `;
-}
-
-function renderLivro() {
-  app.innerHTML = `
-    <div class="screen">
-      <div class="topbar">
-        <div>
-          <h2>Livro</h2>
-          <div class="subtitle">PDF com rolagem vertical, texto selecionável e busca.</div>
-        </div>
-        <button class="btn ghost" onclick="go('home')">Voltar</button>
-      </div>
-
-      <div class="sheet">
-        <div class="panel">
-          <div class="panel-title">Livro Tormenta20</div>
-          <div class="panel-body">
-            <div class="pdf-toolbar">
-              <input type="file" id="pdfUpload" accept="application/pdf">
-              <button class="btn" onclick="carregarPDF()">Carregar PDF</button>
-
-              <input type="text" id="searchText" placeholder="Pesquisar texto">
-              <button class="btn" onclick="buscarTexto()">Buscar</button>
-              <button class="btn" onclick="resultadoAnterior()">◀</button>
-              <button class="btn" onclick="proximoResultado()">▶</button>
-
-              <input type="number" id="goPageInput" min="1" placeholder="Página">
-              <button class="btn" onclick="irParaPagina()">Ir</button>
-            </div>
-
-            <div style="display:flex; gap:16px; flex-wrap:wrap; margin:10px 0 14px;">
-              <label class="checkbox-line">
-                <input type="checkbox" id="searchWholeWord" checked>
-                <span>Palavra/frase exata</span>
-              </label>
-            </div>
-
-            <div id="pdfStatus" class="pdf-status">Nenhum PDF carregado.</div>
-            <div id="pdfSearchInfo" class="pdf-search-info"></div>
-
-            <div id="pdfViewerWrap" class="pdf-viewer-wrap">
-              <div id="pdfPages" class="pdf-pages"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-
-  iniciarPDF();
 }
 
 function renderDados() {
@@ -10791,6 +12896,7 @@ function renderFicha() {
         </div>
       </div>
 
+      <div class="sheet-scroll">
       <div class="sheet">
         <div class="sheet-grid">
           <div class="row-2">
@@ -10856,13 +12962,21 @@ function renderFicha() {
          
           <div class="row-2">
   <div>
-    <div class="row-3">
+    <div class="row-4">
       <div class="panel">
         <div class="panel-title">XP</div>
         <div class="panel-body-centro">
-          <input style="text-align:center;type="number" value="${escapeAttr(f.xp)}" onchange="updateFicha('xp', Number(this.value))">
+          <input style="text-align:center;width:100px;type="number" value="${escapeAttr(f.xp)}" onchange="updateFicha('xp', Number(this.value))">
         </div>
       </div>
+
+      <div class="panel">
+  <div class="panel-title">CD Magias${f.atributoChaveMagias ? ` (${escapeHtml(({ inteligencia: "INT", sabedoria: "SAB", carisma: "CAR" }[f.atributoChaveMagias] || f.atributoChaveMagias))})` : ""}</div>
+<div class="panel-body" style="display:flex;  align-items:center; justify-content:center; gap:8px;">
+  <input style="text-align:center; width:50px;" type="number" value="${escapeAttr(f.cdMagias)}" onchange="updateFicha('cdMagias', Number(this.value))">
+  <button class="btn ghost" onclick="recalcularCdMagiasFichaAtual()">Rc</button>
+</div>
+</div>
 
       <div class="panel">
         <div class="panel-title">Nível total</div>
@@ -11087,14 +13201,14 @@ function renderFicha() {
                 <div class="panel">
                   <div class="panel-title">Tamanho</div>
                   <div class="panel-body-centro">
-                    <input style="text-align:center;"value="${escapeAttr(f.tamanho)}"onchange="updateFicha('tamanho', this.value)">
+                    <input style="text-align:center;width:100px;"value="${escapeAttr(f.tamanho)}"onchange="updateFicha('tamanho', this.value)">
                   </div>
                 </div>
 
                 <div class="panel">
                   <div class="panel-title">Deslocamento</div>
                   <div class="panel-body-centro">
-                    <input style="text-align:center;"value="${escapeAttr(f.deslocamento)}" onchange="updateFicha('deslocamento', this.value)">
+                    <input style="text-align:center;width:100px;"value="${escapeAttr(f.deslocamento)}" onchange="updateFicha('deslocamento', this.value)">
                   </div>
                 </div>
               </div>
@@ -11142,126 +13256,145 @@ function renderFicha() {
 <div style="height:14px"></div>
 
 <div class="panel">
-  <div class="panel-title">Poderes</div>
-  <div class="panel-body">
-    ${poderesVisiveis.length === 0
-          ? `<div class="empty">Nenhum poder cadastrado.</div>`
-          : `
-          <div class="list">
-            ${poderesVisiveis.map(h => `
-              <div class="list-item">
-                <div style="display:flex; align-items:flex-start; gap:10px; flex:1;">
-                  <input
-                    type="checkbox"
-                    ${h.selecionada ? "checked" : ""}
-                    onchange="updateHabilidade('${h.id}', 'selecionada', this.checked)"
-                    style="margin-top:4px;"
-                  >
-
-                  <button
-                    class="btn ghost"
-                    style="padding:0; min-height:auto; border:none; background:none; text-align:left; box-shadow:none;"
-                    onclick="abrirDetalheHabilidade('${h.id}')"
-                  >
-                    <div class="list-item-title">${escapeHtml(h.nome || "Sem nome")}</div>
-                  </button>
-                </div>
-
-                <div style="font-weight:bold;">
-                  ${Number(h.custoPm) || 0} PM
-                </div>
-              </div>
-            `).join("")}
-          </div>
-        `
-      }
-
-    <div style="height:12px"></div>
-
-    ${(() => {
-          const totalPm = getCustoTotalHabilidadesSelecionadas();
-          const pmAtual = Number(f.pmAtual) || 0;
-          const excedeu = totalPm > pmAtual;
-
-          return `
-          <div class="row-2">
-            <div class="notice" style="${excedeu ? "background:#ffd7d7; border-color:#c43a3a; color:#7a1010;" : ""}">
-              PM total selecionado:
-              <strong style="${excedeu ? "color:#b00020;" : ""}">
-                ${totalPm}
-              </strong>
-              <br>
-              PM atual do personagem: <strong>${pmAtual}</strong>
-            </div>
-
-            <div class="actions" style="justify-content:flex-end; align-items:center;">
-              <button class="btn" onclick="addHabilidade()">Adicionar habilidade</button>
-              <button
-                class="btn primary"
-                onclick="usarHabilidadesSelecionadas()"
-                ${excedeu ? "disabled" : ""}
-                style="${excedeu ? "opacity:.5; cursor:not-allowed;" : ""}"
-              >
-                Usar habilidades
-              </button>
-            </div>
-          </div>
-        `;
-      })()
-    }
+  <div
+    class="panel-title"
+    style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+    onclick="toggleSecaoFicha('poderes')"
+  >
+    <span>Poderes</span>
+    <span>${secaoFichaEstaAberta('poderes') ? "▲" : "▼"}</span>
   </div>
+
+  ${secaoFichaEstaAberta('poderes') ? `
+    <div class="panel-body">
+      ${poderesVisiveis.length === 0
+              ? `<div class="empty">Nenhum poder cadastrado.</div>`
+              : `
+        <div class="list">
+          ${poderesVisiveis.map(h => `
+            <div class="list-item">
+              <div style="display:flex; align-items:flex-start; gap:10px; flex:1;">
+                <input
+                  type="checkbox"
+                  ${h.selecionada ? "checked" : ""}
+                  onchange="updateHabilidade('${h.id}', 'selecionada', this.checked)"
+                  style="margin-top:4px;"
+                >
+
+                <button
+                  class="btn ghost"
+                  style="padding:0; min-height:auto; border:none; background:none; text-align:left; box-shadow:none;"
+                  onclick="abrirDetalheHabilidade('${h.id}')"
+                >
+                  <div class="list-item-title">${escapeHtml(h.nome || "Sem nome")}</div>
+                </button>
+              </div>
+
+              <div style="font-weight:bold;">
+                ${Number(h.custoPm) || 0} PM
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `
+          }
+
+      <div style="height:12px"></div>
+
+      ${(() => {
+              const totalPm = getCustoTotalHabilidadesSelecionadas();
+              const pmAtual = Number(f.pmAtual) || 0;
+              const excedeu = totalPm > pmAtual;
+
+              return `
+        <div class="row-2">
+          <div class="notice" style="${excedeu ? "background:#ffd7d7; border-color:#c43a3a; color:#7a1010;" : ""}">
+            PM total selecionado:
+            <strong style="${excedeu ? "color:#b00020;" : ""}">
+              ${totalPm}
+            </strong>
+            <br>
+            PM atual do personagem: <strong>${pmAtual}</strong>
+          </div>
+
+          <div class="actions" style="justify-content:flex-end; align-items:center;">
+            <button class="btn" onclick="addHabilidade()">Adicionar habilidade</button>
+            <button
+              class="btn primary"
+              onclick="usarHabilidadesSelecionadas()"
+              ${excedeu ? "disabled" : ""}
+              style="${excedeu ? "opacity:.5; cursor:not-allowed;" : ""}"
+            >
+              Usar habilidades
+            </button>
+          </div>
+        </div>
+      `;
+          })()
+          }
+    </div>
+  ` : ""}
 </div>
 
 <div style="height:14px"></div>
 
 <div class="panel">
-  <div class="panel-title">Magias</div>
-  <div class="panel-body">
-    ${
-      f.magias.length === 0
-        ? `<div class="empty">Nenhuma magia cadastrada.</div>`
-        : `
-          <div class="list">
-            ${f.magias.map(m => {
-              const custoBase = Number(m.custoPm) || 0;
-              const semPm = custoBase > (Number(f.pmAtual) || 0);
+  <div
+    class="panel-title"
+    style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+    onclick="toggleSecaoFicha('magias')"
+  >
+    <span>Magias</span>
+    <span>${secaoFichaEstaAberta('magias') ? "▲" : "▼"}</span>
+  </div>
 
-              return `
-                <div class="list-item">
-                  <div style="flex:1;">
-                    <button
-                      class="btn ghost"
-                      style="padding:0; min-height:auto; border:none; background:none; text-align:left; box-shadow:none;"
-                      onclick="abrirDetalheMagia('${m.id}')"
-                    >
-                      <div class="list-item-title">${escapeHtml(m.nome || "Sem nome")}</div>
-                    </button>
+  ${secaoFichaEstaAberta('magias') ? `
+    <div class="panel-body">
+      ${f.magias.length === 0
+              ? `<div class="empty">Nenhuma magia cadastrada.</div>`
+              : `
+            <div class="list">
+              ${f.magias.map(m => {
+                  const custoBase = Number(m.custoPm) || 0;
+                  const semPm = custoBase > (Number(f.pmAtual) || 0);
 
-                    <div class="list-item-sub">
-                      Círculo: ${escapeHtml(m.circulo || "—")} • Custo: ${custoBase} PM
+                  return `
+                  <div class="list-item">
+                    <div style="flex:1;">
+                      <button
+                        class="btn ghost"
+                        style="padding:0; min-height:auto; border:none; background:none; text-align:left; box-shadow:none;"
+                        onclick="abrirDetalheMagia('${m.id}')"
+                      >
+                        <div class="list-item-title">${escapeHtml(m.nome || "Sem nome")}</div>
+                      </button>
+
+                      <div class="list-item-sub">
+                        Círculo: ${escapeHtml(m.circulo || "—")} • Custo: ${custoBase} PM
+                      </div>
+                    </div>
+
+                    <div class="actions">
+                      <button
+                        class="btn primary"
+                        onclick="abrirDetalheMagia('${m.id}')"
+                        ${semPm ? "disabled" : ""}
+                      >
+                        Usar
+                      </button>
                     </div>
                   </div>
+                `;
+              }).join("")}
+            </div>
+          `
+          }
 
-                  <div class="actions">
-                    <button
-                      class="btn primary"
-                      onclick="abrirDetalheMagia('${m.id}')"
-                      ${semPm ? "disabled" : ""}
-                    >
-                      Usar
-                    </button>
-                  </div>
-                </div>
-              `;
-            }).join("")}
-          </div>
-        `
-    }
-
-    <div style="margin-top:12px">
-      <button class="btn" onclick="addMagia()">Adicionar magia</button>
+      <div style="margin-top:12px">
+        <button class="btn" onclick="addMagia()">Adicionar magia</button>
+      </div>
     </div>
-  </div>
+  ` : ""}
 </div>
 
 <div style="height:14px"></div>
@@ -11272,7 +13405,10 @@ ${renderInventarioSimples(f)}
                <div class="panel">
                   <div class="panel-title">Anotações</div>
                   <div class="panel-body">
-                    <textarea onchange="updateFicha('anotacoes', this.value)">${escapeHtml(f.anotacoes)}</textarea>
+                    <textarea
+  style="min-width:600px; min-height:100px;"
+  onchange="updateFicha('anotacoes', this.value)"
+>${escapeHtml(f.anotacoes)}</textarea>
                   </div>
                 </div>
               </div>
@@ -11340,13 +13476,11 @@ ${renderInventarioSimples(f)}
     </div>
   </div>
 </div>
-
-      <div class="side-buttons">
-        <button class="btn primary floating" onclick="abrirModal('livro')">Livro</button>
+</div>
+      <div class="side-buttons">        
         <button class="btn primary floating" onclick="abrirModal('dados')">Dados</button>
       </div>
-
-      ${renderLivroModal()}
+      
       ${renderDadosModal()}
       ${renderEquipamentoModal()}
       ${renderHabilidadeModal()}
@@ -11356,68 +13490,6 @@ ${renderInventarioSimples(f)}
       ${renderModalDetalhesItemInventario()}
       ${renderEscolhaDivindadeEvolucaoModal()}
       ${renderProficienciasModal()}
-    </div>
-  `;
-}
-
-function renderLivroModal() {
-  if (state.modal !== "livro") return "";
-
-  setTimeout(() => {
-    document.body.classList.add("modal-open");
-
-    const viewer = document.getElementById("pdfViewerWrap");
-    if (viewer && !viewer.dataset.ready) {
-      viewer.dataset.ready = "1";
-      iniciarPDF();
-    }
-  }, 0);
-
-  return `
-    <div class="overlay" onclick="fecharModal()">
-      <div class="overlay-card" onclick="event.stopPropagation()">
-        <div class="overlay-header">
-          <div>
-            <div class="overlay-title">Livro</div>
-            <div class="subtitle">Consulta rápida sem sair da ficha.</div>
-          </div>
-          <button class="btn ghost" onclick="fecharModal()">Fechar</button>
-        </div>
-
-        <div class="overlay-body">
-          <div class="panel">
-            <div class="panel-title">Livro Tormenta20</div>
-            <div class="panel-body">
-              <div class="pdf-toolbar">
-                <input type="file" id="pdfUpload" accept="application/pdf">
-                <button class="btn" onclick="carregarPDF()">Carregar PDF</button>
-
-                <input type="text" id="searchText" placeholder="Pesquisar texto">
-                <button class="btn" onclick="buscarTexto()">Buscar</button>
-                <button class="btn" onclick="resultadoAnterior()">◀</button>
-                <button class="btn" onclick="proximoResultado()">▶</button>
-
-                <input type="number" id="goPageInput" min="1" placeholder="Página">
-                <button class="btn" onclick="irParaPagina()">Ir</button>
-              </div>
-
-              <div style="display:flex; gap:16px; flex-wrap:wrap; margin:10px 0 14px;">
-                <label class="checkbox-line">
-                  <input type="checkbox" id="searchWholeWord" checked>
-                  <span>Palavra/frase exata</span>
-                </label>
-              </div>
-
-              <div id="pdfStatus" class="pdf-status">Nenhum PDF carregado.</div>
-              <div id="pdfSearchInfo" class="pdf-search-info"></div>
-
-              <div id="pdfViewerWrap" class="pdf-viewer-wrap">
-                <div id="pdfPages" class="pdf-pages"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   `;
 }
@@ -12051,7 +14123,22 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
 }
+function secaoFichaEstaAberta(chave) {
+    return !!state?.secoesFicha?.[chave];
+}
 
+function toggleSecaoFicha(chave) {
+    if (!state.secoesFicha) {
+        state.secoesFicha = {
+            poderes: true,
+            magias: true,
+            inventario: true
+        };
+    }
+
+    state.secoesFicha[chave] = !state.secoesFicha[chave];
+    render();
+}
 function escapeAttr(value) {
   return escapeHtml(value);
 }
@@ -12060,680 +14147,11 @@ function render() {
   if (state.screen === "home") return renderHome();
   if (state.screen === "personagens") return renderPersonagens();
   if (state.screen === "criacao") return renderCriacao();
-  if (state.screen === "evolucao") return renderEvolucao();
-  if (state.screen === "livro") return renderLivro();
+  if (state.screen === "evolucao") return renderEvolucao();  
   if (state.screen === "dados") return renderDados();
   if (state.screen === "ficha") return renderFicha();
 }
-
-let pdfDoc = null;
-let pdfPagesText = [];
-let pdfRenderedScale = 1.25;
-let pdfPageStates = [];
-let pdfObserver = null;
-let pdfPageMaps = [];
-
-let activeSearchTerm = "";
-let searchMatches = [];
-let currentMatchIndex = -1;
-
-const DB_NAME = "t20LivroDB";
-const STORE_NAME = "arquivos";
-const PDF_KEY = "livroPdf";
-const PDF_READING_STATE_KEY = "livroReadingState";
-
-function setPdfStatus(text) {
-  const el = document.getElementById("pdfStatus");
-  if (el) el.textContent = text;
-}
-
-function setPdfSearchInfo(text) {
-  const el = document.getElementById("pdfSearchInfo");
-  if (el) el.textContent = text;
-}
-
-function abrirBanco() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1);
-
-    request.onupgradeneeded = function (event) {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME);
-      }
-    };
-
-    request.onsuccess = function () {
-      resolve(request.result);
-    };
-
-    request.onerror = function () {
-      reject(request.error);
-    };
-  });
-}
-
-async function salvarPdfNoBanco(arrayBuffer) {
-  const db = await abrirBanco();
-
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.put(arrayBuffer, PDF_KEY);
-
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error);
-  });
-}
-
-async function lerPdfDoBanco() {
-  const db = await abrirBanco();
-
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readonly");
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.get(PDF_KEY);
-
-    request.onsuccess = () => resolve(request.result || null);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-async function iniciarPDF() {
-  try {
-    const pdfSalvo = await lerPdfDoBanco();
-    if (pdfSalvo) {
-      setPdfStatus("Abrindo PDF salvo...");
-      await abrirPDF(pdfSalvo);
-    } else {
-      setPdfStatus("Nenhum PDF carregado.");
-    }
-  } catch (err) {
-    console.error("Erro ao iniciar PDF:", err);
-    setPdfStatus("Erro ao abrir PDF salvo.");
-  }
-}
-
-async function carregarPDF() {
-  const input = document.getElementById("pdfUpload");
-
-  if (!input || !input.files || !input.files.length) {
-    alert("Selecione um arquivo PDF primeiro.");
-    return;
-  }
-
-  const file = input.files[0];
-
-  try {
-    setPdfStatus("Lendo arquivo...");
-    const arrayBuffer = await file.arrayBuffer();
-    await salvarPdfNoBanco(arrayBuffer);
-    await abrirPDF(arrayBuffer);
-  } catch (err) {
-    console.error("Erro ao carregar PDF:", err);
-    alert("Não foi possível carregar esse PDF.");
-    setPdfStatus("Falha ao carregar PDF.");
-  }
-}
-
-async function abrirPDF(data) {
-  try {
-    destruirObserverPdf();
-
-    activeSearchTerm = "";
-    searchMatches = [];
-    currentMatchIndex = -1;
-    setPdfSearchInfo("");
-
-    setPdfStatus("Processando PDF...");
-    const loadingTask = pdfjsLib.getDocument({ data });
-    pdfDoc = await loadingTask.promise;
-
-    pdfPagesText = new Array(pdfDoc.numPages).fill("");
-    pdfPageMaps = new Array(pdfDoc.numPages).fill(null);
-    pdfPageStates = new Array(pdfDoc.numPages).fill(null).map(() => ({
-      rendered: false,
-      rendering: false,
-      textReady: false,
-      width: 0,
-      height: 0,
-      textDivs: [],
-      matches: []
-    }));
-
-    await prepararEstruturaPaginas();
-    iniciarObserverPdf();
-    configurarPersistenciaDeLeitura();
-
-    await restaurarEstadoLeitura();
-
-    setPdfStatus(`PDF carregado. ${pdfDoc.numPages} páginas.`);
-  } catch (err) {
-    console.error("Erro ao abrir PDF:", err);
-    alert("Não foi possível abrir o PDF.");
-    setPdfStatus("Falha ao abrir PDF.");
-  }
-}
-
-function destruirObserverPdf() {
-  if (pdfObserver) {
-    pdfObserver.disconnect();
-    pdfObserver = null;
-  }
-}
-
-async function prepararEstruturaPaginas() {
-  const pagesContainer = document.getElementById("pdfPages");
-  if (!pagesContainer || !pdfDoc) return;
-
-  pagesContainer.innerHTML = "";
-
-  const firstPage = await pdfDoc.getPage(1);
-  const firstViewport = firstPage.getViewport({ scale: pdfRenderedScale });
-  const ratio = firstViewport.height / firstViewport.width;
-
-  for (let num = 1; num <= pdfDoc.numPages; num++) {
-    const pageWrap = document.createElement("div");
-    pageWrap.className = "pdf-page loading";
-    pageWrap.dataset.page = String(num);
-
-    const width = Math.min(firstViewport.width, 900);
-    const height = width * ratio;
-
-    pageWrap.style.maxWidth = `${width}px`;
-    pageWrap.style.minHeight = `${height}px`;
-    pageWrap.innerHTML = `<div>Carregando página ${num}...</div>`;
-
-    pagesContainer.appendChild(pageWrap);
-  }
-}
-
-function iniciarObserverPdf() {
-  const wrap = document.getElementById("pdfViewerWrap");
-  const pageEls = document.querySelectorAll(".pdf-page");
-
-  if (!wrap || !pageEls.length) return;
-
-  pdfObserver = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        const pageNum = Number(entry.target.dataset.page);
-        renderPaginaSobDemanda(pageNum);
-      }
-    },
-    {
-      root: wrap,
-      rootMargin: "1200px 0px",
-      threshold: 0.01
-    }
-  );
-
-  pageEls.forEach((el) => pdfObserver.observe(el));
-
-  renderPaginaSobDemanda(1);
-  renderPaginaSobDemanda(2);
-  renderPaginaSobDemanda(3);
-}
-
-function buildPageTextMap(textItems) {
-  let fullText = "";
-  const itemRanges = [];
-
-  for (let i = 0; i < textItems.length; i++) {
-    const str = textItems[i].str || "";
-    const start = fullText.length;
-    fullText += str;
-    const end = fullText.length;
-
-    itemRanges.push({
-      index: i,
-      start,
-      end,
-      text: str
-    });
-
-    if (i < textItems.length - 1) {
-      fullText += " ";
-    }
-  }
-
-  return {
-    fullText,
-    itemRanges
-  };
-}
-
-function findMatchesInPageMap(pageMap, regex) {
-  const matches = [];
-  if (!pageMap || !regex) return matches;
-
-  regex.lastIndex = 0;
-
-  let result;
-  while ((result = regex.exec(pageMap.fullText)) !== null) {
-    const matchStart = result.index;
-    const matchText = result[0];
-    const matchEnd = matchStart + matchText.length;
-
-    const matchedItems = pageMap.itemRanges
-      .filter(item => item.end > matchStart && item.start < matchEnd)
-      .map(item => item.index);
-
-    matches.push({
-      start: matchStart,
-      end: matchEnd,
-      itemIndexes: matchedItems
-    });
-
-    if (result.index === regex.lastIndex) {
-      regex.lastIndex++;
-    }
-  }
-
-  return matches;
-}
-
-function clearTextHighlightsOnPage(pageNumber) {
-  const pageState = pdfPageStates[pageNumber - 1];
-  if (!pageState?.textDivs) return;
-
-  pageState.textDivs.forEach(div => {
-    if (!div) return;
-    div.classList.remove("pdf-text-hit", "pdf-text-hit-current");
-  });
-}
-
-function applyMatchHighlight(pageNumber, match, isCurrent = false) {
-  const pageEl = document.querySelector(`.pdf-page[data-page="${pageNumber}"]`);
-  if (!pageEl || !match) return;
-
-  const pageState = pdfPageStates[pageNumber - 1];
-  if (!pageState?.textDivs) return;
-
-  match.itemIndexes.forEach(idx => {
-    const div = pageState.textDivs[idx];
-    if (!div) return;
-    div.classList.add(isCurrent ? "pdf-text-hit-current" : "pdf-text-hit");
-  });
-}
-
-function clearAllTextHighlights() {
-  pdfPageStates.forEach((state, idx) => {
-    if (state?.textDivs?.length) {
-      state.textDivs.forEach(div => {
-        if (!div) return;
-        div.classList.remove("pdf-text-hit", "pdf-text-hit-current");
-      });
-    }
-  });
-}
-
-async function renderPaginaSobDemanda(num) {
-  if (!pdfDoc) return;
-
-  const state = pdfPageStates[num - 1];
-  if (!state || state.rendered || state.rendering) return;
-
-  state.rendering = true;
-
-  try {
-    const page = await pdfDoc.getPage(num);
-    const viewport = page.getViewport({ scale: pdfRenderedScale });
-
-    const pageWrap = document.querySelector(`.pdf-page[data-page="${num}"]`);
-    if (!pageWrap) {
-      state.rendering = false;
-      return;
-    }
-
-    pageWrap.innerHTML = "";
-    pageWrap.classList.remove("loading");
-    pageWrap.style.maxWidth = `${viewport.width}px`;
-    pageWrap.style.minHeight = `${viewport.height}px`;
-    pageWrap.style.height = `${viewport.height}px`;
-
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-
-    const textLayerDiv = document.createElement("div");
-    textLayerDiv.className = "textLayer";
-    textLayerDiv.style.width = `${viewport.width}px`;
-    textLayerDiv.style.height = `${viewport.height}px`;
-
-    pageWrap.appendChild(canvas);
-    pageWrap.appendChild(textLayerDiv);
-
-    await page.render({
-      canvasContext: ctx,
-      viewport
-    }).promise;
-
-    const textContent = await page.getTextContent();
-    const pageMap = buildPageTextMap(textContent.items);
-
-    pdfPagesText[num - 1] = pageMap.fullText;
-    pdfPageMaps[num - 1] = pageMap;
-
-    const textDivs = [];
-    const textLayerTask = pdfjsLib.renderTextLayer({
-      textContent,
-      container: textLayerDiv,
-      viewport,
-      textDivs
-    });
-
-    if (textLayerTask?.promise) {
-      await textLayerTask.promise;
-    }
-
-    state.width = viewport.width;
-    state.height = viewport.height;
-    state.textReady = true;
-    state.rendered = true;
-    state.textDivs = textDivs;
-
-    if (activeSearchTerm) {
-      const options = getSearchOptions();
-      const regex = buildSearchRegex(activeSearchTerm, options);
-      const matches = findMatchesInPageMap(pageMap, regex);
-      state.matches = matches;
-
-      matches.forEach(match => applyMatchHighlight(num, match, false));
-    }
-  } catch (err) {
-    console.error(`Erro ao renderizar página ${num}:`, err);
-  } finally {
-    state.rendering = false;
-  }
-}
-
-function limparDestaquesBusca() {
-  document.querySelectorAll(".pdf-hit").forEach(el => el.classList.remove("pdf-hit"));
-  clearAllTextHighlights();
-}
-
-function salvarEstadoLeitura(state) {
-  localStorage.setItem(PDF_READING_STATE_KEY, JSON.stringify(state));
-}
-
-function lerEstadoLeitura() {
-  try {
-    return JSON.parse(localStorage.getItem(PDF_READING_STATE_KEY)) || null;
-  } catch {
-    return null;
-  }
-}
-
-function configurarPersistenciaDeLeitura() {
-  const wrap = document.getElementById("pdfViewerWrap");
-  if (!wrap) return;
-
-  let timeout = null;
-
-  wrap.addEventListener("scroll", () => {
-    clearTimeout(timeout);
-
-    timeout = setTimeout(() => {
-      const pages = [...document.querySelectorAll(".pdf-page")];
-      if (!pages.length) return;
-
-      const wrapRect = wrap.getBoundingClientRect();
-
-      let bestPage = null;
-      let bestDistance = Infinity;
-
-      pages.forEach((pageEl) => {
-        const rect = pageEl.getBoundingClientRect();
-        const distance = Math.abs(rect.top - wrapRect.top);
-
-        if (distance < bestDistance) {
-          bestDistance = distance;
-          bestPage = Number(pageEl.dataset.page);
-        }
-      });
-
-      if (bestPage) {
-        salvarEstadoLeitura({ page: bestPage });
-      }
-    }, 150);
-  });
-}
-
-async function restaurarEstadoLeitura() {
-  const state = lerEstadoLeitura();
-  if (!state?.page || !pdfDoc) return;
-
-  const pagina = Number(state.page);
-  if (!pagina || pagina < 1 || pagina > pdfDoc.numPages) return;
-
-  await renderPaginaSobDemanda(pagina);
-
-  const pageEl = document.querySelector(`.pdf-page[data-page="${pagina}"]`);
-  if (pageEl) {
-    pageEl.scrollIntoView({ behavior: "auto", block: "start" });
-    setPdfStatus(`PDF carregado. Retomado na página ${pagina}.`);
-  }
-}
-
-async function garantirTextoDaPagina(pageNumber) {
-  if (!pdfDoc) return "";
-
-  if (pdfPageMaps[pageNumber - 1]?.fullText) {
-    return pdfPageMaps[pageNumber - 1].fullText;
-  }
-
-  const page = await pdfDoc.getPage(pageNumber);
-  const textContent = await page.getTextContent();
-  const pageMap = buildPageTextMap(textContent.items);
-
-  pdfPageMaps[pageNumber - 1] = pageMap;
-  pdfPagesText[pageNumber - 1] = pageMap.fullText;
-
-  return pageMap.fullText;
-}
-
-function aplicarHighlightsNaPagina(pageNumber) {
-  const termo = activeSearchTerm.trim();
-  if (!termo) return;
-
-  const options = getSearchOptions();
-  const regex = buildSearchRegex(termo, options);
-  if (!regex) return;
-
-  const pageEl = document.querySelector(`.pdf-page[data-page="${pageNumber}"]`);
-  if (!pageEl) return;
-
-  const spans = pageEl.querySelectorAll(".textLayer span");
-
-  spans.forEach(span => {
-    span.classList.remove("pdf-text-hit", "pdf-text-hit-current");
-
-    const txt = span.textContent || "";
-    regex.lastIndex = 0;
-
-    if (regex.test(txt)) {
-      span.classList.add("pdf-text-hit");
-    }
-  });
-}
-
-function atualizarHighlightAtual() {
-  clearAllTextHighlights();
-
-  if (currentMatchIndex < 0 || currentMatchIndex >= searchMatches.length) return;
-
-  const current = searchMatches[currentMatchIndex];
-  const pageState = pdfPageStates[current.page - 1];
-  const pageMap = pdfPageMaps[current.page - 1];
-
-  if (!pageMap) return;
-
-  const options = getSearchOptions();
-  const regex = buildSearchRegex(activeSearchTerm, options);
-  const matches = findMatchesInPageMap(pageMap, regex);
-
-  matches.forEach((match, idx) => {
-    applyMatchHighlight(current.page, match, idx === current.matchIndexOnPage);
-  });
-
-  const currentMatch = matches[current.matchIndexOnPage];
-  if (!currentMatch) return;
-
-  const textDivs = pageState?.textDivs || [];
-  const firstIdx = currentMatch.itemIndexes[0];
-  const firstDiv = textDivs[firstIdx];
-
-  if (firstDiv) {
-    firstDiv.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
-  }
-}
-
-function escapeRegex(text) {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function getSearchOptions() {
-  const wholeWord = document.getElementById("searchWholeWord")?.checked ?? true;
-  return { wholeWord };
-}
-
-function buildSearchRegex(term, options = {}) {
-  const escaped = escapeRegex(term.trim());
-  if (!escaped) return null;
-
-  const flags = "giu";
-
-  if (options.wholeWord) {
-    return new RegExp(`(?<![\\p{L}\\p{N}_])${escaped}(?![\\p{L}\\p{N}_])`, flags);
-  }
-
-  return new RegExp(escaped, flags);
-}
-
-function textMatchesSearch(text, regex) {
-  if (!regex) return false;
-  regex.lastIndex = 0;
-  return regex.test(text);
-}
-
-function normalizeForSearch(text, caseSensitive) {
-  return caseSensitive ? text : text.toLowerCase();
-}
-
-async function buscarTexto() {
-  const input = document.getElementById("searchText");
-  if (!input || !pdfDoc) return;
-
-  const termo = input.value.trim();
-  limparDestaquesBusca();
-
-  activeSearchTerm = termo;
-  searchMatches = [];
-  currentMatchIndex = -1;
-
-  if (!termo) {
-    setPdfStatus(`PDF carregado. ${pdfDoc.numPages} páginas.`);
-    setPdfSearchInfo("");
-    return;
-  }
-
-  const options = getSearchOptions();
-  const regex = buildSearchRegex(termo, options);
-
-  if (!regex) {
-    setPdfStatus("Busca inválida.");
-    setPdfSearchInfo("");
-    return;
-  }
-
-  setPdfStatus(`Buscando por "${termo}"...`);
-
-  for (let i = 1; i <= pdfDoc.numPages; i++) {
-    await garantirTextoDaPagina(i);
-
-    const pageMap = pdfPageMaps[i - 1];
-    const matches = findMatchesInPageMap(pageMap, regex);
-
-    if (matches.length > 0) {
-      searchMatches.push(
-        ...matches.map((match, localIndex) => ({
-          page: i,
-          matchIndexOnPage: localIndex,
-          itemIndexes: match.itemIndexes
-        }))
-      );
-    }
-  }
-
-  if (searchMatches.length === 0) {
-    setPdfStatus(`Nenhum resultado para: "${termo}"`);
-    setPdfSearchInfo("");
-    return;
-  }
-
-  currentMatchIndex = 0;
-  await navegarParaResultadoAtual();
-}
-
-async function navegarParaResultadoAtual() {
-  if (currentMatchIndex < 0 || currentMatchIndex >= searchMatches.length) return;
-
-  limparDestaquesBusca();
-
-  const current = searchMatches[currentMatchIndex];
-  await renderPaginaSobDemanda(current.page);
-
-  const pageEl = document.querySelector(`.pdf-page[data-page="${current.page}"]`);
-  if (pageEl) {
-    pageEl.classList.add("pdf-hit");
-    pageEl.scrollIntoView({ behavior: "smooth", block: "center" });
-    salvarEstadoLeitura({ page: current.page });
-  }
-
-  atualizarHighlightAtual();
-  setPdfStatus(`Resultado ${currentMatchIndex + 1} de ${searchMatches.length} na página ${current.page}.`);
-  setPdfSearchInfo(`"${activeSearchTerm}" — resultado ${currentMatchIndex + 1} de ${searchMatches.length}`);
-}
-
-async function proximoResultado() {
-  if (searchMatches.length === 0) return;
-  currentMatchIndex = (currentMatchIndex + 1) % searchMatches.length;
-  await navegarParaResultadoAtual();
-}
-
-async function resultadoAnterior() {
-  if (searchMatches.length === 0) return;
-  currentMatchIndex = (currentMatchIndex - 1 + searchMatches.length) % searchMatches.length;
-  await navegarParaResultadoAtual();
-}
-
-async function irParaPagina() {
-  if (!pdfDoc) return;
-
-  const input = document.getElementById("goPageInput");
-  if (!input) return;
-
-  const pagina = Number(input.value);
-  if (!pagina || pagina < 1 || pagina > pdfDoc.numPages) {
-    alert(`Digite uma página entre 1 e ${pdfDoc.numPages}.`);
-    return;
-  }
-
-  limparDestaquesBusca();
-  await renderPaginaSobDemanda(pagina);
-
-  const pageEl = document.querySelector(`.pdf-page[data-page="${pagina}"]`);
-  if (pageEl) {
-    pageEl.classList.add("pdf-hit");
-    pageEl.scrollIntoView({ behavior: "smooth", block: "start" });
-    setPdfStatus(`Indo para a página ${pagina}.`);
-    setPdfSearchInfo("");
-    salvarEstadoLeitura({ page: pagina });
-  }
-}
+ 
 carregarTodosOsBancos().then(() => {
     render();
 });
