@@ -6657,7 +6657,17 @@ function getClasseEvolucaoAtualCriacao() {
 
 function escolhaClasseNivelPreenchida(escolha) {
     const valores = getEscolhaClasseValores(escolha.id);
-    return valores.length === (Number(escolha.quantidade) || 0);
+    const quantidade = Number(escolha.quantidade) || 0;
+
+    if (valores.length !== quantidade) return false;
+
+    return valores.every(item => {
+        const precisaConfirmar =
+            isGolpePessoalOpcao?.(item) ||
+            (Array.isArray(item?.escolhas) && item.escolhas.length > 0);
+
+        return !precisaConfirmar || !!item?.escolhasConfirmadas;
+    });
 }
 
 function todasEscolhasClasseNivelPreenchidas(classe, nivelAlvo, primeiraClasse, ficha = null) {
@@ -8490,7 +8500,16 @@ function getTituloOpcaoEscolha(opcao) {
 
 function escolhaRacialPreenchida(escolha) {
     const valores = getEscolhaRacialValores(escolha.id);
-    return valores.length === (Number(escolha.quantidade) || 0);
+    const quantidade = Number(escolha.quantidade) || 0;
+
+    if (valores.length !== quantidade) return false;
+
+    return valores.every(item => {
+        const precisaConfirmar =
+            Array.isArray(item?.escolhas) && item.escolhas.length > 0;
+
+        return !precisaConfirmar || !!item?.escolhasConfirmadas;
+    });
 }
 
 function todasEscolhasRaciaisPreenchidas(raca) {
@@ -9748,7 +9767,17 @@ function escolhaClasseTemOpcaoConfirmadaEvolucao(escolhaId) {
 }
 function escolhaClassePreenchida(escolha) {
     const valores = getEscolhaClasseValores(escolha.id);
-    return valores.length === (Number(escolha.quantidade) || 0);
+    const quantidade = Number(escolha.quantidade) || 0;
+
+    if (valores.length !== quantidade) return false;
+
+    return valores.every(item => {
+        const precisaConfirmar =
+            isGolpePessoalOpcao?.(item) ||
+            (Array.isArray(item?.escolhas) && item.escolhas.length > 0);
+
+        return !precisaConfirmar || !!item?.escolhasConfirmadas;
+    });
 }
 
 function todasEscolhasClassePreenchidas(classe) {
