@@ -11624,7 +11624,7 @@ function renderConteudoEtapaCriacao() {
           ${escolhasRaciaisDisponiveis.map(escolha => {
                     const selecionados = getEscolhaRacialValores(escolha.id);
                     const quantidade = Number(escolha.quantidade) || 0;
-                    const preenchida = selecionados.length === quantidade;
+                    const preenchida = escolhaRacialPreenchida(escolha);
                     const desbloqueada = escolhaRacialDesbloqueada(escolha);
 
                     return `
