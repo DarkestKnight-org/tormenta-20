@@ -1638,6 +1638,15 @@ function buscarPoderesDaClassePorFiltro(classeId, filtro) {
 function getPoderClassePorId(classeId, poderId) {
     return getPoderesDaClasse(classeId).find(p => String(p.id) === String(poderId)) || null;
 }
+function getPoderClassePorNome(classeId, nome) {
+    const classe = getClasseDoBanco(classeId);
+    const alvo = normalizarTextoRegra(nome || "");
+    if (!classe || !alvo) return null;
+
+    return (classe.poderes || []).find(p =>
+        normalizarTextoRegra(p.nome || "") === alvo
+    ) || null;
+}
 
 function getRegistroPoderMagiaPorId(id) {
     return (PODERES_MAGIAS_DB.registros || []).find(r => String(r.id) === String(id)) || null;
@@ -1651,7 +1660,15 @@ function getRegistroMagiaPorNome(nome) {
         normalizarTextoRegra(r.nome || "") === alvo
     ) || null;
 }
+function getRegistroPoderPorNome(nome) {
+    const alvo = normalizarTextoRegra(nome || "");
+    if (!alvo) return null;
 
+    return (PODERES_MAGIAS_DB.registros || []).find(r =>
+        String(r.tipoRegistro || "").toLowerCase() === "poder" &&
+        normalizarTextoRegra(r.nome || "") === alvo
+    ) || null;
+}
 function montarIncrementosDaMagia(registroId) {
     return getIncrementosPoderMagia(registroId).map(inc => ({
         id: uid(),
@@ -6345,13 +6362,23 @@ function aplicarEscolhasClasseResolvidasNaFicha(ficha) {
 
                 let registroHabilidade = null;
 
-                if (opcao.registroId) {
-                    registroHabilidade = getPoderClassePorId(classe.id, opcao.registroId);
-                }
+if (normalizarTextoRegra(opcao.origemBanco || "") === "geral") {
+    if (opcao.registroId) {
+        registroHabilidade = getRegistroPoderMagiaPorId(opcao.registroId);
+    }
 
-                if (!registroHabilidade && opcao.valor) {
-                    registroHabilidade = getPoderClassePorNome(classe.id, opcao.valor);
-                }
+    if (!registroHabilidade && opcao.valor) {
+        registroHabilidade = getRegistroPoderPorNome(opcao.valor);
+    }
+} else {
+    if (opcao.registroId) {
+        registroHabilidade = getPoderClassePorId(classe.id, opcao.registroId);
+    }
+
+    if (!registroHabilidade && opcao.valor) {
+        registroHabilidade = getPoderClassePorNome(classe.id, opcao.valor);
+    }
+}
 
                 const nomeHabilidade =
                     opcao.nomeCurto ||
@@ -11239,13 +11266,23 @@ function aplicarEscolhasClasseNaFicha(ficha, classe) {
 
                 let registroHabilidade = null;
 
-                if (opcao.registroId) {
-                    registroHabilidade = getPoderClassePorId(classe.id, opcao.registroId);
-                }
+if (normalizarTextoRegra(opcao.origemBanco || "") === "geral") {
+    if (opcao.registroId) {
+        registroHabilidade = getRegistroPoderMagiaPorId(opcao.registroId);
+    }
 
-                if (!registroHabilidade && opcao.valor) {
-                    registroHabilidade = getPoderClassePorNome(classe.id, opcao.valor);
-                }
+    if (!registroHabilidade && opcao.valor) {
+        registroHabilidade = getRegistroPoderPorNome(opcao.valor);
+    }
+} else {
+    if (opcao.registroId) {
+        registroHabilidade = getPoderClassePorId(classe.id, opcao.registroId);
+    }
+
+    if (!registroHabilidade && opcao.valor) {
+        registroHabilidade = getPoderClassePorNome(classe.id, opcao.valor);
+    }
+}
 
                 const nomeHabilidade =
                     opcao.nomeCurto ||
