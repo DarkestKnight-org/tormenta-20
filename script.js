@@ -898,8 +898,7 @@ let state = {
   fichaAtualId: null,
     secoesFicha: {
         poderes: true,
-        magias: true,
-        inventario: true
+        magias: true
     },
   modal: null,
   modalPayload: null,
@@ -12896,7 +12895,6 @@ function renderFicha() {
         </div>
       </div>
 
-      <div class="sheet-scroll">
       <div class="sheet">
         <div class="sheet-grid">
           <div class="row-2">
@@ -13476,7 +13474,7 @@ ${renderInventarioSimples(f)}
     </div>
   </div>
 </div>
-</div>
+
       <div class="side-buttons">        
         <button class="btn primary floating" onclick="abrirModal('dados')">Dados</button>
       </div>
