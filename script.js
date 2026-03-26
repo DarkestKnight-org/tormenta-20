@@ -8532,6 +8532,17 @@ function aplicarEscolhasRaciaisNaFicha(ficha, raca) {
             return false;
         }
 
+        const todasConfirmadas = selecionadas.every(opcao => {
+            const precisaConfirmar =
+                Array.isArray(opcao?.escolhas) && opcao.escolhas.length > 0;
+
+            return !precisaConfirmar || !!opcao?.escolhasConfirmadas;
+        });
+
+        if (!todasConfirmadas) {
+            return false;
+        }
+
         selecionadas.forEach(opcao => {
             if (opcao.tipoAplicacao === "pericia_bonus") {
                 const pericia = ficha.pericias.find(p => p.nome === opcao.valor);
@@ -8597,47 +8608,91 @@ function aplicarEscolhasRaciaisNaFicha(ficha, raca) {
                 });
             }
 
-            if (opcao.tipoAplicacao === "habilidade_racial_copiada") {
-                aplicarHabilidadeRacialCopiadaNaFicha(ficha, opcao);
-                return;
-            }
-
             if (opcao.tipoAplicacao === "habilidade_adicionar") {
-                const registro = opcao.registroId ? getRegistroPoderMagiaPorId(opcao.registroId) : null;
-
                 adicionarHabilidadeNaFicha(
                     ficha,
                     {
-                        nome: registro?.nome || opcao.valor,
-                        descricao: registro?.descricao || `Escolhido na criação pela raça ${raca.nome}.`,
-                        custoPm: Number(registro?.custoPm) || 0
+                        nome: opcao.nomeCurto || opcao.valor || "",
+                        descricao: opcao.descricao || "",
+                        custoPm: Number(opcao.custoPm) || 0,
+                        custoVida: Number(opcao.custoVida) || 0,
+                        custoPmPermanente: Number(opcao.custoPmPermanente) || 0,
+                        custoVidaPermanente: Number(opcao.custoVidaPermanente) || 0,
+                        resumoUso: opcao.resumoUso || "",
+                        registroId: opcao.registroId || "",
+                        ativavel: !!opcao.ativavel,
+                        permiteIntensificar: !!opcao.permiteIntensificar,
+                        incrementos: Array.isArray(opcao.incrementos) ? opcao.incrementos : [],
+                        escolhas: Array.isArray(opcao.escolhas) ? opcao.escolhas : []
                     },
                     "Raça",
                     raca.nome
                 );
-
-                const habilidadeAdicionada = ficha.habilidades[ficha.habilidades.length - 1];
-                if (habilidadeAdicionada && registro) {
-                    habilidadeAdicionada.registroId = registro.id;
-                    habilidadeAdicionada.ativavel = Number(registro.ativavel) === 1 || registro.ativavel === true;
-                    habilidadeAdicionada.permiteIntensificar = Number(registro.permiteIntensificar) === 1 || registro.permiteIntensificar === true;
-                }
 
                 ficha.efeitosAplicados.push({
                     id: uid(),
                     origemTipo: "Raça",
                     origemNome: raca.nome,
                     tipo: "habilidade_adicionar",
-                    alvo: opcao.valor
+                    alvo: opcao.nomeCurto || opcao.valor || ""
+                });
+            }
+
+            if (Array.isArray(opcao.escolhasResolvidas)) {
+                opcao.escolhasResolvidas.forEach(bloco => {
+                    (bloco?.selecionadas || []).forEach(subopcao => {
+                        if (subopcao.tipoAplicacao === "pericia_treinada") {
+                            const pericia = ficha.pericias.find(p => p.nome === subopcao.valor);
+                            if (pericia) {
+                                pericia.treinada = true;
+                            }
+
+                            ficha.efeitosAplicados.push({
+                                id: uid(),
+                                origemTipo: "Raça",
+                                origemNome: raca.nome,
+                                tipo: "pericia_treinada",
+                                alvo: subopcao.valor
+                            });
+                        }
+
+                        if (subopcao.tipoAplicacao === "magia_adicionar") {
+                            adicionarOuAtualizarMagiaNaFicha(
+                                ficha,
+                                {
+                                    registroId: subopcao.registroId || "",
+                                    nome: subopcao.valor || "",
+                                    nomeAdicionado: subopcao.nomeAdicionado || ""
+                                },
+                                "Raça",
+                                raca.nome
+                            );
+
+                            ficha.efeitosAplicados.push({
+                                id: uid(),
+                                origemTipo: "Raça",
+                                origemNome: raca.nome,
+                                tipo: "magia_adicionar",
+                                alvo: subopcao.valor
+                            });
+                        }
+
+                        if (subopcao.tipoAplicacao === "proficiencia_adicionar") {
+                            adicionarProficienciaNaFicha(ficha, subopcao.valor);
+
+                            ficha.efeitosAplicados.push({
+                                id: uid(),
+                                origemTipo: "Raça",
+                                origemNome: raca.nome,
+                                tipo: "proficiencia_adicionar",
+                                alvo: subopcao.valor
+                            });
+                        }
+                    });
                 });
             }
         });
     }
-
-    ficha.escolhasRaciaisResolvidas = Object.entries(state.criacao.racaEscolhas || {}).map(([escolhaId, opcoes]) => ({
-        escolhaId,
-        opcoes: (opcoes || []).map(op => ({ ...op }))
-    }));
 
     return true;
 }
