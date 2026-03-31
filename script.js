@@ -10,6 +10,22 @@ const PROFICIENCIAS_DISPONIVEIS = [
     "Armaduras pesadas",
     "Escudos"
 ];
+
+const ESPECIALIZACOES_OFICIO = [
+    "Alfaiate",
+    "Alquimista",
+    "Armeiro",
+    "Artesão",
+    "Cozinheiro",
+    "Escriba",
+    "Fazendeiro",
+    "Minerador",
+    "Engenhoqueiro"
+];
+const PODERES_INVENTOR_FORMULAS = {
+    alquimistaIniciado: "Alquimista Iniciado",
+    mestreAlquimista: "Mestre Alquimista"
+};
 const GOLPE_PESSOAL_EFEITOS = [
     {
         codigo: "amplo",
@@ -142,78 +158,78 @@ let RACAS_DB = [];
 let RACAS_DB_CARREGADO = false;
 
 const RACAS_FALLBACK = [
-  {
-    id: "humano",
-    nome: "Humano",
-    tipoAtributo: "distribuivel3",
-    tamanho: "Médio",
-    deslocamento: "9m",
-    atributosFixos: {
-      forca: 0,
-      destreza: 0,
-      constituicao: 0,
-      inteligencia: 0,
-      sabedoria: 0,
-      carisma: 0
+    {
+        id: "humano",
+        nome: "Humano",
+        tipoAtributo: "distribuivel3",
+        tamanho: "Médio",
+        deslocamento: "9m",
+        atributosFixos: {
+            forca: 0,
+            destreza: 0,
+            constituicao: 0,
+            inteligencia: 0,
+            sabedoria: 0,
+            carisma: 0
+        },
+        habilidades: [
+            {
+                nome: "Versátil",
+                custoPm: 0,
+                descricao: "Você recebe um poder geral à sua escolha."
+            }
+        ],
+        periciasOutros: [],
+        proficiencias: []
     },
-    habilidades: [
-      {
-        nome: "Versátil",
-        custoPm: 0,
-        descricao: "Você recebe um poder geral à sua escolha."
-      }
-    ],
-    periciasOutros: [],
-    proficiencias: []
-  },
-  {
-    id: "elfo",
-    nome: "Elfo",
-    tipoAtributo: "fixo",
-    tamanho: "Médio",
-    deslocamento: "9m",
-    atributosFixos: {
-      forca: 0,
-      destreza: 2,
-      constituicao: -1,
-      inteligencia: 0,
-      sabedoria: 0,
-      carisma: 0
+    {
+        id: "elfo",
+        nome: "Elfo",
+        tipoAtributo: "fixo",
+        tamanho: "Médio",
+        deslocamento: "9m",
+        atributosFixos: {
+            forca: 0,
+            destreza: 2,
+            constituicao: -1,
+            inteligencia: 0,
+            sabedoria: 0,
+            carisma: 0
+        },
+        habilidades: [
+            {
+                nome: "Sentidos Élficos",
+                custoPm: 0,
+                descricao: "Você recebe os benefícios raciais correspondentes."
+            }
+        ],
+        periciasOutros: [],
+        proficiencias: []
     },
-    habilidades: [
-      {
-        nome: "Sentidos Élficos",
-        custoPm: 0,
-        descricao: "Você recebe os benefícios raciais correspondentes."
-      }
-    ],
-    periciasOutros: [],
-    proficiencias: []
-  },
-  {
-    id: "anao",
-    nome: "Anão",
-    tipoAtributo: "fixo",
-    tamanho: "Médio",
-    deslocamento: "6m",
-    atributosFixos: {
-      forca: 0,
-      destreza: 0,
-      constituicao: 2,
-      inteligencia: 0,
-      sabedoria: 1,
-      carisma: -1
-    },
-    habilidades: [
-      {
-        nome: "Tradição de Heredrimm",
-        custoPm: 0,
-        descricao: "Você recebe os benefícios raciais correspondentes."
-      }
-    ],
-    periciasOutros: [],
-    proficiencias: []
-  }
+    {
+        id: "anao",
+        nome: "Anão",
+        tipoAtributo: "fixo",
+        tamanho: "Médio",
+        deslocamento: "6m",
+        atributosFixos: {
+            forca: 0,
+            destreza: 0,
+            constituicao: 2,
+            inteligencia: 0,
+            sabedoria: 1,
+            carisma: -1
+        },
+        habilidades: [
+            {
+                nome: "Tradição de Heredrimm",
+                custoPm: 0,
+                descricao: "Você recebe os benefícios raciais correspondentes."
+            }
+        ],
+        periciasOutros: [],
+        proficiencias: []
+    }
 ];
 
 let CLASSES_DB = [];
@@ -624,94 +640,94 @@ function getClasseSelecionadaCriacao() {
 
 
 async function carregarRacasDB() {
-  if (RACAS_DB_CARREGADO) return;
+    if (RACAS_DB_CARREGADO) return;
 
-  try {
-    const res = await fetch("racas.json");
-    if (!res.ok) throw new Error("racas.json não encontrado");
+    try {
+        const res = await fetch("racas.json");
+        if (!res.ok) throw new Error("racas.json não encontrado");
 
-    const data = await res.json();
+        const data = await res.json();
 
-    const racas = data.racas || [];
-    const habilidades = data.racas_habilidades || [];
-    const efeitos = data.racas_efeitos || [];
-    const escolhas = data.racas_escolhas || [];
+        const racas = data.racas || [];
+        const habilidades = data.racas_habilidades || [];
+        const efeitos = data.racas_efeitos || [];
+        const escolhas = data.racas_escolhas || [];
 
-    RACAS_DB = racas.map(r => {
-      const habilidadesDaRaca = habilidades
-        .filter(h => h.raca_id === r.id)
-        .sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0))
-        .map(h => ({
-          id: h.id,
-          nome: h.nome || "",
-          descricao: h.descricao || "",
-          custoPm: Number(h.custoPm) || 0,
-          ativavel: Number(h.ativavel) === 1,
-          permiteIntensificar: Number(h.permiteIntensificar) === 1,
-          origemTipo: h.origemTipo || "Raça",
-          origemNome: h.origemNome || r.nome
-        }));
+        RACAS_DB = racas.map(r => {
+            const habilidadesDaRaca = habilidades
+                .filter(h => h.raca_id === r.id)
+                .sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0))
+                .map(h => ({
+                    id: h.id,
+                    nome: h.nome || "",
+                    descricao: h.descricao || "",
+                    custoPm: Number(h.custoPm) || 0,
+                    ativavel: Number(h.ativavel) === 1,
+                    permiteIntensificar: Number(h.permiteIntensificar) === 1,
+                    origemTipo: h.origemTipo || "Raça",
+                    origemNome: h.origemNome || r.nome
+                }));
 
-      const efeitosDaRaca = efeitos
-        .filter(e => e.raca_id === r.id)
-        .sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0))
-        .map(e => ({
-          id: e.id,
-          habilidade_id: e.habilidade_id || "",
-          tipo: e.tipo || "",
-          alvo: e.alvo || "",
-          valor: e.valor === "" || e.valor == null ? null : Number(e.valor),
-          valorTexto: e.valorTexto || "",
-          nomeAdicionado: e.nomeAdicionado || "",
-          descricao: e.descricao || "",
-          custoPm: e.custoPm === "" || e.custoPm == null ? 0 : Number(e.custoPm),
-          ativavel: Number(e.ativavel) === 1,
-          permiteIntensificar: Number(e.permiteIntensificar) === 1,
-          bonusAtaque: e.bonusAtaque === "" || e.bonusAtaque == null ? 0 : Number(e.bonusAtaque),
-          dano: e.dano || "",
-          critico: e.critico || "",
-          tipoAtaque: e.tipoAtaque || "",
-          alcance: e.alcance || "",
-          filtro: e.filtro || ""
-        }));
+            const efeitosDaRaca = efeitos
+                .filter(e => e.raca_id === r.id)
+                .sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0))
+                .map(e => ({
+                    id: e.id,
+                    habilidade_id: e.habilidade_id || "",
+                    tipo: e.tipo || "",
+                    alvo: e.alvo || "",
+                    valor: e.valor === "" || e.valor == null ? null : Number(e.valor),
+                    valorTexto: e.valorTexto || "",
+                    nomeAdicionado: e.nomeAdicionado || "",
+                    descricao: e.descricao || "",
+                    custoPm: e.custoPm === "" || e.custoPm == null ? 0 : Number(e.custoPm),
+                    ativavel: Number(e.ativavel) === 1,
+                    permiteIntensificar: Number(e.permiteIntensificar) === 1,
+                    bonusAtaque: e.bonusAtaque === "" || e.bonusAtaque == null ? 0 : Number(e.bonusAtaque),
+                    dano: e.dano || "",
+                    critico: e.critico || "",
+                    tipoAtaque: e.tipoAtaque || "",
+                    alcance: e.alcance || "",
+                    filtro: e.filtro || ""
+                }));
 
-      const escolhasDaRaca = escolhas
-        .filter(c => c.raca_id === r.id)
-        .sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0))
-          .map(c => ({
-              id: c.id,
-              habilidade_id: c.habilidade_id || "",
-              tipo: c.tipo || "",
-              titulo: c.titulo || "",
-              descricao: c.descricao || "",
-              quantidade: Number(c.quantidade) || 0,
-              filtro: c.filtro || "",
-              opcoesTexto: c.opcoesTexto || "",
-              regrasGrupo: c.regrasGrupo || "",
-              dependeDe: c.dependeDe || ""
-          }));
+            const escolhasDaRaca = escolhas
+                .filter(c => c.raca_id === r.id)
+                .sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0))
+                .map(c => ({
+                    id: c.id,
+                    habilidade_id: c.habilidade_id || "",
+                    tipo: c.tipo || "",
+                    titulo: c.titulo || "",
+                    descricao: c.descricao || "",
+                    quantidade: Number(c.quantidade) || 0,
+                    filtro: c.filtro || "",
+                    opcoesTexto: c.opcoesTexto || "",
+                    regrasGrupo: c.regrasGrupo || "",
+                    dependeDe: c.dependeDe || ""
+                }));
 
-      return {
-        ...r,
-        atributosFixos: {
-          forca: Number(r.forca) || 0,
-          destreza: Number(r.destreza) || 0,
-          constituicao: Number(r.constituicao) || 0,
-          inteligencia: Number(r.inteligencia) || 0,
-          sabedoria: Number(r.sabedoria) || 0,
-          carisma: Number(r.carisma) || 0
-        },
-        habilidades: habilidadesDaRaca,
-        efeitos: efeitosDaRaca,
-        escolhas: escolhasDaRaca
-      };
-    });
-  } catch (err) {
-    console.warn("Usando raças fallback:", err);
-    RACAS_DB = RACAS_FALLBACK;
-  }
+            return {
+                ...r,
+                atributosFixos: {
+                    forca: Number(r.forca) || 0,
+                    destreza: Number(r.destreza) || 0,
+                    constituicao: Number(r.constituicao) || 0,
+                    inteligencia: Number(r.inteligencia) || 0,
+                    sabedoria: Number(r.sabedoria) || 0,
+                    carisma: Number(r.carisma) || 0
+                },
+                habilidades: habilidadesDaRaca,
+                efeitos: efeitosDaRaca,
+                escolhas: escolhasDaRaca
+            };
+        });
+    } catch (err) {
+        console.warn("Usando raças fallback:", err);
+        RACAS_DB = RACAS_FALLBACK;
+    }
 
-  RACAS_DB_CARREGADO = true;
+    RACAS_DB_CARREGADO = true;
 }
 function getOrigemSelecionadaCriacao() {
     return ORIGENS_DB.find(o => o.id === state.criacao.origemSelecionadaId) || null;
@@ -854,107 +870,108 @@ function filtrarOpcoesOrigemPorPreRequisito(opcoes, ficha) {
     return (opcoes || []).filter(opcao => !getPreRequisitoNaoAtendidoOpcao(opcao, ficha));
 }
 function getRacaSelecionadaCriacao() {
-  if (state.criacao.racaSelecionadaId === "custom") {
-    return {
-      id: "custom",
-      nome: state.criacao.racaCustom.nome || "Custom",
-      tipoAtributo: "custom",
-      tamanho: state.criacao.racaCustom.tamanho || "",
-      deslocamento: state.criacao.racaCustom.deslocamento || "",
-      atributosFixos: { ...state.criacao.racaCustom.atributos },
-      habilidades: (state.criacao.racaCustom.habilidadesTexto || "")
-        .split("\n")
-        .map(t => t.trim())
-        .filter(Boolean)
-        .map(nome => ({
-          nome,
-          custoPm: 0,
-          descricao: "Habilidade racial custom."
-        })),
-      periciasOutros: [],
-      proficiencias: []
-    };
-  }
-
-  const r = RACAS_DB.find(r => r.id === state.criacao.racaSelecionadaId);
-  if (!r) return null;
-
-  return {
-    ...r,
-    atributosFixos: r.atributosFixos || {
-      forca: Number(r.forca) || 0,
-      destreza: Number(r.destreza) || 0,
-      constituicao: Number(r.constituicao) || 0,
-      inteligencia: Number(r.inteligencia) || 0,
-      sabedoria: Number(r.sabedoria) || 0,
-      carisma: Number(r.carisma) || 0
+    if (state.criacao.racaSelecionadaId === "custom") {
+        return {
+            id: "custom",
+            nome: state.criacao.racaCustom.nome || "Custom",
+            tipoAtributo: "custom",
+            tamanho: state.criacao.racaCustom.tamanho || "",
+            deslocamento: state.criacao.racaCustom.deslocamento || "",
+            atributosFixos: { ...state.criacao.racaCustom.atributos },
+            habilidades: (state.criacao.racaCustom.habilidadesTexto || "")
+                .split("\n")
+                .map(t => t.trim())
+                .filter(Boolean)
+                .map(nome => ({
+                    nome,
+                    custoPm: 0,
+                    descricao: "Habilidade racial custom."
+                })),
+            periciasOutros: [],
+            proficiencias: []
+        };
     }
-  };
+
+    const r = RACAS_DB.find(r => r.id === state.criacao.racaSelecionadaId);
+    if (!r) return null;
+
+    return {
+        ...r,
+        atributosFixos: r.atributosFixos || {
+            forca: Number(r.forca) || 0,
+            destreza: Number(r.destreza) || 0,
+            constituicao: Number(r.constituicao) || 0,
+            inteligencia: Number(r.inteligencia) || 0,
+            sabedoria: Number(r.sabedoria) || 0,
+            carisma: Number(r.carisma) || 0
+        }
+    };
 }
 
 let state = {
-  screen: "home",
-  fichas: loadFichas(),
-  fichaAtualId: null,
+    screen: "home",
+    fichas: loadFichas(),
+    fichaAtualId: null,
     secoesFicha: {
         poderes: true,
-        magias: true
+        magias: true,
+        inventario: true
     },
-  modal: null,
-  modalPayload: null,
-  dados: {
-    grupos: [
-      { id: uid(), quantidade: 1, tipo: "d20" }
-    ],
-    ultimoResultado: null,
-    historico: loadDadosHistorico()
-  },
-  criacao: {
-  etapa: 0,
-  ficha: null,
-  listaRacasAberta: false,
-  racaSelecionadaId: null,
-  racaDistribuicao: [],
-  racaEscolhas: {},
-  escolhaAbertaId: null,
-
-  listaClassesAberta: false,
-  classeSelecionadaId: null,
-  classeEscolhas: {},
-  escolhaClasseAbertaId: null,
-  origemSelecionadaId: null,
-  origemEscolhas: {},
-  escolhaOrigemAbertaId: null,
-  divindadeSelecionadaId: null,
-  divindadePoderSelecionadoNome: "",
-  periciasInteligenciaAberta: false,
-  periciasInteligenciaSelecoes: [],
-  periciasInteligenciaQuantidade: 0,
-  periciasInteligenciaAposFechar: "",
-
-      poderClasseEscolhas: {},
-      escolhaPoderClasseAbertaId: null,
-      golpePessoalModal: null,
-
-      fluxoClasseAtivo: false,
-      classeEvolucaoContexto: null,
-      classeSelecaoEvolucaoId: "",
-
-  racaCustom: {
-    nome: "Custom",
-    tamanho: "",
-    deslocamento: "",
-    atributos: {
-      forca: 0,
-      destreza: 0,
-      constituicao: 0,
-      inteligencia: 0,
-      sabedoria: 0,
-      carisma: 0
+    modal: null,
+    modalPayload: null,
+    dados: {
+        grupos: [
+            { id: uid(), quantidade: 1, tipo: "d20" }
+        ],
+        ultimoResultado: null,
+        historico: loadDadosHistorico()
     },
-    habilidadesTexto: ""
-  }
- },
+    criacao: {
+        etapa: 0,
+        ficha: null,
+        listaRacasAberta: false,
+        racaSelecionadaId: null,
+        racaDistribuicao: [],
+        racaEscolhas: {},
+        escolhaAbertaId: null,
+
+        listaClassesAberta: false,
+        classeSelecionadaId: null,
+        classeEscolhas: {},
+        escolhaClasseAbertaId: null,
+        origemSelecionadaId: null,
+        origemEscolhas: {},
+        escolhaOrigemAbertaId: null,
+        divindadeSelecionadaId: null,
+        divindadePoderSelecionadoNome: "",
+        periciasInteligenciaAberta: false,
+        periciasInteligenciaSelecoes: [],
+        periciasInteligenciaQuantidade: 0,
+        periciasInteligenciaAposFechar: "",
+
+        poderClasseEscolhas: {},
+        escolhaPoderClasseAbertaId: null,
+        golpePessoalModal: null,
+
+        fluxoClasseAtivo: false,
+        classeEvolucaoContexto: null,
+        classeSelecaoEvolucaoId: "",
+
+        racaCustom: {
+            nome: "Custom",
+            tamanho: "",
+            deslocamento: "",
+            atributos: {
+                forca: 0,
+                destreza: 0,
+                constituicao: 0,
+                inteligencia: 0,
+                sabedoria: 0,
+                carisma: 0
+            },
+            habilidadesTexto: ""
+        }
+    },
     evolucao: {
         ativa: false,
         fichaId: null,
@@ -972,14 +989,14 @@ let state = {
 };
 
 const ETAPAS_CRIACAO = [
-  "Identidade",
-  "Atributos",
-  "Raça",
-  "Classe",
-  "Origem",
-  "Divindade",
-  "Equipamento",
-  "Revisão"
+    "Identidade",
+    "Atributos",
+    "Raça",
+    "Classe",
+    "Origem",
+    "Divindade",
+    "Equipamento",
+    "Revisão"
 ];
 
 function abrirEscolhaCriacao(escolhaId) {
@@ -1734,6 +1751,13 @@ function adicionarOuAtualizarMagiaNaFicha(ficha, referencia, origemTipo, origemN
             aplicarDescontoMagiaRacial(magiaExistente, 1);
         }
 
+        if (referencia?.origemEspecial === "inventor_formula") {
+            magiaExistente.tipoMagiaInventor = "formula";
+            magiaExistente.prefixoExibicao = "Fórmula";
+            magiaExistente.origem = origemTipo || magiaExistente.origem || "Classe";
+            magiaExistente.origemDetalhe = origemNome || magiaExistente.origemDetalhe || "";
+        }
+
         return magiaExistente;
     }
 
@@ -1755,7 +1779,9 @@ function adicionarOuAtualizarMagiaNaFicha(ficha, referencia, origemTipo, origemN
         incrementos: registro ? montarIncrementosDaMagia(registro.id) : [],
         origem: origemTipo || "Raça",
         origemDetalhe: origemNome || "",
-        registroId: registro?.id || ""
+        registroId: registro?.id || "",
+        tipoMagiaInventor: referencia?.tipoMagiaInventor || "",
+        prefixoExibicao: referencia?.origemEspecial === "inventor_formula" ? "Fórmula" : ""
     };
 
     ficha.magias.push(magia);
@@ -3383,8 +3409,7 @@ function classeRecebeMagiasNoNivel(classe, nivelClasse, ficha) {
 }
 
 function periciaJaTreinadaNaCriacao(ficha, nomePericia) {
-    const pericia = ficha?.pericias?.find(p => p.nome === nomePericia);
-    return !!pericia?.treinada;
+    return fichaTemPericiaTreinadaOuOficio(ficha, nomePericia);
 }
 
 function getTodasEscolhasAtuaisComoValores() {
@@ -3409,8 +3434,7 @@ function opcaoPericiaIndisponivelPorTreinoGlobal(opcao, escolhaIdAtual, tipoOrig
     const ficha = getFichaCriacao();
     if (!ficha || opcao.tipoAplicacao !== "pericia_treinada") return false;
 
-    const pericia = ficha.pericias.find(p => p.nome === opcao.valor);
-    if (pericia?.treinada) return true;
+    if (fichaTemPericiaTreinadaOuOficio(ficha, opcao.valor)) return true;
 
     const colecao = tipoOrigem === "classe"
         ? (state.criacao.classeEscolhas || {})
@@ -3419,7 +3443,10 @@ function opcaoPericiaIndisponivelPorTreinoGlobal(opcao, escolhaIdAtual, tipoOrig
     for (const [escolhaId, lista] of Object.entries(colecao)) {
         if (escolhaId === escolhaIdAtual) continue;
 
-        if ((lista || []).some(item => item.tipoAplicacao === "pericia_treinada" && item.valor === opcao.valor)) {
+        if ((lista || []).some(item =>
+            item.tipoAplicacao === "pericia_treinada" &&
+            normalizarTextoRegra(item.valor || "") === normalizarTextoRegra(opcao.valor || "")
+        )) {
             return true;
         }
     }
@@ -3552,6 +3579,423 @@ function normalizarTextoRegra(txt) {
         .trim();
 }
 
+
+function garantirOficiosFicha(ficha) {
+    if (!ficha) return [];
+
+    if (!Array.isArray(ficha.oficios)) {
+        if (Array.isArray(ficha.especializacoesOficio)) {
+            ficha.oficios = [...ficha.especializacoesOficio];
+        } else {
+            ficha.oficios = [];
+        }
+    }
+
+    ficha.oficios = ficha.oficios
+        .map(v => String(v || "").trim())
+        .filter(Boolean)
+        .filter((valor, indice, arr) =>
+            arr.findIndex(item => normalizarTextoRegra(item) === normalizarTextoRegra(valor)) === indice
+        );
+
+    return ficha.oficios;
+}
+
+function montarNomePericiaOficio(especialidade) {
+    const nome = String(especialidade || "").trim();
+    return nome ? `Ofício (${nome})` : "Ofício";
+}
+
+function extrairEspecializacaoOficio(nomePericia) {
+    const texto = String(nomePericia || "").trim();
+    const match = texto.match(/^Of[ií]cio\s*\(([^)]+)\)$/i);
+    return match ? String(match[1] || "").trim() : "";
+}
+
+function ehPericiaOficioEspecializada(nomePericia) {
+    return !!extrairEspecializacaoOficio(nomePericia);
+}
+
+function fichaTemPericiaTreinadaOuOficio(ficha, nomePericia) {
+    if (!ficha || !nomePericia) return false;
+
+    const nomeNormalizado = normalizarTextoRegra(nomePericia);
+    const especializacao = extrairEspecializacaoOficio(nomePericia);
+
+    // Ofício especializado: bloqueia só a própria especialização
+    if (especializacao) {
+        return garantirOficiosFicha(ficha).some(of =>
+            normalizarTextoRegra(of) === normalizarTextoRegra(especializacao)
+        );
+    }
+
+    // Ofício genérico: continua disponível enquanto ainda existir
+    // alguma especialização não aprendida
+    if (nomeNormalizado === normalizarTextoRegra("Ofício")) {
+        const oficios = garantirOficiosFicha(ficha);
+        const totalEspecializacoes = ESPECIALIZACOES_OFICIO.length;
+        const totalAprendidas = oficios.filter(Boolean).length;
+
+        return totalAprendidas >= totalEspecializacoes;
+    }
+
+    const pericia = (ficha.pericias || []).find(p =>
+        normalizarTextoRegra(p.nome || "") === nomeNormalizado
+    );
+
+    return !!pericia?.treinada;
+}
+
+function getPericiasExpandidas(ficha, apenasNaoTreinadas = false) {
+    const resultado = [];
+
+    (ficha?.pericias || []).forEach(pericia => {
+        const nomeBase = String(pericia?.nome || "").trim();
+        if (!nomeBase) return;
+
+        if (normalizarTextoRegra(nomeBase) === normalizarTextoRegra('Ofício')) {
+            ESPECIALIZACOES_OFICIO.forEach(especialidade => {
+                const nome = montarNomePericiaOficio(especialidade);
+                const treinada = fichaTemPericiaTreinadaOuOficio(ficha, nome);
+                if (apenasNaoTreinadas && treinada) return;
+                resultado.push({
+                    ...pericia,
+                    nome,
+                    nomeBase,
+                    especializacaoOficio: especialidade,
+                    treinada
+                });
+            });
+            return;
+        }
+
+        if (apenasNaoTreinadas && pericia?.treinada) return;
+        resultado.push({ ...pericia, nome: nomeBase, nomeBase, treinada: !!pericia?.treinada });
+    });
+
+    return resultado;
+}
+
+function aplicarTreinoPericiaNaFicha(ficha, nomePericia, origemTipo = '', origemNome = '') {
+    if (!ficha || !nomePericia) return false;
+
+    const especializacao = extrairEspecializacaoOficio(nomePericia);
+    ficha.efeitosAplicados = Array.isArray(ficha.efeitosAplicados) ? ficha.efeitosAplicados : [];
+
+    if (especializacao) {
+        const oficios = garantirOficiosFicha(ficha);
+        const jaTem = oficios.some(of => normalizarTextoRegra(of) === normalizarTextoRegra(especializacao));
+        if (!jaTem) {
+            oficios.push(especializacao);
+        }
+
+        const periciaOficio = (ficha.pericias || []).find(p =>
+            normalizarTextoRegra(p.nome || '') === normalizarTextoRegra('Ofício')
+        );
+        if (periciaOficio) {
+            periciaOficio.treinada = true;
+        }
+
+        const alvoPadrao = montarNomePericiaOficio(especializacao);
+        const jaTemEfeito = ficha.efeitosAplicados.some(e =>
+            normalizarTextoRegra(e?.tipo || '') === 'pericia_treinada' &&
+            normalizarTextoRegra(e?.alvo || '') === normalizarTextoRegra(alvoPadrao) &&
+            normalizarTextoRegra(e?.origemTipo || '') === normalizarTextoRegra(origemTipo) &&
+            normalizarTextoRegra(e?.origemNome || '') === normalizarTextoRegra(origemNome)
+        );
+
+        if (!jaTemEfeito) {
+            ficha.efeitosAplicados.push({
+                id: uid(),
+                origemTipo,
+                origemNome,
+                tipo: 'pericia_treinada',
+                alvo: alvoPadrao
+            });
+        }
+
+        return true;
+    }
+
+    const pericia = (ficha.pericias || []).find(p =>
+        normalizarTextoRegra(p.nome || '') === normalizarTextoRegra(nomePericia)
+    );
+    if (!pericia) return false;
+
+    pericia.treinada = true;
+
+    const jaTemEfeito = ficha.efeitosAplicados.some(e =>
+        normalizarTextoRegra(e?.tipo || '') === 'pericia_treinada' &&
+        normalizarTextoRegra(e?.alvo || '') === normalizarTextoRegra(pericia.nome) &&
+        normalizarTextoRegra(e?.origemTipo || '') === normalizarTextoRegra(origemTipo) &&
+        normalizarTextoRegra(e?.origemNome || '') === normalizarTextoRegra(origemNome)
+    );
+
+    if (!jaTemEfeito) {
+        ficha.efeitosAplicados.push({
+            id: uid(),
+            origemTipo,
+            origemNome,
+            tipo: 'pericia_treinada',
+            alvo: pericia.nome
+        });
+    }
+
+    return true;
+}
+
+
+function marcarTreinoPericiaSemRegistrar(ficha, nomePericia) {
+    if (!ficha || !nomePericia) return false;
+
+    const especializacao = extrairEspecializacaoOficio(nomePericia);
+
+    if (especializacao) {
+        const oficios = garantirOficiosFicha(ficha);
+        const jaTem = oficios.some(of => normalizarTextoRegra(of) === normalizarTextoRegra(especializacao));
+        if (!jaTem) {
+            oficios.push(especializacao);
+        }
+
+        const periciaOficio = (ficha.pericias || []).find(p =>
+            normalizarTextoRegra(p.nome || '') === normalizarTextoRegra('Ofício')
+        );
+        if (periciaOficio) {
+            periciaOficio.treinada = true;
+        }
+        return true;
+    }
+
+    const pericia = (ficha.pericias || []).find(p =>
+        normalizarTextoRegra(p.nome || '') === normalizarTextoRegra(nomePericia)
+    );
+    if (!pericia) return false;
+
+    pericia.treinada = true;
+    return true;
+}
+
+function reconstruirTreinosPericiaDaFicha(ficha) {
+    if (!ficha) return;
+
+    const oficios = garantirOficiosFicha(ficha);
+
+    (ficha.pericias || []).forEach(pericia => {
+        pericia.treinada = false;
+    });
+
+    (ficha.efeitosAplicados || []).forEach(efeito => {
+        if (normalizarTextoRegra(efeito?.tipo || '') !== 'pericia_treinada') return;
+
+        const alvo = String(efeito?.alvo || '').trim();
+        if (!alvo) return;
+
+        const especializacao = extrairEspecializacaoOficio(alvo);
+        if (especializacao) {
+            const jaTem = oficios.some(of => normalizarTextoRegra(of) === normalizarTextoRegra(especializacao));
+            if (!jaTem) oficios.push(especializacao);
+            return;
+        }
+
+        const pericia = (ficha.pericias || []).find(p =>
+            normalizarTextoRegra(p.nome || '') === normalizarTextoRegra(alvo)
+        );
+        if (pericia) {
+            pericia.treinada = true;
+        }
+    });
+
+    const periciaOficio = (ficha.pericias || []).find(p =>
+        normalizarTextoRegra(p.nome || '') === normalizarTextoRegra('Ofício')
+    );
+    if (periciaOficio && oficios.length > 0) {
+        periciaOficio.treinada = true;
+    }
+}
+
+function renderResumoOficiosFicha(ficha) {
+    return "";
+}
+
+function opcaoGenericaOficioTemEspecializacaoSelecionada(lista, opcaoBase) {
+    const itens = Array.isArray(lista) ? lista : [];
+    if (!ehOpcaoPericiaOficioGenerico(opcaoBase)) return false;
+
+    const prefixoId = `${String(opcaoBase?.id || "")}:oficio:`;
+    return itens.some(item => {
+        const itemId = String(item?.id || "");
+        const mesmoPrefixo = prefixoId && itemId.startsWith(prefixoId);
+        const ehEspecializacao = !!item?.especializacaoOficio || ehPericiaOficioEspecializada(item?.valor || "");
+        return mesmoPrefixo || ehEspecializacao;
+    });
+}
+
+function ehOpcaoPericiaOficioGenerico(opcao) {
+    return opcao?.tipoAplicacao === "pericia_treinada"
+        && normalizarTextoRegra(opcao?.valor || "") === normalizarTextoRegra("Ofício");
+}
+
+function criarOpcaoEspecializadaOficio(opcaoBase, especialidade) {
+    const nome = montarNomePericiaOficio(especialidade);
+    return {
+        ...opcaoBase,
+        id: `${String(opcaoBase?.id || "oficio")}:oficio:${normalizarTextoRegra(especialidade).replace(/\s+/g, "_")}`,
+        valor: nome,
+        label: `Perícia: ${nome}`,
+        especializacaoOficio: especialidade
+    };
+}
+function getEspecializacoesOficioDisponiveisParaEscolha(ficha, selecoesAtuais = []) {
+    const atuais = Array.isArray(selecoesAtuais) ? selecoesAtuais : [];
+
+    return ESPECIALIZACOES_OFICIO.filter(nome => {
+        const jaTemNaFicha = fichaTemPericiaTreinadaOuOficio(ficha, montarNomePericiaOficio(nome));
+        const jaSelecionadoNoModal = atuais.some(item =>
+            normalizarTextoRegra(item) === normalizarTextoRegra(nome)
+        );
+
+        return !jaTemNaFicha || jaSelecionadoNoModal;
+    });
+}
+function abrirModalEspecializacoesOficioEscolha(contexto) {
+    const payload = { ...(contexto || {}) };
+    const targetState = payload.targetState === "evolucao" ? state.evolucao : state.criacao;
+    const lista = Array.isArray(targetState?.[payload.escolhaKey]?.[payload.escolhaId])
+        ? targetState[payload.escolhaKey][payload.escolhaId]
+        : [];
+
+    const selecoesAtuais = lista
+        .filter(item => {
+            const itemId = String(item?.id || "");
+            const prefixoId = `${String(payload?.opcaoBase?.id || "")}:oficio:`;
+            return itemId.startsWith(prefixoId) || !!item?.especializacaoOficio || ehPericiaOficioEspecializada(item?.valor || "");
+        })
+        .map(item => String(item?.especializacaoOficio || extrairEspecializacaoOficio(item?.valor || "") || "").trim())
+        .filter(Boolean);
+
+    state.modal = "oficios_escolha";
+    state.modalPayload = {
+        ...payload,
+        selecoes: selecoesAtuais
+    };
+    render();
+}
+
+function toggleEspecializacaoOficioEscolha(nome) {
+    if (state.modal !== "oficios_escolha") return;
+    state.modalPayload = state.modalPayload || {};
+    state.modalPayload.selecoes = Array.isArray(state.modalPayload.selecoes)
+        ? state.modalPayload.selecoes
+        : [];
+
+    const lista = state.modalPayload.selecoes;
+    const idx = lista.findIndex(item => normalizarTextoRegra(item) === normalizarTextoRegra(nome));
+
+    if (idx >= 0) {
+        lista.splice(idx, 1);
+    } else {
+        const maximo = Number(state.modalPayload?.maximo) || 1;
+        if (lista.length >= maximo) return;
+        lista.push(nome);
+    }
+
+    render();
+}
+
+function confirmarModalEspecializacoesOficioEscolha() {
+    if (state.modal !== "oficios_escolha") return;
+
+    const payload = state.modalPayload || {};
+    const selecoes = Array.isArray(payload.selecoes)
+        ? payload.selecoes.map(v => String(v || "").trim()).filter(Boolean)
+        : [];
+
+    if (!selecoes.length) return;
+
+    const targetState = payload.targetState === "evolucao" ? state.evolucao : state.criacao;
+    targetState[payload.escolhaKey] = targetState[payload.escolhaKey] || {};
+    targetState[payload.escolhaKey][payload.escolhaId] = targetState[payload.escolhaKey][payload.escolhaId] || [];
+
+    const lista = targetState[payload.escolhaKey][payload.escolhaId];
+    const ficha = payload.targetState === "evolucao" ? getFichaEvolucaoAtual() : getFichaCriacao();
+
+    selecoes.forEach(nome => {
+        const opcao = criarOpcaoEspecializadaOficio(payload.opcaoBase || {}, nome);
+        const jaExisteNaLista = lista.some(item => normalizarTextoRegra(item?.valor || "") === normalizarTextoRegra(opcao.valor || ""));
+        const jaTemNaFicha = ficha ? fichaTemPericiaTreinadaOuOficio(ficha, opcao.valor || "") : false;
+        if (!jaExisteNaLista && !jaTemNaFicha) {
+            lista.push(opcao);
+        }
+    });
+
+    fecharModal();
+
+    if (payload.targetState === "evolucao") {
+        render();
+    } else {
+        renderMantendoScrollEscolha();
+    }
+}
+
+function renderModalEspecializacoesOficioEscolha() {
+    if (state.modal !== "oficios_escolha") return "";
+
+    state.modalPayload = state.modalPayload || {};
+    const selecoes = Array.isArray(state.modalPayload.selecoes)
+        ? state.modalPayload.selecoes
+        : [];
+    const ficha = state.modalPayload?.targetState === "evolucao"
+        ? getFichaEvolucaoAtual()
+        : getFichaCriacao();
+
+    const especializacoesDisponiveis = getEspecializacoesOficioDisponiveisParaEscolha(ficha, selecoes);
+    const maximo = Number(state.modalPayload.maximo) || 1;
+    const titulo = state.modalPayload.titulo || "Escolha os ofícios";
+
+    return `
+      <div class="overlay" onclick="fecharModal()">
+        <div class="overlay-card" onclick="event.stopPropagation()">
+          <div class="overlay-header">
+            <div>
+              <div class="overlay-title">${escapeHtml(titulo)}</div>
+              <div class="subtitle">Selecionados: ${selecoes.length} / ${maximo}</div>
+            </div>
+            <div class="actions">
+              <button class="btn ghost" onclick="fecharModal()">Cancelar</button>
+              <button class="btn primary" onclick="confirmarModalEspecializacoesOficioEscolha()">Confirmar</button>
+            </div>
+          </div>
+<div class="overlay-body">
+  <div class="list">
+    ${especializacoesDisponiveis.length === 0
+            ? `<div class="empty">Todas as especializações de Ofício já foram aprendidas.</div>`
+            : especializacoesDisponiveis.map(nome => {
+                const checked = selecoes.some(item => normalizarTextoRegra(item) === normalizarTextoRegra(nome));
+                const disabled = !checked && selecoes.length >= maximo;
+                return `
+              <div class="list-item ${disabled ? "disabled" : ""}" style="align-items:flex-start; gap:12px; ${disabled ? "opacity:.65;" : ""}">
+                <div class="choice-main">
+                  <div class="list-item-title">${escapeHtml(nome)}</div>
+                </div>
+                <input
+                  class="choice-checkbox"
+                  type="checkbox"
+                  ${checked ? "checked" : ""}
+                  ${disabled ? "disabled" : ""}
+                  onclick="event.stopPropagation()"
+                  onchange="toggleEspecializacaoOficioEscolha('${escapeAttr(nome)}')"
+                >
+              </div>
+            `;
+            }).join("")
+    }
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+}
+
 function contarPoderesTormentaPendentesComPerdaCarisma() {
     let total = 0;
 
@@ -3652,6 +4096,10 @@ function getNomesPericiasTreinadasNoContexto(ficha) {
 
     (ficha?.pericias || []).forEach(p => {
         if (p?.treinada) set.add(p.nome);
+    });
+
+    garantirOficiosFicha(ficha).forEach(oficio => {
+        set.add(montarNomePericiaOficio(oficio));
     });
 
     Object.values(state.criacao?.racaEscolhas || {}).forEach(lista => {
@@ -3836,7 +4284,7 @@ function poderClassePodeSerEscolhidoMaisDeUmaVez(nomePoder) {
     ].includes(nome);
 }
 function montarEscolhaEspecialPoderTreinamentoPericia(opcaoBase, ficha) {
-    const opcoes = (ficha?.pericias || []).map(p => p.nome).filter(Boolean);
+    const opcoes = getPericiasExpandidas(ficha, true).map(p => p.nome);
 
     return [{
         id: `poder_especial:${opcaoBase.registroId}:treinamento_pericia`,
@@ -3999,21 +4447,26 @@ function aplicarEscolhasDoPoderClasseNaFichaImediatamente(ficha, classe, opcaoCo
                     {
                         registroId: opcao.registroId || "",
                         nome: opcao.valor || "",
-                        nomeAdicionado: opcao.nomeAdicionado || ""
+                        nomeAdicionado: opcao.nomeAdicionado || "",
+                        tipoMagiaInventor: opcao.tipoMagiaInventor || "",
+                        origemEspecial: opcao.origemEspecial || ""
                     },
                     "Classe",
                     classe.nome
                 );
+
+                const magiaAdicionada = (ficha.magias || []).find(m =>
+                    normalizarTextoRegra(m?.nome || "") === normalizarTextoRegra(opcao.valor || "")
+                );
+
+                if (magiaAdicionada && opcao.origemEspecial === "inventor_formula") {
+                    magiaAdicionada.tipoMagiaInventor = "formula";
+                    magiaAdicionada.prefixoExibicao = "Fórmula";
+                }
             }
 
             if (opcao.tipoAplicacao === "pericia_treinada") {
-                const pericia = (ficha.pericias || []).find(p =>
-                    normalizarTextoRegra(p.nome) === normalizarTextoRegra(opcao.valor)
-                );
-
-                if (pericia) {
-                    pericia.treinada = true;
-                }
+                marcarTreinoPericiaSemRegistrar(ficha, opcao.valor);
             }
 
             if (opcao.tipoAplicacao === "proficiencia_adicionar") {
@@ -4198,7 +4651,7 @@ function renderEscolhaPoderClasseModal() {
     const opcoesBase = getOpcoesEscolha(escolha, ficha);
 
     const opcoes = ordenarOpcoesParaExibicao(opcoesBase, (opcao) => {
-        const checked = selecionados.some(item => item.id === opcao.id);
+        const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
         const bloqueada = !!opcao.escolhaBloqueada;
         return checked || (!bloqueada && (quantidade <= 0 || selecionados.length < quantidade));
     });
@@ -4235,7 +4688,7 @@ function renderEscolhaPoderClasseModal() {
           <div class="overlay-body">
             <div class="list">
               ${opcoes.map(opcao => {
-        const checked = selecionados.some(item => item.id === opcao.id);
+        const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
         const bloqueada = !!opcao.escolhaBloqueada;
         const disabled = bloqueada || (!checked && quantidade > 0 && selecionados.length >= quantidade);
 
@@ -4299,6 +4752,7 @@ function montarContextoPreRequisitos(ficha) {
         nivelPersonagem: getNivelTotalFicha(ficha) || 1,
         proficiencias: new Set((ficha?.proficiencias || []).map(p => normalizarTextoRegra(p))),
         podeLancarMagias: personagemPodeLancarMagiasNoContexto(ficha),
+        oficios: new Set(garantirOficiosFicha(ficha).map(oficio => normalizarTextoRegra(oficio)))
     };
 }
 
@@ -4429,20 +4883,41 @@ function getCirculoMaximoPorClasseNoContexto(ficha, classeId) {
 }
 
 function extrairPartesPreRequisito(texto) {
-    return String(texto || "")
+    const partesBase = String(texto || "")
         .split(/\s*,\s*/g)
         .map(s => s.trim())
-        .filter(Boolean)
-        .map(parte => {
-            const opcoesOu = parte
-                .split(/\s+ou\s+/i)
-                .map(s => s.trim())
-                .filter(Boolean);
+        .filter(Boolean);
 
-            return opcoesOu.length > 1
-                ? { tipo: "ou", opcoes: opcoesOu }
-                : { tipo: "simples", valor: parte };
+    const partesFinais = [];
+
+    partesBase.forEach(parte => {
+        const opcoesOu = parte
+            .split(/\s+ou\s+/i)
+            .map(s => s.trim())
+            .filter(Boolean);
+
+        if (opcoesOu.length > 1) {
+            partesFinais.push({
+                tipo: "ou",
+                opcoes: opcoesOu
+            });
+            return;
+        }
+
+        const subpartesE = parte
+            .split(/\s+e\s+/i)
+            .map(s => s.trim())
+            .filter(Boolean);
+
+        subpartesE.forEach(sub => {
+            partesFinais.push({
+                tipo: "simples",
+                valor: sub
+            });
         });
+    });
+
+    return partesFinais;
 }
 
 function avaliarPartePreRequisito(parte, ctx) {
@@ -4472,7 +4947,15 @@ function avaliarPartePreRequisito(parte, ctx) {
 
         return `${nomes[chave]} ${minimo}`;
     }
-
+    // nível de classe: "7º nível de inventor"
+    m = txt.match(/\b(\d+)\s*(?:o|º)?\s*nivel de\s+(barbaro|bárbaro|arcanista|bardo|bucaneiro|cacador|caçador|cavaleiro|clerigo|clérigo|druida|guerreiro|inventor|ladino|lutador|nobre|paladino)\b/);
+    if (m) {
+        const minimo = Number(m[1]) || 0;
+        const classeId = aliasClasse[m[2]];
+        const atual = Number(ctx.niveisClasse?.[classeId]) || 0;
+        if (atual >= minimo) return null;
+        return raw.replace(/\s+/g, " ").trim();
+    }
     // classe: "Bárbaro 3"
     m = txt.match(/\b(barbaro|bárbaro|arcanista|bardo|bucaneiro|cacador|caçador|cavaleiro|clerigo|clérigo|druida|guerreiro|inventor|ladino|lutador|nobre|paladino)\s+(\d+)\b/);
     if (m) {
@@ -4500,6 +4983,14 @@ function avaliarPartePreRequisito(parte, ctx) {
         const totalAtual = Number(ctx.poderesTormenta) || 0;
 
         if (totalAtual >= regraTormenta.minimo) return null;
+        return raw;
+    }
+
+    // Ofício especializado: "Treinado em Ofício (alquimista)"
+    m = raw.match(/(?:treinado\s+em\s+)?of[ií]cio\s*\(([^)]+)\)/i);
+    if (m) {
+        const oficioReq = normalizarTextoRegra(m[1]);
+        if (ctx.oficios?.has(oficioReq)) return null;
         return raw;
     }
 
@@ -4783,8 +5274,8 @@ function podeSelecionarOpcaoGrupo(escolha, opcao) {
 }
 
 function toggleListaRacasCriacao() {
-  state.criacao.listaRacasAberta = !state.criacao.listaRacasAberta;
-  render();
+    state.criacao.listaRacasAberta = !state.criacao.listaRacasAberta;
+    render();
 }
 
 function selecionarRacaCriacao(id) {
@@ -4845,22 +5336,16 @@ function toggleAtributoDistribuicaoRacial(attr) {
 }
 
 function updateRacaCustom(field, value) {
-  state.criacao.racaCustom[field] = value;
-  render();
+    state.criacao.racaCustom[field] = value;
+    render();
 }
 
 function updateRacaCustomAtributo(attr, value) {
-  state.criacao.racaCustom.atributos[attr] = Number(value) || 0;
-  render();
+    state.criacao.racaCustom.atributos[attr] = Number(value) || 0;
+    render();
 }
 
 function limparEfeitosRaciaisFicha(ficha) {
-    const treinosNaoRaciais = new Set(
-        (ficha.efeitosAplicados || [])
-            .filter(e => e.origemTipo !== "Raça" && e.tipo === "pericia_treinada" && e.alvo)
-            .map(e => normalizarTextoRegra(e.alvo))
-    );
-
     ficha.modRacialAtributos = {
         forca: 0,
         destreza: 0,
@@ -4876,9 +5361,9 @@ function limparEfeitosRaciaisFicha(ficha) {
 
     ficha.pericias.forEach(p => {
         p.outrosRacial = 0;
-        p.treinada = treinosNaoRaciais.has(normalizarTextoRegra(p.nome));
     });
 
+    reconstruirTreinosPericiaDaFicha(ficha);
     ficha.proficiencias = [];
 }
 
@@ -5127,14 +5612,14 @@ async function iniciarCriacaoFicha() {
 }
 
 function getFichaCriacao() {
-  return state.criacao?.ficha || null;
+    return state.criacao?.ficha || null;
 }
 
 function updateFichaCriacao(field, value) {
-  const ficha = getFichaCriacao();
-  if (!ficha) return;
+    const ficha = getFichaCriacao();
+    if (!ficha) return;
 
-  ficha[field] = value;
+    ficha[field] = value;
 }
 function garantirControlePericiasInteligencia(ficha) {
     if (!ficha) return {
@@ -5195,9 +5680,7 @@ function getTotalPericiasInteligenciaConcedidas(ficha) {
 }
 
 function getPericiasDisponiveisParaInteligencia(ficha) {
-    return (ficha?.pericias || [])
-        .filter(pericia => !pericia.treinada)
-        .sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"));
+    return getPericiasExpandidas(ficha, true);
 }
 function criacaoJaPassouDaOrigem() {
     return Number(state.criacao?.etapa) >= 5;
@@ -5290,26 +5773,18 @@ function confirmarPericiasInteligenciaCriacao() {
     const controle = garantirControlePericiasInteligencia(ficha);
 
     selecionadas.forEach(nomePericia => {
-        const pericia = (ficha.pericias || []).find(p =>
-            normalizarTextoRegra(p.nome) === normalizarTextoRegra(nomePericia)
+        const aplicou = aplicarTreinoPericiaNaFicha(
+            ficha,
+            nomePericia,
+            "Inteligência",
+            "Inteligência"
         );
 
-        if (!pericia) return;
-
-        pericia.treinada = true;
+        if (!aplicou) return;
 
         if (!(controle.selecionadas || []).some(nome => normalizarTextoRegra(nome) === normalizarTextoRegra(nomePericia))) {
-            controle.selecionadas.push(pericia.nome);
+            controle.selecionadas.push(nomePericia);
         }
-
-        ficha.efeitosAplicados = ficha.efeitosAplicados || [];
-        ficha.efeitosAplicados.push({
-            id: uid(),
-            origemTipo: "Inteligência",
-            origemNome: "Inteligência",
-            tipo: "pericia_treinada",
-            alvo: pericia.nome
-        });
     });
 
     controle.totalConcedido = controle.selecionadas.length;
@@ -5520,15 +5995,15 @@ function concluirCriacaoFicha() {
 }
 
 function loadFichas() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-  } catch {
-    return [];
-  }
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    } catch {
+        return [];
+    }
 }
 
 function saveFichas() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.fichas));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.fichas));
 }
 function exportarFichasJson() {
     try {
@@ -5636,138 +6111,139 @@ function handleInputImportarFichas(input) {
 }
 
 function loadDadosHistorico() {
-  try {
-    return JSON.parse(localStorage.getItem(DADOS_HISTORY_KEY)) || [];
-  } catch {
-    return [];
-  }
+    try {
+        return JSON.parse(localStorage.getItem(DADOS_HISTORY_KEY)) || [];
+    } catch {
+        return [];
+    }
 }
 
 function saveDadosHistorico() {
-  localStorage.setItem(DADOS_HISTORY_KEY, JSON.stringify(state.dados.historico));
+    localStorage.setItem(DADOS_HISTORY_KEY, JSON.stringify(state.dados.historico));
 }
 
 function uid() {
-  return "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+    return "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
 }
 
 function fichaVazia() {
-  return {
-    id: uid(),
-    nome: "",
-    jogador: "",
-    raca: "",
-      classesPersonagem: [],
-      arcanistaCaminho: "",
-      bardoEscolas: [],
-      druidaEscolas: [],
-      nivelTotal: 0,
-      escolhasClasseResolvidas: [],
-      inventario: [],
-      dinheiro: 0,
-      origem: "",
-      origemId: "",
-      escolhasOrigemResolvidas: [],
-      divindade: "",
-      divindadeId: "",
-      divindadeDados: null,
-      divindadePoderEscolhido: "",
-    tamanho: "",
-    xp: 0,
-    deslocamento: "",
-    forcaBase: 0,
-destrezaBase: 0,
-constituicaoBase: 0,
-inteligenciaBase: 0,
-sabedoriaBase: 0,
-carismaBase: 0,
-      aumentosPorAtributo: {
-          forca: 0,
-          destreza: 0,
-          constituicao: 0,
-          inteligencia: 0,
-          sabedoria: 0,
-          carisma: 0
-      },
-      controlePericiasInteligencia: {
-          totalConcedido: 0,
-          selecionadas: []
-      },
-modRacialAtributos: {
-  forca: 0,
-  destreza: 0,
-  constituicao: 0,
-  inteligencia: 0,
-  sabedoria: 0,
-  carisma: 0
-},
-    pontosAtributoIniciais: 10,
-    pontosAtributoAtuais: 10,
-    pvMax: 0,
-    pvAtual: 0,
-      pmMax: 0,
-      pmAtual: 0,
-      defesa: 10,
-      defesaOutros: 0,
-      penalidadeArmadura: 0,
-      atributoChaveMagias: "",
-      cdMagias: 0,
-      ataques: [
-          {
-              id: uid(),
-              nome: "",
-              bonus: "",
-              dano: "",
-              critico: "",
-              tipo: "",
-              alcance: "",
-              automatico: false,
-              origemEquipamento: false
-          }
-      ],
-  pericias: [
-  { nome: "Acrobacia", outros: 0, treinada: false, atributo: "DES", somenteTreinada: false, penalidadeArmadura: true },
-  { nome: "Adestramento", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: true, penalidadeArmadura: false },
-  { nome: "Atletismo", outros: 0, treinada: false, atributo: "FOR", somenteTreinada: false, penalidadeArmadura: false },
-  { nome: "Atuação", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: true, penalidadeArmadura: false },
-  { nome: "Cavalgar", outros: 0, treinada: false, atributo: "DES", somenteTreinada: false, penalidadeArmadura: false },
-  { nome: "Conhecimento", outros: 0, treinada: false, atributo: "INT", somenteTreinada: true, penalidadeArmadura: false },
-  { nome: "Cura", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: false, penalidadeArmadura: false },
-  { nome: "Diplomacia", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: false, penalidadeArmadura: false },
-  { nome: "Enganação", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: false, penalidadeArmadura: false },
-  { nome: "Fortitude", outros: 0, treinada: false, atributo: "CON", somenteTreinada: false, penalidadeArmadura: false },
-  { nome: "Furtividade", outros: 0, treinada: false, atributo: "DES", somenteTreinada: false, penalidadeArmadura: true },
-  { nome: "Guerra", outros: 0, treinada: false, atributo: "INT", somenteTreinada: true, penalidadeArmadura: false },
-  { nome: "Iniciativa", outros: 0, treinada: false, atributo: "DES", somenteTreinada: false, penalidadeArmadura: false },
-  { nome: "Intimidação", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: false, penalidadeArmadura: false },
-  { nome: "Intuição", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: false, penalidadeArmadura: false },
-  { nome: "Investigação", outros: 0, treinada: false, atributo: "INT", somenteTreinada: false, penalidadeArmadura: false },
-  { nome: "Jogatina", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: true, penalidadeArmadura: false },
-  { nome: "Ladinagem", outros: 0, treinada: false, atributo: "DES", somenteTreinada: true, penalidadeArmadura: true },
-  { nome: "Luta", outros: 0, treinada: false, atributo: "FOR", somenteTreinada: false, penalidadeArmadura: false },
-  { nome: "Misticismo", outros: 0, treinada: false, atributo: "INT", somenteTreinada: true, penalidadeArmadura: false },
-  { nome: "Nobreza", outros: 0, treinada: false, atributo: "INT", somenteTreinada: true, penalidadeArmadura: false },
-  { nome: "Ofício", outros: 0, treinada: false, atributo: "INT", somenteTreinada: true, penalidadeArmadura: false },
-  { nome: "Percepção", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: false, penalidadeArmadura: false },
-  { nome: "Pilotagem", outros: 0, treinada: false, atributo: "DES", somenteTreinada: true, penalidadeArmadura: false },
-  { nome: "Pontaria", outros: 0, treinada: false, atributo: "DES", somenteTreinada: false, penalidadeArmadura: false },
-  { nome: "Reflexos", outros: 0, treinada: false, atributo: "DES", somenteTreinada: false, penalidadeArmadura: false },
-  { nome: "Religião", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: true, penalidadeArmadura: false },
-  { nome: "Sobrevivência", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: false, penalidadeArmadura: false },
-  { nome: "Vontade", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: false, penalidadeArmadura: false }
-],
-    equipamentos: [],
-    proficiencias: [],
-    contadorPoderesTormenta: 0,
-    efeitosAplicados: [],
-    habilidades: [],
-    magias: [],
-    anotacoes: ""
-  };
+    return {
+        id: uid(),
+        nome: "",
+        jogador: "",
+        raca: "",
+        classesPersonagem: [],
+        arcanistaCaminho: "",
+        bardoEscolas: [],
+        druidaEscolas: [],
+        nivelTotal: 0,
+        escolhasClasseResolvidas: [],
+        inventario: [],
+        dinheiro: 0,
+        origem: "",
+        origemId: "",
+        escolhasOrigemResolvidas: [],
+        divindade: "",
+        divindadeId: "",
+        divindadeDados: null,
+        divindadePoderEscolhido: "",
+        tamanho: "",
+        xp: 0,
+        deslocamento: "",
+        forcaBase: 0,
+        destrezaBase: 0,
+        constituicaoBase: 0,
+        inteligenciaBase: 0,
+        sabedoriaBase: 0,
+        carismaBase: 0,
+        aumentosPorAtributo: {
+            forca: 0,
+            destreza: 0,
+            constituicao: 0,
+            inteligencia: 0,
+            sabedoria: 0,
+            carisma: 0
+        },
+        controlePericiasInteligencia: {
+            totalConcedido: 0,
+            selecionadas: []
+        },
+        oficios: [],
+        modRacialAtributos: {
+            forca: 0,
+            destreza: 0,
+            constituicao: 0,
+            inteligencia: 0,
+            sabedoria: 0,
+            carisma: 0
+        },
+        pontosAtributoIniciais: 10,
+        pontosAtributoAtuais: 10,
+        pvMax: 0,
+        pvAtual: 0,
+        pmMax: 0,
+        pmAtual: 0,
+        defesa: 10,
+        defesaOutros: 0,
+        penalidadeArmadura: 0,
+        atributoChaveMagias: "",
+        cdMagias: 0,
+        ataques: [
+            {
+                id: uid(),
+                nome: "",
+                bonus: "",
+                dano: "",
+                critico: "",
+                tipo: "",
+                alcance: "",
+                automatico: false,
+                origemEquipamento: false
+            }
+        ],
+        pericias: [
+            { nome: "Acrobacia", outros: 0, treinada: false, atributo: "DES", somenteTreinada: false, penalidadeArmadura: true },
+            { nome: "Adestramento", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: true, penalidadeArmadura: false },
+            { nome: "Atletismo", outros: 0, treinada: false, atributo: "FOR", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Atuação", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: true, penalidadeArmadura: false },
+            { nome: "Cavalgar", outros: 0, treinada: false, atributo: "DES", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Conhecimento", outros: 0, treinada: false, atributo: "INT", somenteTreinada: true, penalidadeArmadura: false },
+            { nome: "Cura", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Diplomacia", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Enganação", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Fortitude", outros: 0, treinada: false, atributo: "CON", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Furtividade", outros: 0, treinada: false, atributo: "DES", somenteTreinada: false, penalidadeArmadura: true },
+            { nome: "Guerra", outros: 0, treinada: false, atributo: "INT", somenteTreinada: true, penalidadeArmadura: false },
+            { nome: "Iniciativa", outros: 0, treinada: false, atributo: "DES", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Intimidação", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Intuição", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Investigação", outros: 0, treinada: false, atributo: "INT", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Jogatina", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: true, penalidadeArmadura: false },
+            { nome: "Ladinagem", outros: 0, treinada: false, atributo: "DES", somenteTreinada: true, penalidadeArmadura: true },
+            { nome: "Luta", outros: 0, treinada: false, atributo: "FOR", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Misticismo", outros: 0, treinada: false, atributo: "INT", somenteTreinada: true, penalidadeArmadura: false },
+            { nome: "Nobreza", outros: 0, treinada: false, atributo: "INT", somenteTreinada: true, penalidadeArmadura: false },
+            { nome: "Ofício", outros: 0, treinada: false, atributo: "INT", somenteTreinada: true, penalidadeArmadura: false },
+            { nome: "Percepção", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Pilotagem", outros: 0, treinada: false, atributo: "DES", somenteTreinada: true, penalidadeArmadura: false },
+            { nome: "Pontaria", outros: 0, treinada: false, atributo: "DES", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Reflexos", outros: 0, treinada: false, atributo: "DES", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Religião", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: true, penalidadeArmadura: false },
+            { nome: "Sobrevivência", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Vontade", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: false, penalidadeArmadura: false }
+        ],
+        equipamentos: [],
+        proficiencias: [],
+        contadorPoderesTormenta: 0,
+        efeitosAplicados: [],
+        habilidades: [],
+        magias: [],
+        anotacoes: ""
+    };
 }
 
 function getFichaAtual() {
-  return state.fichas.find(f => f.id === state.fichaAtualId);
+    return state.fichas.find(f => f.id === state.fichaAtualId);
 }
 
 function getNivelTotalPersonagem(ficha) {
@@ -5910,12 +6386,6 @@ function classeEhPrimeira(ficha, classeId) {
 }
 
 function limparEfeitosClasseFicha(ficha) {
-    const treinosNaoClasse = new Set(
-        (ficha.efeitosAplicados || [])
-            .filter(e => e.origemTipo !== "Classe" && e.tipo === "pericia_treinada" && e.alvo)
-            .map(e => normalizarTextoRegra(e.alvo))
-    );
-
     ficha.habilidades = (ficha.habilidades || []).filter(h => h.origem !== "Classe");
     ficha.magias = (ficha.magias || []).filter(m => m.origem !== "Classe");
     ficha.efeitosAplicados = (ficha.efeitosAplicados || []).filter(e => e.origemTipo !== "Classe");
@@ -5923,9 +6393,9 @@ function limparEfeitosClasseFicha(ficha) {
     ficha.proficiencias = [];
 
     ficha.pericias.forEach(p => {
-        p.treinada = treinosNaoClasse.has(normalizarTextoRegra(p.nome));
         p.outrosPoder = 0;
     });
+    reconstruirTreinosPericiaDaFicha(ficha);
     garantirAumentosPorAtributo(ficha);
     Object.keys(ficha.aumentosPorAtributo).forEach(chave => {
         ficha.aumentosPorAtributo[chave] = 0;
@@ -5970,7 +6440,125 @@ function formatarClassesPersonagem(ficha) {
 function getRegistroClasse(ficha, classeId) {
     return ficha?.classesPersonagem?.find(c => c.classeId === classeId) || null;
 }
+function fichaTemHabilidadeOuPoderPorNome(ficha, nome) {
+    const alvo = normalizarTextoRegra(nome || "");
+    if (!alvo) return false;
 
+    const habilidades = Array.isArray(ficha?.habilidades) ? ficha.habilidades : [];
+
+    if (habilidades.some(h => normalizarTextoRegra(h?.nome || "") === alvo)) {
+        return true;
+    }
+
+    const escolhasResolvidas = Array.isArray(ficha?.escolhasClasseResolvidas) ? ficha.escolhasClasseResolvidas : [];
+    return escolhasResolvidas.some(bloco =>
+        Array.isArray(bloco?.selecionadas) &&
+        bloco.selecionadas.some(item =>
+            normalizarTextoRegra(item?.valor || item?.nomeCurto || "") === alvo
+        )
+    );
+}
+
+function getNivelInventorDaFicha(ficha) {
+    const registro = getRegistroClasse(ficha, "inventor");
+    return Number(registro?.niveis) || 0;
+}
+
+function inventorTemAlquimistaIniciado(ficha) {
+    return fichaTemHabilidadeOuPoderPorNome(ficha, PODERES_INVENTOR_FORMULAS.alquimistaIniciado);
+}
+
+function inventorTemMestreAlquimista(ficha) {
+    return fichaTemHabilidadeOuPoderPorNome(ficha, PODERES_INVENTOR_FORMULAS.mestreAlquimista);
+}
+
+function getCirculoMaximoFormulaInventor(ficha, nivelInventor) {
+    const n = Number(nivelInventor) || 0;
+    const temMestre = inventorTemMestreAlquimista(ficha);
+
+    if (n >= 18 && temMestre) return 5;
+    if (n >= 14 && temMestre) return 4;
+    if (n >= 10 && temMestre) return 3;
+    if (n >= 6) return 2;
+    if (n >= 1) return 1;
+    return 0;
+}
+
+function getQuantidadeFormulasInventorNoNivel(nivelInventor) {
+    const n = Number(nivelInventor) || 0;
+    if (n <= 0) return 0;
+    if (n === 1) return 3;
+    return 1;
+}
+
+function getOpcoesFormulasInventorAteOCirculo(circuloMaximo, ficha) {
+    const max = Math.max(1, Number(circuloMaximo) || 1);
+    const registros = [];
+    const vistos = new Set();
+
+    for (let c = 1; c <= max; c++) {
+        [
+            `magia_arcana_${c}`,
+            `magia_divina_${c}`,
+            `magia_universal_${c}`
+        ].forEach(filtro => {
+            buscarMagiasPorFiltro(filtro).forEach(registro => {
+                const chave = String(registro?.id || registro?.nome || "");
+                if (!chave || vistos.has(chave)) return;
+                vistos.add(chave);
+                registros.push(registro);
+            });
+        });
+    }
+
+    const filtradas = filtrarForaMagiasJaConhecidas(registros, ficha);
+
+    return filtradas
+        .sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"))
+        .map(registro => {
+            const opcao = montarOpcaoDeRegistroBanco(registro);
+            if (!opcao) return null;
+
+            return {
+                ...opcao,
+                id: `formula_inventor:${registro.id}`,
+                tipoAplicacao: "magia_adicionar",
+                label: `Fórmula: ${registro.nome}`,
+                valor: registro.nome,
+                registroId: registro.id,
+                origemEspecial: "inventor_formula",
+                tipoMagiaInventor: "formula"
+            };
+        })
+        .filter(Boolean);
+}
+
+function criarEscolhaFormulasInventor(classe, nivelClasse, ficha) {
+    if (normalizarTextoRegra(classe?.id || "") !== "inventor") return null;
+    if (!inventorTemAlquimistaIniciado(ficha)) return null;
+
+    const quantidade = getQuantidadeFormulasInventorNoNivel(nivelClasse);
+    if (!quantidade) return null;
+
+    const circuloMaximo = getCirculoMaximoFormulaInventor(ficha, nivelClasse);
+    if (!circuloMaximo) return null;
+
+    return {
+        id: `inventor_formulas_nivel_${nivelClasse}`,
+        habilidade_id: "",
+        tipo: "magia",
+        titulo: "Fórmulas do Inventor",
+        descricao: `Escolha ${quantidade} fórmula(s) de até ${circuloMaximo}º círculo.`,
+        quantidade,
+        filtro: `inventor_formulas_${circuloMaximo}`,
+        opcoesTexto: "",
+        regrasGrupo: "",
+        dependeDe: "",
+        classeIdOrigem: classe.id,
+        circuloMaximoInventor: circuloMaximo,
+        origemEspecial: "inventor_formula"
+    };
+}
 function garantirPrimeiraClasseUnica(ficha) {
     const lista = ficha.classesPersonagem || [];
     let encontrou = false;
@@ -6000,7 +6588,7 @@ function getEscolhasClasseDisponiveisNoNivel(classe, nivelClasse, primeiraClasse
         const nivelMinimo = Number(escolha.nivelMinimo) || 1;
         if (nivelMinimo !== nivelClasse) return false;
         if (escolha.somentePrimeiraClasse && !primeiraClasse) return false;
-        const jaTemDivindade = !!String(ficha?.divindade || "").trim();
+        const jaTemDivindade = !!String(fichaContexto?.divindade || "").trim();
 
         if (escolha.filtro === "divindade_classe" && jaTemDivindade) {
             return false;
@@ -6011,7 +6599,13 @@ function getEscolhasClasseDisponiveisNoNivel(classe, nivelClasse, primeiraClasse
     const escolhasInternas = getEscolhasInternasDeHabilidadesClasseNoNivel(classe, nivelClasse);
     const escolhasMagias = getEscolhasMagiasPorHabilidadeClasse(classe, nivelClasse, fichaContexto);
 
-    return [...escolhasDaClasse, ...escolhasInternas, ...escolhasMagias];
+    const extras = [];
+    const escolhaFormulaInventor = criarEscolhaFormulasInventor(classe, nivelClasse, fichaContexto);
+    if (escolhaFormulaInventor) {
+        extras.push(escolhaFormulaInventor);
+    }
+
+    return [...escolhasDaClasse, ...escolhasInternas, ...escolhasMagias, ...extras];
 }
 
 function getEscolhasInternasDeHabilidadesClasseNoNivel(classe, nivelClasse) {
@@ -6182,16 +6776,7 @@ function aplicarEscolhasClasseResolvidasNaFicha(ficha) {
 
         (registro.selecionadas || []).forEach(opcao => {
             if (opcao.tipoAplicacao === "pericia_treinada") {
-                const pericia = ficha.pericias.find(p => p.nome === opcao.valor);
-                if (pericia) pericia.treinada = true;
-
-                ficha.efeitosAplicados.push({
-                    id: uid(),
-                    origemTipo: "Classe",
-                    origemNome: classe.nome,
-                    tipo: "pericia_treinada",
-                    alvo: opcao.valor
-                });
+                aplicarTreinoPericiaNaFicha(ficha, opcao.valor, "Classe", classe.nome);
             }
 
             if (opcao.tipoAplicacao === "proficiencia_adicionar") {
@@ -6203,11 +6788,23 @@ function aplicarEscolhasClasseResolvidasNaFicha(ficha) {
                     ficha,
                     {
                         registroId: opcao.registroId || "",
-                        nome: opcao.valor || ""
+                        nome: opcao.valor || "",
+                        nomeAdicionado: opcao.nomeAdicionado || "",
+                        tipoMagiaInventor: opcao.tipoMagiaInventor || "",
+                        origemEspecial: opcao.origemEspecial || ""
                     },
                     "Classe",
                     classe.nome
                 );
+
+                const magiaAdicionada = (ficha.magias || []).find(m =>
+                    normalizarTextoRegra(m?.nome || "") === normalizarTextoRegra(opcao.valor || "")
+                );
+
+                if (magiaAdicionada && opcao.origemEspecial === "inventor_formula") {
+                    magiaAdicionada.tipoMagiaInventor = "formula";
+                    magiaAdicionada.prefixoExibicao = "Fórmula";
+                }
 
                 ficha.efeitosAplicados.push({
                     id: uid(),
@@ -6362,23 +6959,23 @@ function aplicarEscolhasClasseResolvidasNaFicha(ficha) {
 
                 let registroHabilidade = null;
 
-if (normalizarTextoRegra(opcao.origemBanco || "") === "geral") {
-    if (opcao.registroId) {
-        registroHabilidade = getRegistroPoderMagiaPorId(opcao.registroId);
-    }
+                if (normalizarTextoRegra(opcao.origemBanco || "") === "geral") {
+                    if (opcao.registroId) {
+                        registroHabilidade = getRegistroPoderMagiaPorId(opcao.registroId);
+                    }
 
-    if (!registroHabilidade && opcao.valor) {
-        registroHabilidade = getRegistroPoderPorNome(opcao.valor);
-    }
-} else {
-    if (opcao.registroId) {
-        registroHabilidade = getPoderClassePorId(classe.id, opcao.registroId);
-    }
+                    if (!registroHabilidade && opcao.valor) {
+                        registroHabilidade = getRegistroPoderPorNome(opcao.valor);
+                    }
+                } else {
+                    if (opcao.registroId) {
+                        registroHabilidade = getPoderClassePorId(classe.id, opcao.registroId);
+                    }
 
-    if (!registroHabilidade && opcao.valor) {
-        registroHabilidade = getPoderClassePorNome(classe.id, opcao.valor);
-    }
-}
+                    if (!registroHabilidade && opcao.valor) {
+                        registroHabilidade = getPoderClassePorNome(classe.id, opcao.valor);
+                    }
+                }
 
                 const nomeHabilidade =
                     opcao.nomeCurto ||
@@ -6462,11 +7059,22 @@ if (normalizarTextoRegra(opcao.origemBanco || "") === "geral") {
                                     {
                                         registroId: subopcao.registroId || "",
                                         nome: subopcao.valor || "",
-                                        nomeAdicionado: subopcao.nomeAdicionado || ""
+                                        nomeAdicionado: subopcao.nomeAdicionado || "",
+                                        tipoMagiaInventor: subopcao.tipoMagiaInventor || "",
+                                        origemEspecial: subopcao.origemEspecial || ""
                                     },
                                     "Classe",
                                     classe.nome
                                 );
+
+                                const magiaAdicionada = (ficha.magias || []).find(m =>
+                                    normalizarTextoRegra(m?.nome || "") === normalizarTextoRegra(subopcao.valor || "")
+                                );
+
+                                if (magiaAdicionada && subopcao.origemEspecial === "inventor_formula") {
+                                    magiaAdicionada.tipoMagiaInventor = "formula";
+                                    magiaAdicionada.prefixoExibicao = "Fórmula";
+                                }
 
                                 ficha.efeitosAplicados.push({
                                     id: uid(),
@@ -6478,21 +7086,7 @@ if (normalizarTextoRegra(opcao.origemBanco || "") === "geral") {
                             }
 
                             if (subopcao.tipoAplicacao === "pericia_treinada") {
-                                const pericia = (ficha.pericias || []).find(p =>
-                                    normalizarTextoRegra(p.nome) === normalizarTextoRegra(subopcao.valor)
-                                );
-
-                                if (pericia) {
-                                    pericia.treinada = true;
-                                }
-
-                                ficha.efeitosAplicados.push({
-                                    id: uid(),
-                                    origemTipo: "Classe",
-                                    origemNome: classe.nome,
-                                    tipo: "pericia_treinada",
-                                    alvo: subopcao.valor
-                                });
+                                aplicarTreinoPericiaNaFicha(ficha, subopcao.valor, "Classe", classe.nome);
                             }
                         });
                     });
@@ -6904,6 +7498,19 @@ function toggleEscolhaClasseValorEvolucao(escolhaId, opcao, quantidadeMaxima) {
         }
     } else {
         if (!podeSelecionarOpcaoClasseEvolucao(escolha, opcao)) return;
+        if (ehOpcaoPericiaOficioGenerico(opcao)) {
+            const restante = Math.max(0, limite - lista.length);
+            if (restante <= 0) return;
+            abrirModalEspecializacoesOficioEscolha({
+                targetState: "evolucao",
+                escolhaKey: "classeEscolhas",
+                escolhaId,
+                opcaoBase: opcao,
+                maximo: restante,
+                titulo: "Escolha as especializações de Ofício"
+            });
+            return;
+        }
         if (limite > 0 && lista.length >= limite) return;
 
         lista.push(opcao);
@@ -6922,7 +7529,7 @@ function toggleEscolhaClasseValorEvolucao(escolhaId, opcao, quantidadeMaxima) {
             return;
         }
 
-        if (Array.isArray(opcao.escolhas) && opcao.escolhas.length > 0) {
+        if (!opcao.ehAumentoAtributo && Array.isArray(opcao.escolhas) && opcao.escolhas.length > 0) {
             state.evolucao.poderClasseEscolhas = state.evolucao.poderClasseEscolhas || {};
             state.evolucao.escolhaPoderClasseAbertaId = String(opcao.escolhas[0].id || "");
         }
@@ -7027,35 +7634,35 @@ function concluirNivelClasseEvolucao() {
 }
 
 function go(screen) {
-  state.screen = screen;
-  render();
+    state.screen = screen;
+    render();
 }
 
 function abrirModal(tipo) {
-  state.modal = tipo;
-  render();
+    state.modal = tipo;
+    render();
 }
 
 function abrirFicha(id) {
-  state.fichaAtualId = id;
-  go("ficha");
+    state.fichaAtualId = id;
+    go("ficha");
 }
 
 function criarFicha() {
-  const nova = fichaVazia();
-  state.fichas.unshift(nova);
-  state.fichaAtualId = nova.id;
-  saveFichas();
-  go("ficha");
+    const nova = fichaVazia();
+    state.fichas.unshift(nova);
+    state.fichaAtualId = nova.id;
+    saveFichas();
+    go("ficha");
 }
 
 function excluirFicha(id) {
-  const ok = confirm("Excluir esta ficha?");
-  if (!ok) return;
-  state.fichas = state.fichas.filter(f => f.id !== id);
-  if (state.fichaAtualId === id) state.fichaAtualId = null;
-  saveFichas();
-  render();
+    const ok = confirm("Excluir esta ficha?");
+    if (!ok) return;
+    state.fichas = state.fichas.filter(f => f.id !== id);
+    if (state.fichaAtualId === id) state.fichaAtualId = null;
+    saveFichas();
+    render();
 }
 
 function updateFicha(field, value) {
@@ -7083,99 +7690,99 @@ function updateFicha(field, value) {
 }
 
 function aumentarNivel() {
-  const ficha = getFichaAtual();
-  if (!ficha) return;
+    const ficha = getFichaAtual();
+    if (!ficha) return;
 
-  const atual = Number(ficha.nivelTotal || 1);
-  ficha.nivelTotal = atual + 1;
+    const atual = Number(ficha.nivelTotal || 1);
+    ficha.nivelTotal = atual + 1;
 
-  saveFichas();
-  render();
+    saveFichas();
+    render();
 }
 
 function diminuirNivel() {
-  const ficha = getFichaAtual();
-  if (!ficha) return;
+    const ficha = getFichaAtual();
+    if (!ficha) return;
 
-  const atual = Number(ficha.nivelTotal || 1);
-  ficha.nivelTotal = Math.max(1, atual - 1);
+    const atual = Number(ficha.nivelTotal || 1);
+    ficha.nivelTotal = Math.max(1, atual - 1);
 
-  saveFichas();
-  render();
+    saveFichas();
+    render();
 }
 
 function addEquipamento() {
-  const ficha = getFichaAtual();
-  if (!ficha) return;
+    const ficha = getFichaAtual();
+    if (!ficha) return;
 
-  const novo = {
-    id: uid(),
-    nome: "",
-    quantidade: 1,
-    slots: 0,
-    preco: "",
-    descricao: "",
-    efeitos: ""
-  };
+    const novo = {
+        id: uid(),
+        nome: "",
+        quantidade: 1,
+        slots: 0,
+        preco: "",
+        descricao: "",
+        efeitos: ""
+    };
 
-  ficha.equipamentos.push(novo);
-  saveFichas();
-  abrirDetalheEquipamento(novo.id);
+    ficha.equipamentos.push(novo);
+    saveFichas();
+    abrirDetalheEquipamento(novo.id);
 }
 
 function abrirDetalheEquipamento(id) {
-  state.modal = "equipamento";
-  state.modalPayload = { id };
-  render();
+    state.modal = "equipamento";
+    state.modalPayload = { id };
+    render();
 }
 
 function fecharModal() {
-  state.modal = null;
-  state.modalPayload = null;
-  document.body.classList.remove("modal-open");
-  render();
+    state.modal = null;
+    state.modalPayload = null;
+    document.body.classList.remove("modal-open");
+    render();
 }
 
 function getEquipamentoAtual() {
-  const ficha = getFichaAtual();
-  if (!ficha || !state.modalPayload?.id) return null;
-  return ficha.equipamentos.find(e => e.id === state.modalPayload.id) || null;
+    const ficha = getFichaAtual();
+    if (!ficha || !state.modalPayload?.id) return null;
+    return ficha.equipamentos.find(e => e.id === state.modalPayload.id) || null;
 }
 
 function updateEquipamento(id, field, value) {
-  const ficha = getFichaAtual();
-  if (!ficha) return;
+    const ficha = getFichaAtual();
+    if (!ficha) return;
 
-  const equip = ficha.equipamentos.find(e => e.id === id);
-  if (!equip) return;
+    const equip = ficha.equipamentos.find(e => e.id === id);
+    if (!equip) return;
 
-  if (field === "quantidade" || field === "slots") {
-    equip[field] = Number(value) || 0;
-  } else {
-    equip[field] = value;
-  }
+    if (field === "quantidade" || field === "slots") {
+        equip[field] = Number(value) || 0;
+    } else {
+        equip[field] = value;
+    }
 
-  saveFichas();
+    saveFichas();
 }
 
 function excluirEquipamento(id) {
-  const ficha = getFichaAtual();
-  if (!ficha) return;
+    const ficha = getFichaAtual();
+    if (!ficha) return;
 
-  const ok = confirm("Excluir este equipamento?");
-  if (!ok) return;
+    const ok = confirm("Excluir este equipamento?");
+    if (!ok) return;
 
-  ficha.equipamentos = ficha.equipamentos.filter(e => e.id !== id);
-  saveFichas();
-  fecharModal();
+    ficha.equipamentos = ficha.equipamentos.filter(e => e.id !== id);
+    saveFichas();
+    fecharModal();
 }
 
 function custoSubirAtributo(valorAtual) {
-  if (valorAtual < 0) return 1;
-  if (valorAtual === 0) return 1;
-  if (valorAtual === 1) return 2;
-  if (valorAtual === 2) return 4;
-  return 7;
+    if (valorAtual < 0) return 1;
+    if (valorAtual === 0) return 1;
+    if (valorAtual === 1) return 2;
+    if (valorAtual === 2) return 4;
+    return 7;
 }
 
 function subirAtributo(campo) {
@@ -7491,6 +8098,7 @@ function expandirOpcoesEspeciaisDePoder(opcoesBase, ficha) {
                         valor: "Aumento de Atributo",
                         atributoEscolhido: nomeAtributo,
                         ehAumentoAtributo: true,
+                        escolhas: [],
                         descricao: `${opcao.descricao || ""}\n\nAtributo escolhido: ${nomeAtributo}`.trim()
                     });
                 });
@@ -7515,14 +8123,14 @@ function adicionarMagiaNaFicha(ficha, nome, origemTipo, origemNome) {
     return adicionarOuAtualizarMagiaNaFicha(ficha, nome, origemTipo, origemNome);
 }
 function adicionarAtaqueNaFicha(ficha, efeito) {
-  ficha.ataques.push({
-    nome: efeito.nomeAdicionado || "Ataque",
-    bonus: efeito.bonusAtaque || 0,
-    dano: efeito.dano || "",
-    critico: efeito.critico || "",
-    tipo: efeito.tipoAtaque || "",
-    alcance: efeito.alcance || ""
-  });
+    ficha.ataques.push({
+        nome: efeito.nomeAdicionado || "Ataque",
+        bonus: efeito.bonusAtaque || 0,
+        dano: efeito.dano || "",
+        critico: efeito.critico || "",
+        tipo: efeito.tipoAtaque || "",
+        alcance: efeito.alcance || ""
+    });
 }
 function montarOpcaoDeRegistroBanco(registro) {
     if (!registro) return null;
@@ -7764,7 +8372,7 @@ function getOpcoesEscolhaOrigem(escolha, ficha) {
 
             const pericias = parseListaPipe(escolha.opcoesPericias).flatMap(nome => {
                 if (normalizarTextoRegra(nome) === "*todas_as_pericias*") {
-                    return ficha.pericias.map(p => ({
+                    return getPericiasExpandidas(ficha, false).map(p => ({
                         id: `pericia:${p.nome}`,
                         tipoAplicacao: "pericia_treinada",
                         label: `Perícia: ${p.nome}`,
@@ -7798,11 +8406,11 @@ function getOpcoesEscolhaOrigem(escolha, ficha) {
 
         // EXCEÇÃO: Amnésico
         if (escolha.filtro === "origem_amnesico_mestre") {
-            const pericias = ficha.pericias.map(p => ({
-                id: `pericia:${p.nome}`,
+            const pericias = getPericiasExpandidas(ficha, false).map(pericia => ({
+                id: `pericia:${pericia.nome}`,
                 tipoAplicacao: "pericia_treinada",
-                label: `Perícia: ${p.nome}`,
-                valor: p.nome
+                label: `Perícia: ${pericia.nome}`,
+                valor: pericia.nome
             }));
 
             const poderes = filtrarForaPoderesConcedidos(
@@ -7838,11 +8446,11 @@ function getOpcoesEscolhaOrigem(escolha, ficha) {
 
         // Origem custom
         if (escolha.filtro === "origem_custom_misto") {
-            const pericias = ficha.pericias.map(p => ({
-                id: `pericia:${p.nome}`,
+            const pericias = getPericiasExpandidas(ficha, false).map(pericia => ({
+                id: `pericia:${pericia.nome}`,
                 tipoAplicacao: "pericia_treinada",
-                label: `Perícia: ${p.nome}`,
-                valor: p.nome
+                label: `Perícia: ${pericia.nome}`,
+                valor: pericia.nome
             }));
 
             const poderes = filtrarForaPoderesConcedidos(
@@ -7893,7 +8501,7 @@ function getOpcoesEscolha(escolha, ficha) {
         let opcoes = [];
 
         if (escolha.filtro === "todas") {
-            opcoes = ficha.pericias.map(p => p.nome);
+            opcoes = getPericiasExpandidas(ficha, false).map(p => p.nome);
         } else if (escolha.filtro === "lista") {
             opcoes = (escolha.opcoesTexto || "")
                 .split("|")
@@ -7998,6 +8606,10 @@ function getOpcoesEscolha(escolha, ficha) {
         }
         if (escolha.filtro === "magia_clerigo_conhecimento") {
             return getMagiasClerigoConhecimentoMagico(ficha);
+        }
+        if (/^inventor_formulas_\d+$/.test(String(escolha.filtro || ""))) {
+            const circulo = Number(String(escolha.filtro || "").match(/\d+$/)?.[0]) || 1;
+            return getOpcoesFormulasInventorAteOCirculo(circulo, ficha);
         }
         if (escolha.filtro && escolha.filtro !== "lista") {
             const filtros = normalizarListaFiltros(escolha.filtro);
@@ -8173,11 +8785,11 @@ function getOpcoesEscolha(escolha, ficha) {
 
     if (escolha.tipo === "grupo") {
         if (escolha.filtro === "pericia_ou_poder") {
-            const pericias = ficha.pericias.map(nomeObj => ({
-                id: `pericia:${nomeObj.nome}`,
+            const pericias = getPericiasExpandidas(ficha, false).map(pericia => ({
+                id: `pericia:${pericia.nome}`,
                 tipoAplicacao: "pericia_treinada",
-                label: `Perícia: ${nomeObj.nome}`,
-                valor: nomeObj.nome
+                label: `Perícia: ${pericia.nome}`,
+                valor: pericia.nome
             }));
 
             const poderes = filtrarForaPoderesConcedidos(
@@ -8194,7 +8806,7 @@ function getOpcoesEscolha(escolha, ficha) {
         }
 
         if (escolha.filtro === "pericia_ou_poder_ou_habilidade_racial") {
-            const pericias = ficha.pericias.map(pericia => ({
+            const pericias = getPericiasExpandidas(ficha, false).map(pericia => ({
                 id: `pericia:${pericia.nome}`,
                 tipoAplicacao: "pericia_treinada",
                 label: `Perícia: ${pericia.nome}`,
@@ -8374,6 +8986,19 @@ function toggleEscolhaRacialValor(escolhaId, opcao, quantidadeMaxima) {
         lista.splice(idx, 1);
     } else {
         if (!podeSelecionarOpcaoRacial(escolha, opcao)) return;
+        if (ehOpcaoPericiaOficioGenerico(opcao)) {
+            const restante = Math.max(0, (Number(quantidadeMaxima) || 0) - lista.length);
+            if (restante <= 0) return;
+            abrirModalEspecializacoesOficioEscolha({
+                targetState: "criacao",
+                escolhaKey: "racaEscolhas",
+                escolhaId,
+                opcaoBase: opcao,
+                maximo: restante,
+                titulo: "Escolha as especializações de Ofício"
+            });
+            return;
+        }
         if (lista.length >= quantidadeMaxima) return;
         lista.push(opcao);
     }
@@ -8400,6 +9025,19 @@ function toggleEscolhaOrigemValor(escolhaId, opcao, quantidadeMaxima) {
         lista.splice(idx, 1);
     } else {
         if (opcaoPericiaIndisponivelNaOrigem(opcao, ficha)) return;
+        if (ehOpcaoPericiaOficioGenerico(opcao)) {
+            const restante = Math.max(0, limite - lista.length);
+            if (restante <= 0) return;
+            abrirModalEspecializacoesOficioEscolha({
+                targetState: "criacao",
+                escolhaKey: "origemEscolhas",
+                escolhaId,
+                opcaoBase: opcao,
+                maximo: restante,
+                titulo: "Escolha as especializações de Ofício"
+            });
+            return;
+        }
         if (limite > 0 && lista.length >= limite) return;
         lista.push(opcao);
     }
@@ -8423,7 +9061,7 @@ function renderEscolhaCriacaoModal() {
     const opcoesBase = getOpcoesEscolha(escolha, f);
 
     const opcoes = ordenarOpcoesParaExibicao(opcoesBase, (opcao) => {
-        const checked = selecionados.some(item => item.id === opcao.id);
+        const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
         return checked || podeSelecionarOpcaoRacial(escolha, opcao);
     });
 
@@ -8449,17 +9087,17 @@ function renderEscolhaCriacaoModal() {
         <div class="overlay-body">
           <div class="list">
             ${opcoes.map(opcao => {
-                const checked = selecionados.some(item => item.id === opcao.id);
-                const disabled = !checked && !podeSelecionarOpcaoRacial(escolha, opcao);
-                const expandida = opcaoEscolhaEstaExpandida("raca", escolha.id, opcao.id);
-                const titulo = getTituloOpcaoEscolha(opcao);
-                const descricao = String(opcao.descricao || "").trim();
-                const preReqFaltando =
-                    escolha.tipo === "magia" && opcao?.tipoAplicacao === "magia_adicionar"
-                        ? ""
-                        : getPreRequisitoNaoAtendidoOpcao(opcao, f);
+        const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
+        const disabled = !checked && !podeSelecionarOpcaoRacial(escolha, opcao);
+        const expandida = opcaoEscolhaEstaExpandida("raca", escolha.id, opcao.id);
+        const titulo = getTituloOpcaoEscolha(opcao);
+        const descricao = String(opcao.descricao || "").trim();
+        const preReqFaltando =
+            escolha.tipo === "magia" && opcao?.tipoAplicacao === "magia_adicionar"
+                ? ""
+                : getPreRequisitoNaoAtendidoOpcao(opcao, f);
 
-                return `
+        return `
         <div class="list-item" style="align-items:flex-start; gap:12px; ${disabled ? "opacity:.65;" : ""}">
             <button
                 type="button"
@@ -8487,10 +9125,11 @@ function renderEscolhaCriacaoModal() {
             >
         </div>
     `;
-            }).join("")}
+    }).join("")}
           </div>
         </div>
       </div>
+      ${renderModalEspecializacoesOficioFicha()}
     </div>
   `;
 }
@@ -8588,18 +9227,7 @@ function aplicarEscolhasRaciaisNaFicha(ficha, raca) {
             }
 
             if (opcao.tipoAplicacao === "pericia_treinada") {
-                const pericia = ficha.pericias.find(p => p.nome === opcao.valor);
-                if (pericia) {
-                    pericia.treinada = true;
-                }
-
-                ficha.efeitosAplicados.push({
-                    id: uid(),
-                    origemTipo: "Raça",
-                    origemNome: raca.nome,
-                    tipo: "pericia_treinada",
-                    alvo: opcao.valor
-                });
+                aplicarTreinoPericiaNaFicha(ficha, opcao.valor, "Raça", raca.nome);
             }
 
             if (opcao.tipoAplicacao === "proficiencia_adicionar") {
@@ -8669,18 +9297,7 @@ function aplicarEscolhasRaciaisNaFicha(ficha, raca) {
                 opcao.escolhasResolvidas.forEach(bloco => {
                     (bloco?.selecionadas || []).forEach(subopcao => {
                         if (subopcao.tipoAplicacao === "pericia_treinada") {
-                            const pericia = ficha.pericias.find(p => p.nome === subopcao.valor);
-                            if (pericia) {
-                                pericia.treinada = true;
-                            }
-
-                            ficha.efeitosAplicados.push({
-                                id: uid(),
-                                origemTipo: "Raça",
-                                origemNome: raca.nome,
-                                tipo: "pericia_treinada",
-                                alvo: subopcao.valor
-                            });
+                            aplicarTreinoPericiaNaFicha(ficha, subopcao.valor, "Raça", raca.nome);
                         }
 
                         if (subopcao.tipoAplicacao === "magia_adicionar") {
@@ -8764,182 +9381,179 @@ function aplicarHabilidadeRacialCopiadaNaFicha(ficha, opcao) {
     }
 }
 function aplicarEfeitoNaFicha(ficha, efeito, origemTipo, origemNome) {
-  if (!efeito || !efeito.tipo) return;
+    if (!efeito || !efeito.tipo) return;
 
-  ficha.efeitosAplicados.push({
-    id: uid(),
-    origemTipo: origemTipo || "Raça",
-    origemNome: origemNome || "",
-    tipo: efeito.tipo,
-    alvo: efeito.alvo || "",
-    valor: efeito.valor,
-    valorTexto: efeito.valorTexto || "",
-    nomeAdicionado: efeito.nomeAdicionado || ""
-  });
+    ficha.efeitosAplicados.push({
+        id: uid(),
+        origemTipo: origemTipo || "Raça",
+        origemNome: origemNome || "",
+        tipo: efeito.tipo,
+        alvo: efeito.alvo || "",
+        valor: efeito.valor,
+        valorTexto: efeito.valorTexto || "",
+        nomeAdicionado: efeito.nomeAdicionado || ""
+    });
 
-  switch (efeito.tipo) {
-    case "atributo_racial":
-      if (efeito.alvo && ficha.modRacialAtributos[efeito.alvo] != null) {
-        ficha.modRacialAtributos[efeito.alvo] += Number(efeito.valor) || 0;
-      }
-      break;
+    switch (efeito.tipo) {
+        case "atributo_racial":
+            if (efeito.alvo && ficha.modRacialAtributos[efeito.alvo] != null) {
+                ficha.modRacialAtributos[efeito.alvo] += Number(efeito.valor) || 0;
+            }
+            break;
 
-    case "pericia_bonus": {
-      const pericia = ficha.pericias.find(p => p.nome === efeito.alvo);
-      if (pericia) {
-        pericia.outrosRacial = (Number(pericia.outrosRacial) || 0) + (Number(efeito.valor) || 0);
-      }
-      break;
+        case "pericia_bonus": {
+            const pericia = ficha.pericias.find(p => p.nome === efeito.alvo);
+            if (pericia) {
+                pericia.outrosRacial = (Number(pericia.outrosRacial) || 0) + (Number(efeito.valor) || 0);
+            }
+            break;
+        }
+
+        case "pericia_treinada": {
+            marcarTreinoPericiaSemRegistrar(ficha, efeito.alvo);
+            break;
+        }
+        case "penalidade_armadura": {
+            ficha.penalidadeArmadura = (Number(ficha.penalidadeArmadura) || 0) + (Number(efeito.valor) || 0);
+            break;
+        }
+
+        case "habilidade_adicionar":
+            adicionarHabilidadeNaFicha(
+                ficha,
+                {
+                    nome: efeito.nomeAdicionado,
+                    descricao: efeito.descricao,
+                    custoPm: efeito.custoPm,
+                    ativavel: efeito.ativavel,
+                    permiteIntensificar: efeito.permiteIntensificar
+                },
+                origemTipo,
+                origemNome
+            );
+            break;
+
+        case "habilidade_geral_adicionar": {
+            const registro = getHabilidadeGeralPorId(efeito.alvo || efeito.valorTexto || efeito.nomeAdicionado);
+
+            if (registro) {
+                const jaExiste = (ficha.habilidades || []).some(h =>
+                    String(h.registroId) === String(registro.id) ||
+                    String(h.nome || "").trim().toLowerCase() === String(registro.nome || "").trim().toLowerCase()
+                );
+
+                if (!jaExiste) {
+                    adicionarHabilidadeNaFicha(
+                        ficha,
+                        {
+                            nome: registro.nome || "",
+                            descricao: registro.descricao || "",
+                            custoPm: 0
+                        },
+                        origemTipo || "Raça",
+                        origemNome || ""
+                    );
+
+                    const habilidadeAdicionada = ficha.habilidades[ficha.habilidades.length - 1];
+                    if (habilidadeAdicionada) {
+                        habilidadeAdicionada.registroId = registro.id;
+                        habilidadeAdicionada.tipoRegistro = "habilidade_geral";
+                    }
+                }
+            }
+            break;
+        }
+
+        case "magia_adicionar":
+            adicionarOuAtualizarMagiaNaFicha(
+                ficha,
+                {
+                    registroId: efeito.registroId || "",
+                    nomeAdicionado: efeito.nomeAdicionado || efeito.alvo || ""
+                },
+                origemTipo,
+                origemNome
+            );
+            break;
+
+        case "proficiencia_adicionar":
+            adicionarProficienciaNaFicha(ficha, efeito.alvo || efeito.nomeAdicionado);
+            break;
+
+        case "deslocamento_bonus": {
+            const atual = parseInt(String(ficha.deslocamento || "0").replace(/[^\d-]/g, ""), 10) || 0;
+            ficha.deslocamento = `${atual + (Number(efeito.valor) || 0)}m`;
+            break;
+        }
+
+        case "deslocamento_definir":
+            ficha.deslocamento = efeito.valorTexto || ficha.deslocamento;
+            break;
+
+        case "pv_bonus_nivel1":
+        case "pv_bonus_por_nivel":
+        case "pm_bonus_nivel1":
+        case "pm_bonus_por_nivel":
+            break;
+
+        case "ataque_adicionar":
+            adicionarAtaqueNaFicha(ficha, efeito);
+            break;
+
+        case "defesa_bonus":
+            ficha.defesa = (Number(ficha.defesa) || 0) + (Number(efeito.valor) || 0);
+            break;
+
+        case "tamanho_definir":
+            ficha.tamanho = efeito.valorTexto || ficha.tamanho;
+            break;
+
+        case "poder_tormenta_adicionar":
+            ficha.contadorPoderesTormenta = (Number(ficha.contadorPoderesTormenta) || 0) + (Number(efeito.valor) || 0);
+            break;
+
+        case "descricao_apenas":
+            break;
     }
-
-    case "pericia_treinada": {
-      const pericia = ficha.pericias.find(p => p.nome === efeito.alvo);
-      if (pericia) {
-        pericia.treinada = true;
-      }
-      break;
-    }
-      case "penalidade_armadura": {
-          ficha.penalidadeArmadura = (Number(ficha.penalidadeArmadura) || 0) + (Number(efeito.valor) || 0);
-          break;
-      }
-
-    case "habilidade_adicionar":
-      adicionarHabilidadeNaFicha(
-        ficha,
-        {
-          nome: efeito.nomeAdicionado,
-          descricao: efeito.descricao,
-          custoPm: efeito.custoPm,
-          ativavel: efeito.ativavel,
-          permiteIntensificar: efeito.permiteIntensificar
-        },
-        origemTipo,
-        origemNome
-      );
-      break;
-
-      case "habilidade_geral_adicionar": {
-          const registro = getHabilidadeGeralPorId(efeito.alvo || efeito.valorTexto || efeito.nomeAdicionado);
-
-          if (registro) {
-              const jaExiste = (ficha.habilidades || []).some(h =>
-                  String(h.registroId) === String(registro.id) ||
-                  String(h.nome || "").trim().toLowerCase() === String(registro.nome || "").trim().toLowerCase()
-              );
-
-              if (!jaExiste) {
-                  adicionarHabilidadeNaFicha(
-                      ficha,
-                      {
-                          nome: registro.nome || "",
-                          descricao: registro.descricao || "",
-                          custoPm: 0
-                      },
-                      origemTipo || "Raça",
-                      origemNome || ""
-                  );
-
-                  const habilidadeAdicionada = ficha.habilidades[ficha.habilidades.length - 1];
-                  if (habilidadeAdicionada) {
-                      habilidadeAdicionada.registroId = registro.id;
-                      habilidadeAdicionada.tipoRegistro = "habilidade_geral";
-                  }
-              }
-          }
-          break;
-      }
-
-      case "magia_adicionar":
-          adicionarOuAtualizarMagiaNaFicha(
-              ficha,
-              {
-                  registroId: efeito.registroId || "",
-                  nomeAdicionado: efeito.nomeAdicionado || efeito.alvo || ""
-              },
-              origemTipo,
-              origemNome
-          );
-          break;
-
-    case "proficiencia_adicionar":
-      adicionarProficienciaNaFicha(ficha, efeito.alvo || efeito.nomeAdicionado);
-      break;
-
-    case "deslocamento_bonus": {
-      const atual = parseInt(String(ficha.deslocamento || "0").replace(/[^\d-]/g, ""), 10) || 0;
-      ficha.deslocamento = `${atual + (Number(efeito.valor) || 0)}m`;
-      break;
-    }
-
-    case "deslocamento_definir":
-      ficha.deslocamento = efeito.valorTexto || ficha.deslocamento;
-      break;
-
-      case "pv_bonus_nivel1":
-      case "pv_bonus_por_nivel":
-      case "pm_bonus_nivel1":
-      case "pm_bonus_por_nivel":
-          break;
-
-    case "ataque_adicionar":
-      adicionarAtaqueNaFicha(ficha, efeito);
-      break;
-
-    case "defesa_bonus":
-      ficha.defesa = (Number(ficha.defesa) || 0) + (Number(efeito.valor) || 0);
-      break;
-
-    case "tamanho_definir":
-      ficha.tamanho = efeito.valorTexto || ficha.tamanho;
-      break;
-
-    case "poder_tormenta_adicionar":
-      ficha.contadorPoderesTormenta = (Number(ficha.contadorPoderesTormenta) || 0) + (Number(efeito.valor) || 0);
-      break;
-
-    case "descricao_apenas":
-      break;
-  }
 }
 
 function adicionarPontoAtributo() {
-  const ficha = getFichaAtual();
-  if (!ficha) return;
+    const ficha = getFichaAtual();
+    if (!ficha) return;
 
-  ficha.pontosAtributoAtuais += 1;
+    ficha.pontosAtributoAtuais += 1;
 
-  saveFichas();
-  render();
+    saveFichas();
+    render();
 }
 
 function addHabilidade() {
-  const ficha = getFichaAtual();
-  if (!ficha) return;
+    const ficha = getFichaAtual();
+    if (!ficha) return;
 
-  const nova = {
-    id: uid(),
-    nome: "",
-    custoPm: 0,
-    descricao: "",
-    selecionada: false
-  };
+    const nova = {
+        id: uid(),
+        nome: "",
+        custoPm: 0,
+        descricao: "",
+        selecionada: false
+    };
 
-  ficha.habilidades.push(nova);
-  saveFichas();
-  abrirDetalheHabilidade(nova.id);
+    ficha.habilidades.push(nova);
+    saveFichas();
+    abrirDetalheHabilidade(nova.id);
 }
 
 function abrirDetalheHabilidade(id) {
-  state.modal = "habilidade";
-  state.modalPayload = { id };
-  render();
+    state.modal = "habilidade";
+    state.modalPayload = { id };
+    render();
 }
 
 function getHabilidadeAtual() {
-  const ficha = getFichaAtual();
-  if (!ficha || !state.modalPayload?.id) return null;
-  return ficha.habilidades.find(h => h.id === state.modalPayload.id) || null;
+    const ficha = getFichaAtual();
+    if (!ficha || !state.modalPayload?.id) return null;
+    return ficha.habilidades.find(h => h.id === state.modalPayload.id) || null;
 }
 function getRegistroBancoDaHabilidadeFicha(habilidade) {
     const registroId = String(habilidade?.registroId || "").trim();
@@ -9013,236 +9627,330 @@ function habilidadeDeveAparecerNaFicha(habilidade) {
     return true;
 }
 function updateHabilidade(id, field, value) {
-  const ficha = getFichaAtual();
-  if (!ficha) return;
+    const ficha = getFichaAtual();
+    if (!ficha) return;
 
-  const habilidade = ficha.habilidades.find(h => h.id === id);
-  if (!habilidade) return;
+    const habilidade = ficha.habilidades.find(h => h.id === id);
+    if (!habilidade) return;
 
-  if (field === "custoPm") {
-    habilidade[field] = Math.max(0, Number(value) || 0);
-  } else if (field === "selecionada") {
-    habilidade[field] = !!value;
-  } else {
-    habilidade[field] = value;
-  }
+    if (field === "custoPm") {
+        habilidade[field] = Math.max(0, Number(value) || 0);
+    } else if (field === "selecionada") {
+        habilidade[field] = !!value;
+    } else {
+        habilidade[field] = value;
+    }
 
-  saveFichas();
+    saveFichas();
 
-  // Só rerenderiza quando precisa atualizar a lista/resumo da ficha
-  if (field === "selecionada") {
-    render();
-  }
+    // Só rerenderiza quando precisa atualizar a lista/resumo da ficha
+    if (field === "selecionada") {
+        render();
+    }
 }
 
 function excluirHabilidade(id) {
-  const ficha = getFichaAtual();
-  if (!ficha) return;
+    const ficha = getFichaAtual();
+    if (!ficha) return;
 
-  const ok = confirm("Excluir esta habilidade?");
-  if (!ok) return;
+    const ok = confirm("Excluir esta habilidade?");
+    if (!ok) return;
 
-  ficha.habilidades = ficha.habilidades.filter(h => h.id !== id);
-  saveFichas();
-  fecharModal();
+    ficha.habilidades = ficha.habilidades.filter(h => h.id !== id);
+    saveFichas();
+    fecharModal();
 }
 
 function getCustoTotalHabilidadesSelecionadas() {
-  const ficha = getFichaAtual();
-  if (!ficha) return 0;
+    const ficha = getFichaAtual();
+    if (!ficha) return 0;
 
-  return ficha.habilidades
-    .filter(h => h.selecionada)
-    .reduce((total, h) => total + (Number(h.custoPm) || 0), 0);
+    return ficha.habilidades
+        .filter(h => h.selecionada)
+        .reduce((total, h) => total + (Number(h.custoPm) || 0), 0);
 }
 
 function usarHabilidadesSelecionadas() {
-  const ficha = getFichaAtual();
-  if (!ficha) return;
+    const ficha = getFichaAtual();
+    if (!ficha) return;
 
-  const total = getCustoTotalHabilidadesSelecionadas();
-  const pmAtual = Number(ficha.pmAtual) || 0;
+    const total = getCustoTotalHabilidadesSelecionadas();
+    const pmAtual = Number(ficha.pmAtual) || 0;
 
-  if (total > pmAtual) return;
-  if (total < 0) return;
+    if (total > pmAtual) return;
+    if (total < 0) return;
 
-  ficha.pmAtual = pmAtual - total;
+    ficha.pmAtual = pmAtual - total;
 
-  ficha.habilidades.forEach(h => {
-    h.selecionada = false;
-  });
+    ficha.habilidades.forEach(h => {
+        h.selecionada = false;
+    });
 
-  saveFichas();
-  render();
+    saveFichas();
+    render();
 }
 
 function addMagia() {
-  const ficha = getFichaAtual();
-  if (!ficha) return;
+    const ficha = getFichaAtual();
+    if (!ficha) return;
 
-  const nova = {
-    id: uid(),
-    nome: "",
-    circulo: "",
-    custoPm: 1,
-    execucao: "",
-    alcance: "",
-    area: "",
-    duracao: "",
-    resistencia: "",
-    descricao: "",
-    incrementos: []
-  };
+    state.modal = "magia_adicionar";
+    state.modalPayload = {};
+    document.body.classList.add("modal-open");
+    render();
+}
+function podeAdicionarMagiasArcanasNaFicha(ficha) {
+    if (!ficha) return false;
 
-  ficha.magias.push(nova);
-  saveFichas();
-  abrirDetalheMagia(nova.id);
+    const temClasseArcana = (ficha.classesPersonagem || []).some(cp =>
+        ["arcanista", "bardo"].includes(normalizarTextoRegra(cp?.classeId || ""))
+    );
+
+    const temFormulasInventor = inventorTemAlquimistaIniciado?.(ficha);
+
+    return temClasseArcana || temFormulasInventor;
+}
+
+function podeAdicionarMagiasDivinasNaFicha(ficha) {
+    if (!ficha) return false;
+
+    return (ficha.classesPersonagem || []).some(cp =>
+        ["clerigo", "druida"].includes(normalizarTextoRegra(cp?.classeId || ""))
+    ) || inventorTemAlquimistaIniciado?.(ficha);
+}
+
+function getCirculoMaximoMagiasNaFicha(ficha) {
+    if (!ficha) return 0;
+
+    const classes = ["arcanista", "bardo", "clerigo", "druida"];
+    let max = 0;
+
+    classes.forEach(classeId => {
+        max = Math.max(max, getCirculoMaximoPorClasseNoContexto(ficha, classeId) || 0);
+    });
+
+    max = Math.max(max, getCirculoMaximoFormulaInventor?.(ficha, getNivelInventorDaFicha?.(ficha) || 0) || 0);
+
+    return max;
+}
+
+function getMagiasDisponiveisParaAdicionarNaFicha(ficha) {
+    if (!ficha) return [];
+
+    const circuloMaximo = getCirculoMaximoMagiasNaFicha(ficha);
+    if (!circuloMaximo) return [];
+
+    const registros = (PODERES_MAGIAS_DB.registros || []).filter(registro => {
+        if (normalizarTextoRegra(registro?.tipoRegistro || "") !== "magia") return false;
+
+        const circulo = Number(registro?.circulo) || 0;
+        if (circulo < 1 || circulo > circuloMaximo) return false;
+
+        const jaTem = (ficha.magias || []).some(m =>
+            normalizarTextoRegra(m?.nome || "") === normalizarTextoRegra(registro?.nome || "")
+        );
+        if (jaTem) return false;
+
+        return true;
+    });
+
+    return registros
+        .sort((a, b) => {
+            const circA = Number(a.circulo) || 0;
+            const circB = Number(b.circulo) || 0;
+            if (circA !== circB) return circA - circB;
+            return String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR");
+        });
+}
+
+function adicionarMagiaDoBancoNaFicha(registroId) {
+    const ficha = getFichaAtual();
+    if (!ficha) return;
+
+    const registro = getRegistroPoderMagiaPorId(registroId);
+    if (!registro) return;
+
+    adicionarOuAtualizarMagiaNaFicha(
+        ficha,
+        {
+            registroId: registro.id,
+            nome: registro.nome
+        },
+        "Manual",
+        "Banco de magias"
+    );
+
+    saveFichas();
+    fecharModal();
+}
+
+function adicionarMagiaManualNaFicha() {
+    const ficha = getFichaAtual();
+    if (!ficha) return;
+
+    const nova = {
+        id: uid(),
+        nome: "",
+        circulo: "",
+        custoPm: 1,
+        execucao: "",
+        alcance: "",
+        area: "",
+        duracao: "",
+        resistencia: "",
+        descricao: "",
+        incrementos: []
+    };
+
+    ficha.magias.push(nova);
+    saveFichas();
+    abrirDetalheMagia(nova.id);
 }
 
 function abrirDetalheMagia(id) {
-  state.modal = "magia";
-  state.modalPayload = { id };
-  render();
+    state.modal = "magia";
+    state.modalPayload = { id };
+    render();
 }
 
 function getMagiaAtual() {
-  const ficha = getFichaAtual();
-  if (!ficha || !state.modalPayload?.id) return null;
-  return ficha.magias.find(m => m.id === state.modalPayload.id) || null;
+    const ficha = getFichaAtual();
+    if (!ficha || !state.modalPayload?.id) return null;
+    return ficha.magias.find(m => m.id === state.modalPayload.id) || null;
 }
 
 function updateMagia(id, field, value) {
-  const ficha = getFichaAtual();
-  if (!ficha) return;
+    const ficha = getFichaAtual();
+    if (!ficha) return;
 
-  const magia = ficha.magias.find(m => m.id === id);
-  if (!magia) return;
+    const magia = ficha.magias.find(m => m.id === id);
+    if (!magia) return;
 
-  if (field === "custoPm") {
-    magia[field] = Math.max(0, Number(value) || 0);
-  } else {
-    magia[field] = value;
-  }
+    if (field === "custoPm") {
+        magia[field] = Math.max(0, Number(value) || 0);
+    } else {
+        magia[field] = value;
+    }
 
-  saveFichas();
+    saveFichas();
 }
 
 function addIncrementoMagia(idMagia) {
-  const ficha = getFichaAtual();
-  if (!ficha) return;
+    const ficha = getFichaAtual();
+    if (!ficha) return;
 
-  const magia = ficha.magias.find(m => m.id === idMagia);
-  if (!magia) return;
+    const magia = ficha.magias.find(m => m.id === idMagia);
+    if (!magia) return;
 
-  magia.incrementos.push({
-    id: uid(),
-    custoPm: 1,
-    descricao: "",
-    selecionado: false
-  });
+    magia.incrementos.push({
+        id: uid(),
+        custoPm: 1,
+        descricao: "",
+        selecionado: false
+    });
 
-  saveFichas();
-  render();
+    saveFichas();
+    render();
 }
 
 function updateIncrementoMagia(idMagia, idIncremento, field, value) {
-  const ficha = getFichaAtual();
-  if (!ficha) return;
+    const ficha = getFichaAtual();
+    if (!ficha) return;
 
-  const magia = ficha.magias.find(m => m.id === idMagia);
-  if (!magia) return;
+    const magia = ficha.magias.find(m => m.id === idMagia);
+    if (!magia) return;
 
-  const incremento = magia.incrementos.find(i => i.id === idIncremento);
-  if (!incremento) return;
+    const incremento = magia.incrementos.find(i => i.id === idIncremento);
+    if (!incremento) return;
 
-  if (field === "custoPm") {
-    incremento[field] = Math.max(0, Number(value) || 0);
-  } else if (field === "selecionado") {
-    incremento[field] = !!value;
-  } else {
-    incremento[field] = value;
-  }
+    if (field === "custoPm") {
+        incremento[field] = Math.max(0, Number(value) || 0);
+    } else if (field === "selecionado") {
+        incremento[field] = !!value;
+    } else {
+        incremento[field] = value;
+    }
 
-  saveFichas();
+    saveFichas();
 
-  if (field === "selecionado") {
-    render();
-  }
+    if (field === "selecionado") {
+        render();
+    }
 }
 
 function excluirIncrementoMagia(idMagia, idIncremento) {
-  const ficha = getFichaAtual();
-  if (!ficha) return;
+    const ficha = getFichaAtual();
+    if (!ficha) return;
 
-  const magia = ficha.magias.find(m => m.id === idMagia);
-  if (!magia) return;
+    const magia = ficha.magias.find(m => m.id === idMagia);
+    if (!magia) return;
 
-  magia.incrementos = magia.incrementos.filter(i => i.id !== idIncremento);
-  saveFichas();
-  render();
+    magia.incrementos = magia.incrementos.filter(i => i.id !== idIncremento);
+    saveFichas();
+    render();
 }
 
 function excluirMagia(id) {
-  const ficha = getFichaAtual();
-  if (!ficha) return;
+    const ficha = getFichaAtual();
+    if (!ficha) return;
 
-  const ok = confirm("Excluir esta magia?");
-  if (!ok) return;
+    const ok = confirm("Excluir esta magia?");
+    if (!ok) return;
 
-  ficha.magias = ficha.magias.filter(m => m.id !== id);
-  saveFichas();
-  fecharModal();
+    ficha.magias = ficha.magias.filter(m => m.id !== id);
+    saveFichas();
+    fecharModal();
 }
 
 function getCustoTotalMagia(magia) {
-  if (!magia) return 0;
+    if (!magia) return 0;
 
-  const base = Number(magia.custoPm) || 0;
-  const extras = (magia.incrementos || [])
-    .filter(i => i.selecionado)
-    .reduce((total, i) => total + (Number(i.custoPm) || 0), 0);
+    const base = Number(magia.custoPm) || 0;
+    const extras = (magia.incrementos || [])
+        .filter(i => i.selecionado)
+        .reduce((total, i) => total + (Number(i.custoPm) || 0), 0);
 
-  return base + extras;
+    return base + extras;
 }
 
 function podeSelecionarIncremento(magia, incrementoId) {
-  const ficha = getFichaAtual();
-  if (!ficha || !magia) return false;
+    const ficha = getFichaAtual();
+    if (!ficha || !magia) return false;
 
-  const pmAtual = Number(ficha.pmAtual) || 0;
-  const base = Number(magia.custoPm) || 0;
+    const pmAtual = Number(ficha.pmAtual) || 0;
+    const base = Number(magia.custoPm) || 0;
 
-  if (pmAtual < base) return false;
+    if (pmAtual < base) return false;
 
-  const incremento = magia.incrementos.find(i => i.id === incrementoId);
-  if (!incremento) return false;
+    const incremento = magia.incrementos.find(i => i.id === incrementoId);
+    if (!incremento) return false;
 
-  if (incremento.selecionado) return true;
+    if (incremento.selecionado) return true;
 
-  const custoAtual = getCustoTotalMagia(magia);
-  const novoTotal = custoAtual + (Number(incremento.custoPm) || 0);
+    const custoAtual = getCustoTotalMagia(magia);
+    const novoTotal = custoAtual + (Number(incremento.custoPm) || 0);
 
-  return novoTotal <= pmAtual;
+    return novoTotal <= pmAtual;
 }
 
 function usarMagiaAtual() {
-  const ficha = getFichaAtual();
-  const magia = getMagiaAtual();
-  if (!ficha || !magia) return;
+    const ficha = getFichaAtual();
+    const magia = getMagiaAtual();
+    if (!ficha || !magia) return;
 
-  const pmAtual = Number(ficha.pmAtual) || 0;
-  const custoTotal = getCustoTotalMagia(magia);
+    const pmAtual = Number(ficha.pmAtual) || 0;
+    const custoTotal = getCustoTotalMagia(magia);
 
-  if (custoTotal > pmAtual) return;
+    if (custoTotal > pmAtual) return;
 
-  ficha.pmAtual = pmAtual - custoTotal;
+    ficha.pmAtual = pmAtual - custoTotal;
 
-  (magia.incrementos || []).forEach(i => {
-    i.selecionado = false;
-  });
+    (magia.incrementos || []).forEach(i => {
+        i.selecionado = false;
+    });
 
-  saveFichas();
-  render();
+    saveFichas();
+    render();
 }
 
 function updateAtaque(i, campo, valor) {
@@ -9326,43 +10034,43 @@ function getNivelTotalFicha(ficha) {
 }
 
 function getMetadeNivel(ficha) {
-  return Math.floor(getNivelTotalFicha(ficha) / 2);
+    return Math.floor(getNivelTotalFicha(ficha) / 2);
 }
 
 function getBonusTreino(ficha) {
-  const nivel = getNivelTotalFicha(ficha);
+    const nivel = getNivelTotalFicha(ficha);
 
-  if (nivel >= 15) return 6;
-  if (nivel >= 7) return 4;
-  if (nivel >= 1) return 2;
-  return 0;
+    if (nivel >= 15) return 6;
+    if (nivel >= 7) return 4;
+    if (nivel >= 1) return 2;
+    return 0;
 }
 
 function getValorAtributoPericia(ficha, atributo) {
-  if (!ficha) return 0;
+    if (!ficha) return 0;
 
-  switch (atributo) {
-    case "FOR":
-      return getAtributoFinal(ficha, "forca");
+    switch (atributo) {
+        case "FOR":
+            return getAtributoFinal(ficha, "forca");
 
-    case "DES":
-      return getAtributoFinal(ficha, "destreza");
+        case "DES":
+            return getAtributoFinal(ficha, "destreza");
 
-    case "CON":
-      return getAtributoFinal(ficha, "constituicao");
+        case "CON":
+            return getAtributoFinal(ficha, "constituicao");
 
-    case "INT":
-      return getAtributoFinal(ficha, "inteligencia");
+        case "INT":
+            return getAtributoFinal(ficha, "inteligencia");
 
-    case "SAB":
-      return getAtributoFinal(ficha, "sabedoria");
+        case "SAB":
+            return getAtributoFinal(ficha, "sabedoria");
 
-    case "CAR":
-      return getAtributoFinal(ficha, "carisma");
+        case "CAR":
+            return getAtributoFinal(ficha, "carisma");
 
-    default:
-      return 0;
-  }
+        default:
+            return 0;
+    }
 }
 function getOutrosPericia(p) {
     return (
@@ -9520,31 +10228,149 @@ function aplicarBonusEmpatiaSelvagemDahllan(ficha, origemTipo, origemNome) {
     });
 }
 function calcularTotalPericia(ficha, pericia) {
-  if (!ficha || !pericia) return 0;
+    if (!ficha || !pericia) return 0;
 
-  if (pericia.somenteTreinada && !pericia.treinada) {
-    return 0;
-  }
+    if (pericia.somenteTreinada && !pericia.treinada) {
+        return 0;
+    }
 
-  const atributo = getValorAtributoPericia(ficha, pericia.atributo);
-  const metadeNivel = getMetadeNivel(ficha);
-  const treino = pericia.treinada ? getBonusTreino(ficha) : 0;
-  const outros = getOutrosPericia(pericia);
-  const penalidadeArmadura = pericia.penalidadeArmadura ? (Number(ficha.penalidadeArmadura) || 0) : 0;
+    const atributo = getValorAtributoPericia(ficha, pericia.atributo);
+    const metadeNivel = getMetadeNivel(ficha);
+    const treino = pericia.treinada ? getBonusTreino(ficha) : 0;
+    const outros = getOutrosPericia(pericia);
+    const penalidadeArmadura = pericia.penalidadeArmadura ? (Number(ficha.penalidadeArmadura) || 0) : 0;
 
-  return atributo + metadeNivel + treino + outros + penalidadeArmadura;
+    return atributo + metadeNivel + treino + outros + penalidadeArmadura;
+}
+
+
+function abrirModalEspecializacoesOficioFicha(index) {
+    const ficha = getFichaAtual();
+    if (!ficha) return;
+
+    const atuais = garantirOficiosFicha(ficha);
+    state.modal = "oficios_ficha";
+    state.modalPayload = {
+        index,
+        selecoes: [...atuais]
+    };
+    document.body.classList.add("modal-open");
+    render();
+}
+
+function toggleEspecializacaoOficioFicha(nome) {
+    if (state.modal !== "oficios_ficha") return;
+
+    state.modalPayload = state.modalPayload || {};
+    state.modalPayload.selecoes = Array.isArray(state.modalPayload.selecoes)
+        ? state.modalPayload.selecoes
+        : [];
+
+    const lista = state.modalPayload.selecoes;
+    const idx = lista.findIndex(item =>
+        normalizarTextoRegra(item) === normalizarTextoRegra(nome)
+    );
+
+    if (idx >= 0) {
+        lista.splice(idx, 1);
+    } else {
+        lista.push(nome);
+    }
+
+    render();
+}
+
+function confirmarModalEspecializacoesOficioFicha() {
+    const ficha = getFichaAtual();
+    if (!ficha || state.modal !== "oficios_ficha") return;
+
+    const selecoes = Array.isArray(state.modalPayload?.selecoes)
+        ? state.modalPayload.selecoes.map(v => String(v || "").trim()).filter(Boolean)
+        : [];
+
+    ficha.oficios = [...selecoes];
+
+    const periciaOficio = (ficha.pericias || []).find(p =>
+        normalizarTextoRegra(p.nome || "") === normalizarTextoRegra("Ofício")
+    );
+
+    if (periciaOficio) {
+        periciaOficio.treinada = selecoes.length > 0;
+    }
+
+    saveFichas();
+    fecharModal();
+    render();
+}
+
+function renderModalEspecializacoesOficioFicha() {
+    if (state.modal !== "oficios_ficha") return "";
+
+    state.modalPayload = state.modalPayload || {};
+    const selecoes = Array.isArray(state.modalPayload.selecoes)
+        ? state.modalPayload.selecoes
+        : [];
+
+    document.body.classList.add("modal-open");
+
+    return `
+      <div class="overlay" onclick="fecharModal()">
+        <div class="overlay-card" onclick="event.stopPropagation()">
+          <div class="overlay-header">
+            <div>
+              <div class="overlay-title">Especializações de Ofício</div>
+              <div class="overlay-subtitle">Escolha um ou mais ofícios para esta perícia.</div>
+            </div>
+            <div class="actions" style="justify-content:flex-end; align-items:center;">
+              <button class="btn ghost" onclick="fecharModal()">Cancelar</button>
+              <button class="btn primary" onclick="confirmarModalEspecializacoesOficioFicha()">Confirmar</button>
+            </div>
+          </div>
+
+          <div class="overlay-body">
+            <div class="list">
+              ${ESPECIALIZACOES_OFICIO.map(nome => {
+                  const checked = selecoes.some(item => normalizarTextoRegra(item) === normalizarTextoRegra(nome));
+                  return `
+                    <div class="list-item" style="align-items:flex-start; gap:12px;">
+                      <div class="choice-main">
+                        <div class="list-item-title">${escapeHtml(nome)}</div>
+                      </div>
+                      <input
+                        class="choice-checkbox"
+                        type="checkbox"
+                        ${checked ? "checked" : ""}
+                        onclick="event.stopPropagation()"
+                        onchange="toggleEspecializacaoOficioFicha('${escapeAttr(nome)}')"
+                      >
+                    </div>
+                  `;
+              }).join("")}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
 }
 
 function updatePericia(index, field, value) {
     const ficha = getFichaAtual();
-    if (!ficha) return;
+    if (!ficha || !ficha.pericias?.[index]) return;
+
+    const pericia = ficha.pericias[index];
+    const ehOficio = normalizarTextoRegra(pericia.nome || "") === normalizarTextoRegra("Ofício");
+
+    if (ehOficio && field === "treinada") {
+        abrirModalEspecializacoesOficioFicha(index);
+        return;
+    }
 
     if (field === "treinada") {
-        ficha.pericias[index][field] = !!value;
+        pericia[field] = !!value;
     } else if (field === "outros") {
-        ficha.pericias[index][field] = Number(value) || 0;
+        pericia[field] = Number(value) || 0;
     } else {
-        ficha.pericias[index][field] = value;
+        pericia[field] = value;
     }
 
     saveFichas();
@@ -9552,7 +10378,7 @@ function updatePericia(index, field, value) {
 }
 
 function renderHome() {
-  app.innerHTML = `
+    app.innerHTML = `
     <div class="screen">
       <div class="topbar">
         <div>
@@ -9648,7 +10474,7 @@ function renderPersonagens() {
 }
 
 function renderBarraCriacao() {
-  return `
+    return `
     <div class="criacao-etapas">
       ${ETAPAS_CRIACAO.map((nome, index) => `
         <div class="criacao-etapa ${index === state.criacao.etapa ? "ativa" : ""} ${index < state.criacao.etapa ? "feita" : ""}">
@@ -9660,7 +10486,7 @@ function renderBarraCriacao() {
 }
 
 function renderResumoCriacao(f) {
-  return `
+    return `
     <div class="panel">
       <div class="panel-title">Resumo</div>
       <div class="panel-body">
@@ -9812,6 +10638,19 @@ function toggleEscolhaClasseValor(escolhaId, opcao, quantidadeMaxima) {
         }
     } else {
         if (!podeSelecionarOpcaoClasse(escolha, opcao)) return;
+        if (ehOpcaoPericiaOficioGenerico(opcao)) {
+            const restante = Math.max(0, limite - lista.length);
+            if (restante <= 0) return;
+            abrirModalEspecializacoesOficioEscolha({
+                targetState: "criacao",
+                escolhaKey: "classeEscolhas",
+                escolhaId,
+                opcaoBase: opcao,
+                maximo: restante,
+                titulo: "Escolha as especializações de Ofício"
+            });
+            return;
+        }
         if (limite > 0 && lista.length >= limite) return;
 
         lista.push(opcao);
@@ -9830,7 +10669,7 @@ function toggleEscolhaClasseValor(escolhaId, opcao, quantidadeMaxima) {
             return;
         }
 
-        if (Array.isArray(opcao.escolhas) && opcao.escolhas.length > 0) {
+        if (!opcao.ehAumentoAtributo && Array.isArray(opcao.escolhas) && opcao.escolhas.length > 0) {
             state.criacao.poderClasseEscolhas = state.criacao.poderClasseEscolhas || {};
             state.criacao.escolhaPoderClasseAbertaId = String(opcao.escolhas[0].id || "");
         }
@@ -10658,12 +11497,7 @@ function getEscolhasOrigemDisponiveis(origem) {
 }
 function opcaoPericiaIndisponivelNaOrigem(opcao, ficha) {
     if (!opcao || opcao.tipoAplicacao !== "pericia_treinada" || !ficha) return false;
-
-    const nomePericia = normalizarTextoRegra(opcao.valor || "");
-    return (ficha.pericias || []).some(pericia =>
-        normalizarTextoRegra(pericia.nome || "") === nomePericia &&
-        !!pericia.treinada
-    );
+    return fichaTemPericiaTreinadaOuOficio(ficha, opcao.valor || "");
 }
 function aplicarOrigemNaFichaCriacao() {
     const ficha = getFichaCriacao();
@@ -10687,7 +11521,7 @@ function aplicarOrigemNaFichaCriacao() {
             });
     }
 
-        parseListaPipe(origem.itensBancoFixos).forEach(nomeItem => {
+    parseListaPipe(origem.itensBancoFixos).forEach(nomeItem => {
         const registro = (ITENS_EQUIPAMENTOS_DB.registros || []).find(r =>
             normalizarTextoRegra(r.nome || "") === normalizarTextoRegra(nomeItem)
         );
@@ -10714,16 +11548,7 @@ function aplicarOrigemNaFichaCriacao() {
 
         selecionadas.forEach(opcao => {
             if (opcao.tipoAplicacao === "pericia_treinada") {
-                const pericia = ficha.pericias.find(p => p.nome === opcao.valor);
-                if (pericia) pericia.treinada = true;
-
-                ficha.efeitosAplicados.push({
-                    id: uid(),
-                    origemTipo: "Origem",
-                    origemNome: origem.nome,
-                    tipo: "pericia_treinada",
-                    alvo: opcao.valor
-                });
+                aplicarTreinoPericiaNaFicha(ficha, opcao.valor, "Origem", origem.nome);
             }
 
             if (opcao.tipoAplicacao === "habilidade_adicionar") {
@@ -10824,7 +11649,7 @@ function renderEscolhaOrigemCriacaoModal() {
     const necessario = Math.min(quantidade, habilitadas);
 
     const opcoes = ordenarOpcoesParaExibicao(opcoesBase, (opcao) => {
-        const checked = selecionados.some(item => item.id === opcao.id);
+        const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
         const indisponivel = opcaoPericiaIndisponivelNaOrigem(opcao, f);
         return checked || (!indisponivel && (necessario <= 0 || selecionados.length < necessario));
     });
@@ -10849,7 +11674,7 @@ function renderEscolhaOrigemCriacaoModal() {
           <div class="overlay-body">
             <div class="list">
               ${opcoes.map(opcao => {
-        const checked = selecionados.some(item => item.id === opcao.id);
+        const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
         const indisponivel = opcaoPericiaIndisponivelNaOrigem(opcao, f);
         const disabled = indisponivel || (!checked && necessario > 0 && selecionados.length >= necessario);
         const expandida = opcaoEscolhaEstaExpandida("origem", escolha.id, opcao.id);
@@ -10916,7 +11741,7 @@ function renderEscolhaClasseCriacaoModal() {
     const opcoesBase = getOpcoesEscolha(escolha, f);
 
     const opcoes = ordenarOpcoesParaExibicao(opcoesBase, (opcao) => {
-        const checked = selecionados.some(item => item.id === opcao.id);
+        const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
         const desbloqueada = escolhaClasseDesbloqueada(escolha);
         return checked || (desbloqueada && podeSelecionarOpcaoClasse(escolha, opcao));
     });
@@ -10943,15 +11768,15 @@ function renderEscolhaClasseCriacaoModal() {
         <div class="overlay-body">
           <div class="list">
             ${opcoes.map(opcao => {
-                const checked = selecionados.some(item => item.id === opcao.id);
-                const desbloqueada = escolhaClasseDesbloqueada(escolha);
-                const disabled = !checked && (!desbloqueada || !podeSelecionarOpcaoClasse(escolha, opcao));
-                const expandida = opcaoEscolhaEstaExpandida("classe", escolha.id, opcao.id);
-                const titulo = getTituloOpcaoEscolha(opcao);
-                const descricao = String(opcao.descricao || "").trim();
-                const preReqFaltando = getPreRequisitoNaoAtendidoOpcao(opcao, f);
+        const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
+        const desbloqueada = escolhaClasseDesbloqueada(escolha);
+        const disabled = !checked && (!desbloqueada || !podeSelecionarOpcaoClasse(escolha, opcao));
+        const expandida = opcaoEscolhaEstaExpandida("classe", escolha.id, opcao.id);
+        const titulo = getTituloOpcaoEscolha(opcao);
+        const descricao = String(opcao.descricao || "").trim();
+        const preReqFaltando = getPreRequisitoNaoAtendidoOpcao(opcao, f);
 
-                return `
+        return `
         <div class="list-item" style="align-items:flex-start; gap:12px; ${disabled ? "opacity:.65;" : ""}">
             <button
                 type="button"
@@ -10979,7 +11804,7 @@ function renderEscolhaClasseCriacaoModal() {
             >
         </div>
     `;
-            }).join("")}
+    }).join("")}
           </div>
         </div>
       </div>
@@ -11007,7 +11832,7 @@ function renderEscolhaClasseEvolucaoModal() {
     const opcoesBase = getOpcoesEscolha(escolha, f);
 
     const opcoes = ordenarOpcoesParaExibicao(opcoesBase, (opcao) => {
-        const checked = selecionados.some(item => item.id === opcao.id);
+        const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
         const desbloqueada = escolhaClasseDesbloqueada(escolha);
         return checked || (desbloqueada && podeSelecionarOpcaoClasseEvolucao(escolha, opcao));
     });
@@ -11034,7 +11859,7 @@ function renderEscolhaClasseEvolucaoModal() {
         <div class="overlay-body">
           <div class="list">
             ${opcoes.map(opcao => {
-        const checked = selecionados.some(item => item.id === opcao.id);
+        const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
         const desbloqueada = escolhaClasseDesbloqueada(escolha);
         const disabled = !checked && (!desbloqueada || !podeSelecionarOpcaoClasseEvolucao(escolha, opcao));
         const expandida = opcaoEscolhaEstaExpandida("classe", escolha.id, opcao.id);
@@ -11089,16 +11914,7 @@ function aplicarEscolhasClasseNaFicha(ficha, classe) {
 
         selecionadas.forEach(opcao => {
             if (opcao.tipoAplicacao === "pericia_treinada") {
-                const pericia = ficha.pericias.find(p => p.nome === opcao.valor);
-                if (pericia) pericia.treinada = true;
-
-                ficha.efeitosAplicados.push({
-                    id: uid(),
-                    origemTipo: "Classe",
-                    origemNome: classe.nome,
-                    tipo: "pericia_treinada",
-                    alvo: opcao.valor
-                });
+                aplicarTreinoPericiaNaFicha(ficha, opcao.valor, "Classe", classe.nome);
             }
 
             if (opcao.tipoAplicacao === "magia_adicionar") {
@@ -11266,23 +12082,23 @@ function aplicarEscolhasClasseNaFicha(ficha, classe) {
 
                 let registroHabilidade = null;
 
-if (normalizarTextoRegra(opcao.origemBanco || "") === "geral") {
-    if (opcao.registroId) {
-        registroHabilidade = getRegistroPoderMagiaPorId(opcao.registroId);
-    }
+                if (normalizarTextoRegra(opcao.origemBanco || "") === "geral") {
+                    if (opcao.registroId) {
+                        registroHabilidade = getRegistroPoderMagiaPorId(opcao.registroId);
+                    }
 
-    if (!registroHabilidade && opcao.valor) {
-        registroHabilidade = getRegistroPoderPorNome(opcao.valor);
-    }
-} else {
-    if (opcao.registroId) {
-        registroHabilidade = getPoderClassePorId(classe.id, opcao.registroId);
-    }
+                    if (!registroHabilidade && opcao.valor) {
+                        registroHabilidade = getRegistroPoderPorNome(opcao.valor);
+                    }
+                } else {
+                    if (opcao.registroId) {
+                        registroHabilidade = getPoderClassePorId(classe.id, opcao.registroId);
+                    }
 
-    if (!registroHabilidade && opcao.valor) {
-        registroHabilidade = getPoderClassePorNome(classe.id, opcao.valor);
-    }
-}
+                    if (!registroHabilidade && opcao.valor) {
+                        registroHabilidade = getPoderClassePorNome(classe.id, opcao.valor);
+                    }
+                }
 
                 const nomeHabilidade =
                     opcao.nomeCurto ||
@@ -11366,11 +12182,22 @@ if (normalizarTextoRegra(opcao.origemBanco || "") === "geral") {
                                     {
                                         registroId: subopcao.registroId || "",
                                         nome: subopcao.valor || "",
-                                        nomeAdicionado: subopcao.nomeAdicionado || ""
+                                        nomeAdicionado: subopcao.nomeAdicionado || "",
+                                        tipoMagiaInventor: subopcao.tipoMagiaInventor || "",
+                                        origemEspecial: subopcao.origemEspecial || ""
                                     },
                                     "Classe",
                                     classe.nome
                                 );
+
+                                const magiaAdicionada = (ficha.magias || []).find(m =>
+                                    normalizarTextoRegra(m?.nome || "") === normalizarTextoRegra(subopcao.valor || "")
+                                );
+
+                                if (magiaAdicionada && subopcao.origemEspecial === "inventor_formula") {
+                                    magiaAdicionada.tipoMagiaInventor = "formula";
+                                    magiaAdicionada.prefixoExibicao = "Fórmula";
+                                }
 
                                 ficha.efeitosAplicados.push({
                                     id: uid(),
@@ -11382,21 +12209,7 @@ if (normalizarTextoRegra(opcao.origemBanco || "") === "geral") {
                             }
 
                             if (subopcao.tipoAplicacao === "pericia_treinada") {
-                                const pericia = (ficha.pericias || []).find(p =>
-                                    normalizarTextoRegra(p.nome) === normalizarTextoRegra(subopcao.valor)
-                                );
-
-                                if (pericia) {
-                                    pericia.treinada = true;
-                                }
-
-                                ficha.efeitosAplicados.push({
-                                    id: uid(),
-                                    origemTipo: "Classe",
-                                    origemNome: classe.nome,
-                                    tipo: "pericia_treinada",
-                                    alvo: subopcao.valor
-                                });
+                                aplicarTreinoPericiaNaFicha(ficha, subopcao.valor, "Classe", classe.nome);
                             }
                         });
                     });
@@ -11460,13 +12273,13 @@ function aplicarClasseNaFichaCriacao() {
 }
 
 function renderConteudoEtapaCriacao() {
-  const f = getFichaCriacao();
-  if (!f) return "";
+    const f = getFichaCriacao();
+    if (!f) return "";
 
-    const etapa = state.criacao.etapa;    
+    const etapa = state.criacao.etapa;
 
-  if (etapa === 0) {
-    return `
+    if (etapa === 0) {
+        return `
       <div class="panel">
         <div class="panel-title">Identidade</div>
         <div class="panel-body">
@@ -11484,10 +12297,10 @@ function renderConteudoEtapaCriacao() {
         </div>
       </div>
     `;
-  }
+    }
 
-  if (etapa === 1) {
-    return `
+    if (etapa === 1) {
+        return `
       <div class="panel">
         <div class="panel-title">Atributos</div>
         <div class="panel-body">
@@ -11509,7 +12322,7 @@ function renderConteudoEtapaCriacao() {
         </div>
       </div>
     `;
-  }
+    }
 
     if (etapa === 2) {
         const raca = getRacaSelecionadaCriacao();
@@ -11592,23 +12405,23 @@ function renderConteudoEtapaCriacao() {
                       `).join("")}
                     </div>
                   `
-                : racaUsaDistribuicaoLivre(raca)
-                    ? `
+                    : racaUsaDistribuicaoLivre(raca)
+                        ? `
       <div class="notice">
         Escolha 3 atributos diferentes para receber +1.
         ${getAtributosBloqueadosDistribuicaoRacial(raca).length
-                        ? `<br>Atributos bloqueados: <strong>${getAtributosBloqueadosDistribuicaoRacial(raca)
-                            .map(attr => ({
-                                forca: "Força",
-                                destreza: "Destreza",
-                                constituicao: "Constituição",
-                                inteligencia: "Inteligência",
-                                sabedoria: "Sabedoria",
-                                carisma: "Carisma"
-                            }[attr] || attr))
-                            .join(", ")}</strong>`
-                        : ""
-                    }
+                            ? `<br>Atributos bloqueados: <strong>${getAtributosBloqueadosDistribuicaoRacial(raca)
+                                .map(attr => ({
+                                    forca: "Força",
+                                    destreza: "Destreza",
+                                    constituicao: "Constituição",
+                                    inteligencia: "Inteligência",
+                                    sabedoria: "Sabedoria",
+                                    carisma: "Carisma"
+                                }[attr] || attr))
+                                .join(", ")}</strong>`
+                            : ""
+                        }
         <br>
         Selecionados: <strong>${state.criacao.racaDistribuicao.length} / 3</strong>
       </div>
@@ -11617,32 +12430,33 @@ function renderConteudoEtapaCriacao() {
 
       <div class="list">
         ${[
-                        ["forca", "Força"],
-                        ["destreza", "Destreza"],
-                        ["constituicao", "Constituição"],
-                        ["inteligencia", "Inteligência"],
-                        ["sabedoria", "Sabedoria"],
-                        ["carisma", "Carisma"]
-                    ].map(([attr, nome]) => {
-                        const bloqueado = !atributoPermitidoNaDistribuicaoRacial(raca, attr);
-                        const selecionado = state.criacao.racaDistribuicao.includes(attr);
-                        const limiteAtingido = !selecionado && state.criacao.racaDistribuicao.length >= 3;
+                            ["forca", "Força"],
+                            ["destreza", "Destreza"],
+                            ["constituicao", "Constituição"],
+                            ["inteligencia", "Inteligência"],
+                            ["sabedoria", "Sabedoria"],
+                            ["carisma", "Carisma"]
+                        ].map(([attr, nome]) => {
+                            const bloqueado = !atributoPermitidoNaDistribuicaoRacial(raca, attr);
+                            const selecionado = state.criacao.racaDistribuicao.includes(attr);
+                            const limiteAtingido = !selecionado && state.criacao.racaDistribuicao.length >= 3;
 
-                        return `
+                            return `
               <label class="list-item" style="cursor:${bloqueado ? "not-allowed" : "pointer"}; opacity:${bloqueado ? "0.55" : "1"};">
                 <div>
                   <div class="list-item-title">${nome}</div>
                   ${bloqueado ? `<div class="muted" style="font-size:12px;">Indisponível para esta raça</div>` : ``}
                 </div>
                 <input
-                  type="checkbox"
-                  ${selecionado ? "checked" : ""}
-                  ${(bloqueado || limiteAtingido) ? "disabled" : ""}
-                  onchange="toggleAtributoDistribuicaoRacial('${attr}')"
-                >
+  class="choice-checkbox"
+  type="checkbox"
+  ${selecionado ? "checked" : ""}
+  ${(bloqueado || limiteAtingido) ? "disabled" : ""}
+  onchange="toggleAtributoDistribuicaoRacial('${attr}')"
+>
               </label>
             `;
-                    }).join("")}
+                        }).join("")}
       </div>
     `
                         : `
@@ -11710,16 +12524,16 @@ function renderConteudoEtapaCriacao() {
   <div class="panel-title">Escolhas exigidas</div>
   <div class="panel-body">
     ${!escolhasRaciaisDisponiveis.length
-                ? `<div class="empty">Sem escolhas cadastradas.</div>`
-                : `
+                    ? `<div class="empty">Sem escolhas cadastradas.</div>`
+                    : `
         <div class="list">
           ${escolhasRaciaisDisponiveis.map(escolha => {
-                    const selecionados = getEscolhaRacialValores(escolha.id);
-                    const quantidade = Number(escolha.quantidade) || 0;
-                    const preenchida = escolhaRacialPreenchida(escolha);
-                    const desbloqueada = escolhaRacialDesbloqueada(escolha);
+                        const selecionados = getEscolhaRacialValores(escolha.id);
+                        const quantidade = Number(escolha.quantidade) || 0;
+                        const preenchida = escolhaRacialPreenchida(escolha);
+                        const desbloqueada = escolhaRacialDesbloqueada(escolha);
 
-                    return `
+                        return `
 <div class="list-item">
   <div>
     <div class="list-item-title">${escapeHtml(escolha.titulo || escolha.tipo || "Escolha")}</div>
@@ -11740,7 +12554,7 @@ function renderConteudoEtapaCriacao() {
   </div>
 </div>
 `;
-                }).join("")}
+                    }).join("")}
           </div>
       `}
   </div>
@@ -12078,9 +12892,9 @@ ${origemUsaItensLivres ? `
       <div class="notice">
         Use o botão abaixo para adicionar os itens da origem ao inventário sem limite de preço.
         ${origem.id === "amnesico"
-                    ? " O limite de T$ e a escolha dos itens ficam a critério do mestre."
-                    : " Os itens da origem custom são definidos com o mestre."
-                }
+                        ? " O limite de T$ e a escolha dos itens ficam a critério do mestre."
+                        : " Os itens da origem custom são definidos com o mestre."
+                    }
       </div>
 
       <div style="height:12px"></div>
@@ -12097,15 +12911,15 @@ ${origemUsaItensLivres ? `
     <div class="panel-title">Itens já adicionados</div>
     <div class="panel-body">
       ${!(f.inventario || []).length
-                    ? `<div class="empty">Nenhum item adicionado ainda.</div>`
-                    : `
+                        ? `<div class="empty">Nenhum item adicionado ainda.</div>`
+                        : `
           <div class="list">
             ${(f.inventario || []).map(item => {
-                const base = getBaseItemDaEntrada(item);
-                const nome = base?.nome || item.nomeManual || "Item";
-                const qtd = Math.max(1, Number(item.quantidade) || 1);
+                            const base = getBaseItemDaEntrada(item);
+                            const nome = base?.nome || item.nomeManual || "Item";
+                            const qtd = Math.max(1, Number(item.quantidade) || 1);
 
-                return `
+                            return `
       <div class="list-item">
         <div>${escapeHtml(`${qtd} x ${nome}`)}</div>
 
@@ -12116,7 +12930,7 @@ ${origemUsaItensLivres ? `
         </div>
       </div>
     `;
-            }).join("")}
+                        }).join("")}
           </div>
         `}
     </div>
@@ -12155,12 +12969,12 @@ ${habilidadesFixasOrigem.length ? `
                     : `
                           <div class="list">
                             ${escolhasOrigemDisponiveis.map(escolha => {
-                            const selecionados = getEscolhaOrigemValores(escolha.id);
-                            const quantidade = getQuantidadeEscolhaOrigem(escolha);
-                            const opcoes = getOpcoesEscolhaOrigem(escolha, f);
-                            const habilitadas = opcoes.filter(opcao => !opcaoPericiaIndisponivelNaOrigem(opcao, f)).length;
-                            const necessario = Math.min(quantidade, habilitadas);
-                            const preenchida = selecionados.length === necessario;
+                        const selecionados = getEscolhaOrigemValores(escolha.id);
+                        const quantidade = getQuantidadeEscolhaOrigem(escolha);
+                        const opcoes = getOpcoesEscolhaOrigem(escolha, f);
+                        const habilitadas = opcoes.filter(opcao => !opcaoPericiaIndisponivelNaOrigem(opcao, f)).length;
+                        const necessario = Math.min(quantidade, habilitadas);
+                        const preenchida = selecionados.length === necessario;
 
                         return `
                                   <div class="list-item">
@@ -12341,7 +13155,7 @@ ${habilidadesFixasOrigem.length ? `
 `;
     }
 
-  if (etapa === 6) {
+    if (etapa === 6) {
         return `
         <div class="panel">
   <div class="panel-title">Dinheiro inicial</div>
@@ -12364,7 +13178,7 @@ ${habilidadesFixasOrigem.length ? `
     `;
     }
 
-  return `
+    return `
     <div class="panel">
       <div class="panel-title">Revisão</div>
       <div class="panel-body">
@@ -12377,67 +13191,67 @@ ${habilidadesFixasOrigem.length ? `
 }
 
 function subirAtributoCriacao(campo) {
-  const ficha = getFichaCriacao();
-  if (!ficha) return;
+    const ficha = getFichaCriacao();
+    if (!ficha) return;
 
-  const atual = Number(ficha[campo + "Base"]) || 0;
-  const custo = custoSubirAtributo(atual);
+    const atual = Number(ficha[campo + "Base"]) || 0;
+    const custo = custoSubirAtributo(atual);
 
-  if (ficha.pontosAtributoAtuais < custo) return;
+    if (ficha.pontosAtributoAtuais < custo) return;
 
-  ficha[campo + "Base"] = atual + 1;
-  ficha.pontosAtributoAtuais -= custo;
+    ficha[campo + "Base"] = atual + 1;
+    ficha.pontosAtributoAtuais -= custo;
 
-  render();
+    render();
 }
 
 function descerAtributoCriacao(campo) {
-  const ficha = getFichaCriacao();
-  if (!ficha) return;
+    const ficha = getFichaCriacao();
+    if (!ficha) return;
 
-  const atual = Number(ficha[campo + "Base"]) || 0;
+    const atual = Number(ficha[campo + "Base"]) || 0;
 
-  let retorno;
+    let retorno;
 
-  if (atual <= 0) {
-    retorno = 1;
-  } else {
-    retorno = custoSubirAtributo(atual - 1);
-  }
+    if (atual <= 0) {
+        retorno = 1;
+    } else {
+        retorno = custoSubirAtributo(atual - 1);
+    }
 
-  ficha[campo + "Base"] = atual - 1;
-  ficha.pontosAtributoAtuais += retorno;
+    ficha[campo + "Base"] = atual - 1;
+    ficha.pontosAtributoAtuais += retorno;
 
-  render();
+    render();
 }
 
 function adicionarPontoAtributoCriacao() {
-  const ficha = getFichaCriacao();
-  if (!ficha) return;
+    const ficha = getFichaCriacao();
+    if (!ficha) return;
 
-  ficha.pontosAtributoAtuais += 1;
-  render();
+    ficha.pontosAtributoAtuais += 1;
+    render();
 }
 
 function getAtributoBase(ficha, atributo) {
-  if (!ficha) return 0;
+    if (!ficha) return 0;
 
-  switch (atributo) {
-    case "forca":
-      return Number(ficha.forcaBase) || 0;
-    case "destreza":
-      return Number(ficha.destrezaBase) || 0;
-    case "constituicao":
-      return Number(ficha.constituicaoBase) || 0;
-    case "inteligencia":
-      return Number(ficha.inteligenciaBase) || 0;
-    case "sabedoria":
-      return Number(ficha.sabedoriaBase) || 0;
-    case "carisma":
-      return Number(ficha.carismaBase) || 0;
-    default:
-      return 0;
-  }
+    switch (atributo) {
+        case "forca":
+            return Number(ficha.forcaBase) || 0;
+        case "destreza":
+            return Number(ficha.destrezaBase) || 0;
+        case "constituicao":
+            return Number(ficha.constituicaoBase) || 0;
+        case "inteligencia":
+            return Number(ficha.inteligenciaBase) || 0;
+        case "sabedoria":
+            return Number(ficha.sabedoriaBase) || 0;
+        case "carisma":
+            return Number(ficha.carismaBase) || 0;
+        default:
+            return 0;
+    }
 }
 
 function getModRacial(ficha, atributo) {
@@ -12563,26 +13377,25 @@ function renderCriacao() {
         Voltar
       </button>
 
-      ${
-        state.criacao.etapa === ETAPAS_CRIACAO.length - 1
+      ${state.criacao.etapa === ETAPAS_CRIACAO.length - 1
             ? `<button class="btn primary" onclick="concluirCriacaoFicha()">Concluir personagem</button>`
             : `
       <button
         class="btn primary"
         onclick="proximaEtapaCriacao()"
         ${state.criacao.etapa === 2 && !racaCriacaoValida()
-            ? "disabled"
-            : state.criacao.etapa === 3
                 ? "disabled"
-                : state.criacao.etapa === 5 && !divindadeCriacaoValida()
+                : state.criacao.etapa === 3
                     ? "disabled"
-                    : ""
-}
+                    : state.criacao.etapa === 5 && !divindadeCriacaoValida()
+                        ? "disabled"
+                        : ""
+            }
       >
         Próximo
       </button>
     `
-}
+        }
     </div>
   </div>
 
@@ -12598,6 +13411,7 @@ ${renderModalAdicionarItemInventario()}
 ${renderModalDetalhesItemInventario()}
 ${renderEscolhaOrigemCriacaoModal()}
 ${renderEscolhaPoderClasseModal()}
+${renderModalEspecializacoesOficioEscolha()}
     </div>
   `;
 }
@@ -12865,12 +13679,14 @@ function renderEvolucao() {
       ${renderEscolhaClasseEvolucaoModal()}
       ${renderEscolhaDivindadeEvolucaoModal()}
       ${renderEscolhaPoderClasseModal()}
+      ${renderModalEspecializacoesOficioEscolha()}
+    ${renderModalEspecializacoesOficioFicha()}
     </div>
   `;
 }
 
 function renderDados() {
-  app.innerHTML = `
+    app.innerHTML = `
     <div class="screen">
       <div class="topbar">
         <div>
@@ -12930,10 +13746,9 @@ function renderDados() {
             <div class="panel">
               <div class="panel-title">Último resultado</div>
               <div class="panel-body">
-                ${
-                  !state.dados.ultimoResultado
-                    ? `<div class="empty">Nenhuma rolagem ainda.</div>`
-                    : `
+                ${!state.dados.ultimoResultado
+            ? `<div class="empty">Nenhuma rolagem ainda.</div>`
+            : `
                       <div style="font-weight:bold; margin-bottom:10px;">
                         ${escapeHtml(state.dados.ultimoResultado.formula)}
                       </div>
@@ -12954,7 +13769,7 @@ function renderDados() {
                         Total: ${state.dados.ultimoResultado.total}
                       </div>
                     `
-                }
+        }
               </div>
             </div>
 
@@ -12965,10 +13780,9 @@ function renderDados() {
                   <button class="btn danger" onclick="limparHistoricoDados()">Limpar histórico</button>
                 </div>
 
-                ${
-                  state.dados.historico.length === 0
-                    ? `<div class="empty">Sem histórico.</div>`
-                    : `
+                ${state.dados.historico.length === 0
+            ? `<div class="empty">Sem histórico.</div>`
+            : `
                       <div class="list">
                         ${state.dados.historico.map(item => `
                           <div class="list-item">
@@ -12983,7 +13797,7 @@ function renderDados() {
                         `).join("")}
                       </div>
                     `
-                }
+        }
               </div>
             </div>
           </div>
@@ -12994,15 +13808,15 @@ function renderDados() {
 }
 
 function renderFicha() {
-  const f = getFichaAtual();
-  if (!f) {
-    go("personagens");
-    return;
-  }
+    const f = getFichaAtual();
+    if (!f) {
+        go("personagens");
+        return;
+    }
     const habilidadesRaciaisVisiveis = getHabilidadesRaciaisVisiveis(f);
     const poderesVisiveis = getPoderesVisiveis(f);
 
-  app.innerHTML = `
+    app.innerHTML = `
     <div class="screen">
       <div class="topbar">
         <div>
@@ -13066,15 +13880,15 @@ function renderFicha() {
               <div class="panel-title">Divindade</div>
               <div class="panel-body">
                 ${f.divindade
-          ? `
+            ? `
                     <button class="btn btn-divindade" type="button" onclick="abrirModalDetalhesDivindade()">
                       ${escapeHtml(f.divindade)}
                     </button>
                   `
-          : `
+            : `
                     <div class="muted">Nenhuma divindade.</div>
                   `
-                }
+        }
               </div>
             </div>
           </div>
@@ -13213,26 +14027,26 @@ function renderFicha() {
                       </thead>
                       <tbody>
   ${f.ataques.map((a, i) => {
-      const auto = !!a.origemEquipamento;
+            const auto = !!a.origemEquipamento;
 
-      const nomeValor = auto ? (a.nomeExtra || a.nomeBase || "") : (a.nome || "");
-      const bonusValor = auto
-          ? `${a.bonusBase ?? ""}${a.bonusExtra ? ` ${a.bonusExtra}` : ""}`.trim()
-          : (a.bonus || "");
-      const danoValor = auto
-          ? `${a.danoBase || ""}${a.danoExtra ? ` ${a.danoExtra}` : ""}`.trim()
-          : (a.dano || "");
-      const criticoValor = auto
-          ? `${a.criticoBase || ""}${a.criticoExtra ? ` ${a.criticoExtra}` : ""}`.trim()
-          : (a.critico || "");
-      const tipoValor = auto
-          ? `${a.tipoBase || ""}${a.tipoExtra ? ` ${a.tipoExtra}` : ""}`.trim()
-          : (a.tipo || "");
-      const alcanceValor = auto
-          ? `${a.alcanceBase || ""}${a.alcanceExtra ? ` ${a.alcanceExtra}` : ""}`.trim()
-          : (a.alcance || "");
+            const nomeValor = auto ? (a.nomeExtra || a.nomeBase || "") : (a.nome || "");
+            const bonusValor = auto
+                ? `${a.bonusBase ?? ""}${a.bonusExtra ? ` ${a.bonusExtra}` : ""}`.trim()
+                : (a.bonus || "");
+            const danoValor = auto
+                ? `${a.danoBase || ""}${a.danoExtra ? ` ${a.danoExtra}` : ""}`.trim()
+                : (a.dano || "");
+            const criticoValor = auto
+                ? `${a.criticoBase || ""}${a.criticoExtra ? ` ${a.criticoExtra}` : ""}`.trim()
+                : (a.critico || "");
+            const tipoValor = auto
+                ? `${a.tipoBase || ""}${a.tipoExtra ? ` ${a.tipoExtra}` : ""}`.trim()
+                : (a.tipo || "");
+            const alcanceValor = auto
+                ? `${a.alcanceBase || ""}${a.alcanceExtra ? ` ${a.alcanceExtra}` : ""}`.trim()
+                : (a.alcance || "");
 
-      return `
+            return `
         <tr ${auto ? `style="background:rgba(0,0,0,.03);"` : ""}>
           <td>
             <input
@@ -13272,13 +14086,13 @@ function renderFicha() {
           </td>
           <td>
             ${auto
-              ? `<span class="muted">Arma equipada</span>`
-              : `<button class="btn danger" onclick="removeAtaque(${i})">X</button>`
-          }
+                    ? `<span class="muted">Arma equipada</span>`
+                    : `<button class="btn danger" onclick="removeAtaque(${i})">X</button>`
+                }
           </td>
         </tr>
       `;
-  }).join("")}
+        }).join("")}
 </tbody>
                     </table>
                   </div>
@@ -13337,10 +14151,9 @@ function renderFicha() {
 <div class="panel">
   <div class="panel-title">Habilidades de raça</div>
   <div class="panel-body">
-    ${
-      habilidadesRaciaisVisiveis.length === 0
-          ? `<div class="empty">Nenhuma habilidade racial cadastrada.</div>`
-          : `
+    ${habilidadesRaciaisVisiveis.length === 0
+            ? `<div class="empty">Nenhuma habilidade racial cadastrada.</div>`
+            : `
           <div class="list">
             ${habilidadesRaciaisVisiveis.map(h => `
               <div class="list-item">
@@ -13368,7 +14181,7 @@ function renderFicha() {
             `).join("")}
           </div>
         `
-      }
+        }
   </div>
 </div>
 
@@ -13387,8 +14200,8 @@ function renderFicha() {
   ${secaoFichaEstaAberta('poderes') ? `
     <div class="panel-body">
       ${poderesVisiveis.length === 0
-              ? `<div class="empty">Nenhum poder cadastrado.</div>`
-              : `
+                ? `<div class="empty">Nenhum poder cadastrado.</div>`
+                : `
         <div class="list">
           ${poderesVisiveis.map(h => `
             <div class="list-item">
@@ -13416,16 +14229,16 @@ function renderFicha() {
           `).join("")}
         </div>
       `
-          }
+            }
 
       <div style="height:12px"></div>
 
       ${(() => {
-              const totalPm = getCustoTotalHabilidadesSelecionadas();
-              const pmAtual = Number(f.pmAtual) || 0;
-              const excedeu = totalPm > pmAtual;
+                const totalPm = getCustoTotalHabilidadesSelecionadas();
+                const pmAtual = Number(f.pmAtual) || 0;
+                const excedeu = totalPm > pmAtual;
 
-              return `
+                return `
         <div class="row-2">
           <div class="notice" style="${excedeu ? "background:#ffd7d7; border-color:#c43a3a; color:#7a1010;" : ""}">
             PM total selecionado:
@@ -13449,8 +14262,8 @@ function renderFicha() {
           </div>
         </div>
       `;
-          })()
-          }
+            })()
+            }
     </div>
   ` : ""}
 </div>
@@ -13470,14 +14283,14 @@ function renderFicha() {
   ${secaoFichaEstaAberta('magias') ? `
     <div class="panel-body">
       ${f.magias.length === 0
-              ? `<div class="empty">Nenhuma magia cadastrada.</div>`
-              : `
+                ? `<div class="empty">Nenhuma magia cadastrada.</div>`
+                : `
             <div class="list">
               ${f.magias.map(m => {
-                  const custoBase = Number(m.custoPm) || 0;
-                  const semPm = custoBase > (Number(f.pmAtual) || 0);
+                    const custoBase = Number(m.custoPm) || 0;
+                    const semPm = custoBase > (Number(f.pmAtual) || 0);
 
-                  return `
+                    return `
                   <div class="list-item">
                     <div style="flex:1;">
                       <button
@@ -13485,7 +14298,7 @@ function renderFicha() {
                         style="padding:0; min-height:auto; border:none; background:none; text-align:left; box-shadow:none;"
                         onclick="abrirDetalheMagia('${m.id}')"
                       >
-                        <div class="list-item-title">${escapeHtml(m.nome || "Sem nome")}</div>
+                        <div class="list-item-title">${escapeHtml(m.prefixoExibicao ? `${m.prefixoExibicao}: ${m.nome}` : (m.nome || "Sem nome"))}</div>
                       </button>
 
                       <div class="list-item-sub">
@@ -13504,10 +14317,10 @@ function renderFicha() {
                     </div>
                   </div>
                 `;
-              }).join("")}
+                }).join("")}
             </div>
           `
-          }
+            }
 
       <div style="margin-top:12px">
         <button class="btn" onclick="addMagia()">Adicionar magia</button>
@@ -13550,8 +14363,7 @@ ${renderInventarioSimples(f)}
     ${calcularTotalPericia(f, p)}
   </span>
 </div>
-          </div>
-
+</div>
                     <div class="row-2">
             <div class="field">
               <label>Racial</label>
@@ -13559,8 +14371,8 @@ ${renderInventarioSimples(f)}
                 class="campo-pericia-centro"
                 type="number"
                 value="${escapeAttr(
-                    (Number(p?.outrosRacial) || 0) + (Number(p?.outrosPoder) || 0)
-                )}"
+                (Number(p?.outrosRacial) || 0) + (Number(p?.outrosPoder) || 0)
+            )}"
                 disabled
                 readonly
               >
@@ -13577,14 +14389,30 @@ ${renderInventarioSimples(f)}
             </div>
           </div>
 
-          <div class="checkbox-line">
-            <input
-              type="checkbox"
-              ${p.treinada ? "checked" : ""}
-              onchange="updatePericia(${i}, 'treinada', this.checked)"
-            />
-            <span>Treino</span>
-          </div>
+          ${normalizarTextoRegra(p.nome) === normalizarTextoRegra("Ofício")
+              ? `
+      <div class="checkbox-line" style="margin-top:20px">
+        <button
+          class="btn ghost"
+          type="button"
+          style="min-height:auto; padding:8px 10px;"
+          onclick="abrirModalEspecializacoesOficioFicha(${i})"
+        >
+          Ofícios
+        </button>
+      </div>
+    `
+              : `
+      <div class="checkbox-line">
+        <input
+          type="checkbox"
+          ${p.treinada ? "checked" : ""}
+          onchange="updatePericia(${i}, 'treinada', this.checked)"
+        />
+        <span>Treino</span>
+      </div>
+    `
+}
         </div>
       `).join("")}
     </div>
@@ -13604,23 +14432,25 @@ ${renderInventarioSimples(f)}
       ${renderEquipamentoModal()}
       ${renderHabilidadeModal()}
       ${renderMagiaModal()}
+      ${renderModalAdicionarMagia()}
       ${renderModalAdicionarItemInventario()}
       ${renderWidgetDinheiroFlutuante()}
       ${renderModalDetalhesItemInventario()}
       ${renderEscolhaDivindadeEvolucaoModal()}
       ${renderProficienciasModal()}
+      ${renderModalEspecializacoesOficioFicha()}
     </div>
   `;
 }
 
 function renderDadosModal() {
-  if (state.modal !== "dados") return "";
+    if (state.modal !== "dados") return "";
 
-  setTimeout(() => {
-    document.body.classList.add("modal-open");
-  }, 0);
+    setTimeout(() => {
+        document.body.classList.add("modal-open");
+    }, 0);
 
-  return `
+    return `
     <div class="overlay" onclick="fecharModal()">
       <div class="overlay-card" onclick="event.stopPropagation()">
         <div class="overlay-header">
@@ -13682,10 +14512,9 @@ function renderDadosModal() {
               <div class="panel">
                 <div class="panel-title">Último resultado</div>
                 <div class="panel-body">
-                  ${
-                    !state.dados.ultimoResultado
-                      ? `<div class="empty">Nenhuma rolagem ainda.</div>`
-                      : `
+                  ${!state.dados.ultimoResultado
+            ? `<div class="empty">Nenhuma rolagem ainda.</div>`
+            : `
                         <div style="font-weight:bold; margin-bottom:10px;">
                           ${escapeHtml(state.dados.ultimoResultado.formula)}
                         </div>
@@ -13706,7 +14535,7 @@ function renderDadosModal() {
                           Total: ${state.dados.ultimoResultado.total}
                         </div>
                       `
-                  }
+        }
                 </div>
               </div>
 
@@ -13717,10 +14546,9 @@ function renderDadosModal() {
                     <button class="btn danger" onclick="limparHistoricoDados()">Limpar histórico</button>
                   </div>
 
-                  ${
-                    state.dados.historico.length === 0
-                      ? `<div class="empty">Sem histórico.</div>`
-                      : `
+                  ${state.dados.historico.length === 0
+            ? `<div class="empty">Sem histórico.</div>`
+            : `
                         <div class="list">
                           ${state.dados.historico.map(item => `
                             <div class="list-item">
@@ -13735,7 +14563,7 @@ function renderDadosModal() {
                           `).join("")}
                         </div>
                       `
-                  }
+        }
                 </div>
               </div>
             </div>
@@ -13747,16 +14575,16 @@ function renderDadosModal() {
 }
 
 function renderEquipamentoModal() {
-  if (state.modal !== "equipamento") return "";
+    if (state.modal !== "equipamento") return "";
 
-  const equip = getEquipamentoAtual();
-  if (!equip) return "";
+    const equip = getEquipamentoAtual();
+    if (!equip) return "";
 
-  setTimeout(() => {
-    document.body.classList.add("modal-open");
-  }, 0);
+    setTimeout(() => {
+        document.body.classList.add("modal-open");
+    }, 0);
 
-  return `
+    return `
     <div class="overlay" onclick="fecharModal()">
       <div class="overlay-card" onclick="event.stopPropagation()">
         <div class="overlay-header">
@@ -13847,16 +14675,16 @@ function renderEquipamentoModal() {
 }
 
 function renderHabilidadeModal() {
-  if (state.modal !== "habilidade") return "";
+    if (state.modal !== "habilidade") return "";
 
-  const habilidade = getHabilidadeAtual();
-  if (!habilidade) return "";
+    const habilidade = getHabilidadeAtual();
+    if (!habilidade) return "";
 
-  setTimeout(() => {
-    document.body.classList.add("modal-open");
-  }, 0);
+    setTimeout(() => {
+        document.body.classList.add("modal-open");
+    }, 0);
 
-  return `
+    return `
     <div class="overlay" onclick="fecharModal()">
       <div class="overlay-card" onclick="event.stopPropagation()">
         <div class="overlay-header">
@@ -13916,7 +14744,7 @@ function renderHabilidadeModal() {
 }
 
 function renderAtributo(nome, campo, valor) {
-  return `
+    return `
     <div class="attr">
 
       <div class="attr-header">
@@ -13940,23 +14768,23 @@ function renderAtributo(nome, campo, valor) {
 }
 
 function renderMagiaModal() {
-  if (state.modal !== "magia") return "";
+    if (state.modal !== "magia") return "";
 
-  const magia = getMagiaAtual();
-  const ficha = getFichaAtual();
-  if (!magia || !ficha) return "";
+    const magia = getMagiaAtual();
+    const ficha = getFichaAtual();
+    if (!magia || !ficha) return "";
 
-  const pmAtual = Number(ficha.pmAtual) || 0;
-  const custoBase = Number(magia.custoPm) || 0;
-  const custoTotal = getCustoTotalMagia(magia);
-  const semPmParaBase = pmAtual < custoBase;
-  const excedeu = custoTotal > pmAtual;
+    const pmAtual = Number(ficha.pmAtual) || 0;
+    const custoBase = Number(magia.custoPm) || 0;
+    const custoTotal = getCustoTotalMagia(magia);
+    const semPmParaBase = pmAtual < custoBase;
+    const excedeu = custoTotal > pmAtual;
 
-  setTimeout(() => {
-    document.body.classList.add("modal-open");
-  }, 0);
+    setTimeout(() => {
+        document.body.classList.add("modal-open");
+    }, 0);
 
-  return `
+    return `
     <div class="overlay" onclick="fecharModal()">
       <div class="overlay-card" onclick="event.stopPropagation()">
         <div class="overlay-header">
@@ -14064,15 +14892,14 @@ function renderMagiaModal() {
             <div class="panel">
               <div class="panel-title">Incrementos</div>
               <div class="panel-body">
-                ${
-  !magia.incrementos.length
-    ? `<div class="empty">Nenhum incremento cadastrado.</div>`
-    : `
+                ${!magia.incrementos.length
+            ? `<div class="empty">Nenhum incremento cadastrado.</div>`
+            : `
       <div class="list">
         ${magia.incrementos.map(inc => {
-          const disabled = !inc.selecionado && !podeSelecionarIncremento(magia, inc.id);
+                const disabled = !inc.selecionado && !podeSelecionarIncremento(magia, inc.id);
 
-          return `
+                return `
             <div class="list-item" style="align-items:flex-start;">
               <div style="display:flex; gap:10px; align-items:flex-start; flex:1;">
                 <input
@@ -14108,10 +14935,10 @@ function renderMagiaModal() {
               </div>
             </div>
           `;
-        }).join("")}
+            }).join("")}
       </div>
     `
-}
+        }
 
                 <div style="height:14px"></div>
 
@@ -14152,95 +14979,159 @@ function renderMagiaModal() {
   `;
 }
 
+function renderModalAdicionarMagia() {
+    if (state.modal !== "magia_adicionar") return "";
+
+    const ficha = getFichaAtual();
+    if (!ficha) return "";
+
+    const registros = getMagiasDisponiveisParaAdicionarNaFicha(ficha);
+
+    setTimeout(() => {
+        document.body.classList.add("modal-open");
+    }, 0);
+
+    return `
+    <div class="overlay" onclick="fecharModal()">
+      <div class="overlay-card" onclick="event.stopPropagation()">
+        <div class="overlay-header">
+          <div>
+            <div class="overlay-title">Adicionar magia</div>
+            <div class="subtitle">Lista de magias disponíveis para o personagem por círculo.</div>
+          </div>
+          <button class="btn ghost" onclick="fecharModal()">Fechar</button>
+        </div>
+
+        <div class="overlay-body">
+          <div class="actions" style="margin-bottom:12px; gap:10px;">
+            <button class="btn" onclick="adicionarMagiaManualNaFicha()">
+              Adicionar manualmente
+            </button>
+          </div>
+
+          ${registros.length === 0
+            ? `<div class="empty">Nenhuma magia disponível para este personagem.</div>`
+            : `
+              <div class="list">
+                ${registros.map(registro => `
+                  <div class="list-item">
+                    <div style="flex:1;">
+                      <div class="list-item-title">${escapeHtml(registro.nome || "Sem nome")}</div>
+                      <div class="list-item-sub">
+                        Círculo ${escapeHtml(String(registro.circulo || "—"))}
+                        ${registro.tradicao ? ` • ${escapeHtml(registro.tradicao)}` : ""}
+                        ${registro.escola ? ` • ${escapeHtml(registro.escola)}` : ""}
+                      </div>
+                    </div>
+
+                    <div class="actions">
+                      <button
+                        class="btn primary"
+                        onclick="adicionarMagiaDoBancoNaFicha('${escapeAttr(String(registro.id))}')"
+                      >
+                        Adicionar
+                      </button>
+                    </div>
+                  </div>
+                `).join("")}
+              </div>
+            `
+        }
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function salvarAviso() {
-  saveFichas();
-  alert("Ficha salva no navegador.");
+    saveFichas();
+    alert("Ficha salva no navegador.");
 }
 
 function addGrupoDado() {
-  state.dados.grupos.push({
-    id: uid(),
-    quantidade: 1,
-    tipo: "d6"
-  });
-  render();
+    state.dados.grupos.push({
+        id: uid(),
+        quantidade: 1,
+        tipo: "d6"
+    });
+    render();
 }
 
 function removeGrupoDado(id) {
-  if (state.dados.grupos.length === 1) return;
-  state.dados.grupos = state.dados.grupos.filter(g => g.id !== id);
-  render();
+    if (state.dados.grupos.length === 1) return;
+    state.dados.grupos = state.dados.grupos.filter(g => g.id !== id);
+    render();
 }
 
 function updateGrupoDado(id, field, value) {
-  const grupo = state.dados.grupos.find(g => g.id === id);
-  if (!grupo) return;
+    const grupo = state.dados.grupos.find(g => g.id === id);
+    if (!grupo) return;
 
-  if (field === "quantidade") {
-    grupo[field] = Math.max(1, Number(value) || 1);
-  } else {
-    grupo[field] = value;
-  }
+    if (field === "quantidade") {
+        grupo[field] = Math.max(1, Number(value) || 1);
+    } else {
+        grupo[field] = value;
+    }
 }
 
 function rolarGrupo(quantidade, tipo) {
-  const faces = Number(tipo.replace("d", ""));
-  const resultados = [];
+    const faces = Number(tipo.replace("d", ""));
+    const resultados = [];
 
-  for (let i = 0; i < quantidade; i++) {
-    resultados.push(Math.floor(Math.random() * faces) + 1);
-  }
+    for (let i = 0; i < quantidade; i++) {
+        resultados.push(Math.floor(Math.random() * faces) + 1);
+    }
 
-  return {
-    quantidade,
-    tipo,
-    resultados,
-    subtotal: resultados.reduce((a, b) => a + b, 0)
-  };
+    return {
+        quantidade,
+        tipo,
+        resultados,
+        subtotal: resultados.reduce((a, b) => a + b, 0)
+    };
 }
 
 function rolarTodosDados() {
-  const gruposRolados = state.dados.grupos.map(g =>
-    rolarGrupo(g.quantidade, g.tipo)
-  );
+    const gruposRolados = state.dados.grupos.map(g =>
+        rolarGrupo(g.quantidade, g.tipo)
+    );
 
-  const total = gruposRolados.reduce((acc, grupo) => acc + grupo.subtotal, 0);
+    const total = gruposRolados.reduce((acc, grupo) => acc + grupo.subtotal, 0);
 
-  const formula = gruposRolados
-    .map(g => `${g.quantidade}${g.tipo}`)
-    .join(" + ");
+    const formula = gruposRolados
+        .map(g => `${g.quantidade}${g.tipo}`)
+        .join(" + ");
 
-  const resultado = {
-    id: uid(),
-    data: new Date().toISOString(),
-    formula,
-    grupos: gruposRolados,
-    total
-  };
+    const resultado = {
+        id: uid(),
+        data: new Date().toISOString(),
+        formula,
+        grupos: gruposRolados,
+        total
+    };
 
-  state.dados.ultimoResultado = resultado;
-  state.dados.historico.unshift(resultado);
-  state.dados.historico = state.dados.historico.slice(0, 20);
-  saveDadosHistorico();
+    state.dados.ultimoResultado = resultado;
+    state.dados.historico.unshift(resultado);
+    state.dados.historico = state.dados.historico.slice(0, 20);
+    saveDadosHistorico();
 
-  render();
+    render();
 }
 
 function limparHistoricoDados() {
-  const ok = confirm("Limpar histórico de rolagens?");
-  if (!ok) return;
+    const ok = confirm("Limpar histórico de rolagens?");
+    if (!ok) return;
 
-  state.dados.historico = [];
-  saveDadosHistorico();
-  render();
+    state.dados.historico = [];
+    saveDadosHistorico();
+    render();
 }
 
 function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
 }
 function secaoFichaEstaAberta(chave) {
     return !!state?.secoesFicha?.[chave];
@@ -14259,18 +15150,18 @@ function toggleSecaoFicha(chave) {
     render();
 }
 function escapeAttr(value) {
-  return escapeHtml(value);
+    return escapeHtml(value);
 }
 
 function render() {
-  if (state.screen === "home") return renderHome();
-  if (state.screen === "personagens") return renderPersonagens();
-  if (state.screen === "criacao") return renderCriacao();
-  if (state.screen === "evolucao") return renderEvolucao();  
-  if (state.screen === "dados") return renderDados();
-  if (state.screen === "ficha") return renderFicha();
+    if (state.screen === "home") return renderHome();
+    if (state.screen === "personagens") return renderPersonagens();
+    if (state.screen === "criacao") return renderCriacao();
+    if (state.screen === "evolucao") return renderEvolucao();
+    if (state.screen === "dados") return renderDados();
+    if (state.screen === "ficha") return renderFicha();
 }
- 
+
 carregarTodosOsBancos().then(() => {
     render();
 });
