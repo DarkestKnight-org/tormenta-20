@@ -4748,7 +4748,7 @@ function montarContextoPreRequisitos(ficha) {
         periciasTreinadas: getNomesPericiasTreinadasNoContexto(ficha),
         habilidades: getNomesHabilidadesNoContexto(ficha),
         poderesTormenta: getTotalPoderesTormentaParaPreRequisito(ficha),
-        circuloMaximo: getCirculoMaximoPorClasseNoContexto(ficha),
+        circuloMaximo: getCirculoMaximoMagiasNaFicha(ficha),
         nivelPersonagem: getNivelTotalFicha(ficha) || 1,
         proficiencias: new Set((ficha?.proficiencias || []).map(p => normalizarTextoRegra(p))),
         podeLancarMagias: personagemPodeLancarMagiasNoContexto(ficha),
