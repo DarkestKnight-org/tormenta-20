@@ -908,6 +908,10 @@ function getRacaSelecionadaCriacao() {
     };
 }
 
+let filtroAdicionarHabilidadeTimer = null;
+let filtroAdicionarMagiaTimer = null;
+let filtroEscolhaClasseTimer = null;
+
 let state = {
     screen: "home",
     fichas: loadFichas(),
@@ -952,6 +956,7 @@ let state = {
         poderClasseEscolhas: {},
         escolhaPoderClasseAbertaId: null,
         golpePessoalModal: null,
+        filtroEscolhaClasse: "",
 
         fluxoClasseAtivo: false,
         classeEvolucaoContexto: null,
@@ -982,6 +987,7 @@ let state = {
         poderClasseEscolhas: {},
         escolhaPoderClasseAbertaId: null,
         golpePessoalModal: null,
+        filtroEscolhaClasse: "",
         divindadeEscolhaAberta: false,
         divindadeSelecionadaId: "",
         divindadePoderSelecionadoNome: ""
@@ -3988,7 +3994,7 @@ function renderModalEspecializacoesOficioEscolha() {
               </div>
             `;
             }).join("")
-    }
+        }
             </div>
           </div>
         </div>
@@ -9558,8 +9564,16 @@ function adicionarHabilidadeManualNaFicha() {
 }
 
 function getPoderesDisponiveisParaAdicionarNaFicha() {
+    const ficha = getFichaAtual();
+    const idsJaNaFicha = new Set(
+        (ficha?.habilidades || [])
+            .map(h => String(h.registroId || "").trim())
+            .filter(Boolean)
+    );
+
     return (PODERES_MAGIAS_DB.registros || [])
         .filter(registro => normalizarTextoRegra(registro?.tipoRegistro || "") === "poder")
+        .filter(registro => !idsJaNaFicha.has(String(registro.id)))
         .sort((a, b) => String(a?.nome || "").localeCompare(String(b?.nome || ""), "pt-BR"));
 }
 
@@ -9570,6 +9584,35 @@ function adicionarPoderDoBancoNaFicha(registroId) {
     const registro = getRegistroPoderMagiaPorId(registroId);
     if (!registro) return;
 
+    const incrementos = getIncrementosPoderMagia(registro.id).map(inc => ({
+        id: uid(),
+        custoPm: Number(inc.custoPm) || 0,
+        custoVida: Number(inc.custoVida) || 0,
+        custoPmPermanente: Number(inc.custoPmPermanente) || 0,
+        custoVidaPermanente: Number(inc.custoVidaPermanente) || 0,
+        descricao: inc.descricao || "",
+        efeitoResumo: inc.efeitoResumo || "",
+        selecionado: false
+    }));
+
+    const escolhas = (PODERES_MAGIAS_DB.escolhas || [])
+        .filter(e => String(e.registro_id) === String(registro.id))
+        .sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0))
+        .map(e => ({
+            id: String(e.id || uid()),
+            registro_id: String(e.registro_id || registro.id),
+            ordem: Number(e.ordem) || 0,
+            tipo: e.tipo || "",
+            titulo: e.titulo || "",
+            descricao: e.descricao || "",
+            quantidade: Number(e.quantidade) || 0,
+            filtro: e.filtro || "",
+            opcoesTexto: e.opcoesTexto || "",
+            regrasGrupo: e.regrasGrupo || "",
+            dependeDe: e.dependeDe || "",
+            selecionadas: []
+        }));
+
     adicionarHabilidadeNaFicha(
         ficha,
         {
@@ -9578,13 +9621,9 @@ function adicionarPoderDoBancoNaFicha(registroId) {
             descricao: registro.descricao || "",
             custoPm: Number(registro.custoPm) || 0,
             custoVida: Number(registro.custoVida) || 0,
-            custoPmPermanente: Number(registro.custoPmPermanente) || 0,
-            custoVidaPermanente: Number(registro.custoVidaPermanente) || 0,
             resumoUso: registro.resumoUso || "",
             ativavel: !!registro.ativavel,
-            permiteIntensificar: !!registro.permiteIntensificar,
-            incrementos: montarIncrementosDoRegistro(registro.id),
-            escolhas: montarEscolhasDoRegistro(registro.id),
+            escolhas,
             tipoRegistro: "poder",
             filtros: registro.filtros || "",
             origemBase: registro.origemBase || ""
@@ -10380,8 +10419,8 @@ function renderModalEspecializacoesOficioFicha() {
           <div class="overlay-body">
             <div class="list">
               ${ESPECIALIZACOES_OFICIO.map(nome => {
-                  const checked = selecoes.some(item => normalizarTextoRegra(item) === normalizarTextoRegra(nome));
-                  return `
+        const checked = selecoes.some(item => normalizarTextoRegra(item) === normalizarTextoRegra(nome));
+        return `
                     <div class="list-item" style="align-items:flex-start; gap:12px;">
                       <div class="choice-main">
                         <div class="list-item-title">${escapeHtml(nome)}</div>
@@ -10395,7 +10434,7 @@ function renderModalEspecializacoesOficioFicha() {
                       >
                     </div>
                   `;
-              }).join("")}
+    }).join("")}
             </div>
           </div>
         </div>
@@ -10780,21 +10819,25 @@ function classeCriacaoValida() {
 }
 function abrirEscolhaClasseCriacao(escolhaId) {
     state.criacao.escolhaClasseAbertaId = escolhaId;
+    state.criacao.filtroEscolhaClasse = "";
     render();
 }
 
 function fecharEscolhaClasseCriacao() {
     state.criacao.escolhaClasseAbertaId = null;
+    state.criacao.filtroEscolhaClasse = "";
     document.body.classList.remove("modal-open");
     render();
 }
 function abrirEscolhaClasseEvolucao(escolhaId) {
     state.evolucao.escolhaClasseAbertaId = escolhaId;
+    state.evolucao.filtroEscolhaClasse = "";
     render();
 }
 
 function fecharEscolhaClasseEvolucao() {
     state.evolucao.escolhaClasseAbertaId = null;
+    state.evolucao.filtroEscolhaClasse = "";
     document.body.classList.remove("modal-open");
     render();
 }
@@ -11770,6 +11813,76 @@ function renderEscolhaOrigemCriacaoModal() {
       </div>
     `;
 }
+function getFiltroEscolhaClasseAtual(modo) {
+    return modo === "evolucao"
+        ? String(state.evolucao?.filtroEscolhaClasse || "")
+        : String(state.criacao?.filtroEscolhaClasse || "");
+}
+
+function setFiltroEscolhaClasseAtual(modo, valor) {
+    if (modo === "evolucao") {
+        state.evolucao.filtroEscolhaClasse = String(valor || "");
+        return;
+    }
+
+    state.criacao.filtroEscolhaClasse = String(valor || "");
+}
+
+function agendarFiltroModalEscolhaClasse(modo, valor) {
+    setFiltroEscolhaClasseAtual(modo, valor);
+
+    if (filtroEscolhaClasseTimer) {
+        clearTimeout(filtroEscolhaClasseTimer);
+    }
+
+    filtroEscolhaClasseTimer = setTimeout(() => {
+        aplicarFiltroModalEscolhaClasse(modo, valor);
+    }, 180);
+}
+
+function aplicarFiltroModalEscolhaClasse(modo, valor = "") {
+    setFiltroEscolhaClasseAtual(modo, valor);
+
+    const lista = document.getElementById(`lista-escolha-classe-${modo}`);
+    if (!lista) return;
+
+    const termo = normalizarTextoRegra(valor);
+    let totalVisivel = 0;
+
+    Array.from(lista.querySelectorAll("[data-escolha-classe-nome-normalizado]")).forEach(item => {
+        const nomeNormalizado = item.getAttribute("data-escolha-classe-nome-normalizado") || "";
+        const exibir = !termo || nomeNormalizado.includes(termo);
+
+        item.style.display = exibir ? "" : "none";
+
+        if (exibir) {
+            totalVisivel += 1;
+        }
+    });
+
+    const mensagem = document.getElementById(`mensagem-sem-opcoes-classe-${modo}`);
+    if (mensagem) {
+        mensagem.style.display = totalVisivel === 0 ? "block" : "none";
+        mensagem.textContent = termo
+            ? "Nenhuma opção encontrada para essa busca."
+            : "Nenhuma opção disponível para esta escolha.";
+    }
+}
+
+function limparBuscaModalEscolhaClasse(modo) {
+    const campo = document.getElementById(`busca-escolha-classe-${modo}`);
+    setFiltroEscolhaClasseAtual(modo, "");
+
+    if (!campo) {
+        aplicarFiltroModalEscolhaClasse(modo, "");
+        return;
+    }
+
+    campo.value = "";
+    aplicarFiltroModalEscolhaClasse(modo, "");
+    campo.focus();
+}
+
 function renderEscolhaClasseCriacaoModal() {
     const f = getFichaCriacao();
     const classe = getClasseEvolucaoAtualCriacao() || getClasseSelecionadaCriacao();
@@ -11789,6 +11902,7 @@ function renderEscolhaClasseCriacaoModal() {
     const selecionados = getEscolhaClasseValores(escolha.id);
     const quantidade = Number(escolha.quantidade) || 0;
     const opcoesBase = getOpcoesEscolha(escolha, f);
+    const buscaAtual = getFiltroEscolhaClasseAtual("criacao");
 
     const opcoes = ordenarOpcoesParaExibicao(opcoesBase, (opcao) => {
         const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
@@ -11798,6 +11912,19 @@ function renderEscolhaClasseCriacaoModal() {
 
     setTimeout(() => {
         document.body.classList.add("modal-open");
+
+        const campoBusca = document.getElementById("busca-escolha-classe-criacao");
+        if (campoBusca) {
+            if (campoBusca.value !== buscaAtual) {
+                campoBusca.value = buscaAtual;
+            }
+
+            if (document.activeElement !== campoBusca) {
+                campoBusca.focus();
+            }
+        }
+
+        aplicarFiltroModalEscolhaClasse("criacao", buscaAtual);
     }, 0);
 
     return `
@@ -11816,46 +11943,78 @@ function renderEscolhaClasseCriacaoModal() {
         </div>
 
         <div class="overlay-body">
-          <div class="list">
-            ${opcoes.map(opcao => {
-        const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
-        const desbloqueada = escolhaClasseDesbloqueada(escolha);
-        const disabled = !checked && (!desbloqueada || !podeSelecionarOpcaoClasse(escolha, opcao));
-        const expandida = opcaoEscolhaEstaExpandida("classe", escolha.id, opcao.id);
-        const titulo = getTituloOpcaoEscolha(opcao);
-        const descricao = String(opcao.descricao || "").trim();
-        const preReqFaltando = getPreRequisitoNaoAtendidoOpcao(opcao, f);
+          <div class="row-2" style="margin-bottom:12px; align-items:end;">
+            <div class="field" style="margin:0;">
+              <label>Buscar por nome</label>
+              <input
+                id="busca-escolha-classe-criacao"
+                type="search"
+                value="${escapeAttr(buscaAtual)}"
+                placeholder="Digite o nome do poder ou magia"
+                oninput="agendarFiltroModalEscolhaClasse('criacao', this.value)"
+                onkeydown="if (event.key === 'Enter') { event.preventDefault(); aplicarFiltroModalEscolhaClasse('criacao', this.value); }"
+              >
+            </div>
 
-        return `
-        <div class="list-item" style="align-items:flex-start; gap:12px; ${disabled ? "opacity:.65;" : ""}">
-            <button
-                type="button"
-                class="btn ghost"
-                style="flex:1; text-align:left; justify-content:flex-start; padding:0; background:none; border:none;"
-                onclick="toggleExpansaoOpcaoEscolha('classe', '${escolha.id}', '${opcao.id}')"
-            >
-                <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px; width:100%;">
-                    <div style="flex:1;">
-                        <div class="list-item-title">${escapeHtml(titulo)}</div>
-                        ${preReqFaltando ? `<div class="list-item-sub">Pré-requisito: ${escapeHtml(preReqFaltando)}</div>` : ``}
-                        ${expandida && descricao ? `<div class="muted" style="margin-top:8px; white-space:normal; line-height:1.45;">${escapeHtml(descricao)}</div>` : ``}
-                    </div>
-                    <div class="muted" style="font-size:12px; padding-top:2px;">${expandida ? "▲" : "▼"}</div>
-                </div>
-            </button>
-
-            <input
-                class="choice-checkbox"
-                type="checkbox"
-                ${checked ? "checked" : ""}
-                ${disabled ? "disabled" : ""}
-                onclick="event.stopPropagation()"
-                onchange='toggleEscolhaClasseValor("${escolha.id}", ${JSON.stringify(opcao).replace(/'/g, "&apos;")}, ${quantidade})'
-            >
-        </div>
-    `;
-    }).join("")}
+            <div class="actions" style="justify-content:flex-end; align-items:end;">
+              <button class="btn ghost" type="button" onclick="limparBuscaModalEscolhaClasse('criacao')">
+                Limpar
+              </button>
+            </div>
           </div>
+
+          ${opcoes.length === 0
+            ? `<div class="empty">Nenhuma opção disponível para esta escolha.</div>`
+            : `
+              <div id="mensagem-sem-opcoes-classe-criacao" class="empty" style="display:none; margin-bottom:12px;">Nenhuma opção encontrada para essa busca.</div>
+
+              <div class="list" id="lista-escolha-classe-criacao">
+                ${opcoes.map(opcao => {
+                    const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
+                    const desbloqueada = escolhaClasseDesbloqueada(escolha);
+                    const disabled = !checked && (!desbloqueada || !podeSelecionarOpcaoClasse(escolha, opcao));
+                    const expandida = opcaoEscolhaEstaExpandida("classe", escolha.id, opcao.id);
+                    const titulo = getTituloOpcaoEscolha(opcao);
+                    const descricao = String(opcao.descricao || "").trim();
+                    const preReqFaltando = getPreRequisitoNaoAtendidoOpcao(opcao, f);
+                    const textoBusca = normalizarTextoRegra(titulo || opcao.valor || opcao.label || "");
+
+                    return `
+                    <div
+                        class="list-item"
+                        style="align-items:flex-start; gap:12px; ${disabled ? "opacity:.65;" : ""}"
+                        data-escolha-classe-nome-normalizado="${escapeAttr(textoBusca)}"
+                    >
+                        <button
+                            type="button"
+                            class="btn ghost"
+                            style="flex:1; text-align:left; justify-content:flex-start; padding:0; background:none; border:none;"
+                            onclick="toggleExpansaoOpcaoEscolha('classe', '${escolha.id}', '${opcao.id}')"
+                        >
+                            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px; width:100%;">
+                                <div style="flex:1;">
+                                    <div class="list-item-title">${escapeHtml(titulo)}</div>
+                                    ${preReqFaltando ? `<div class="list-item-sub">Pré-requisito: ${escapeHtml(preReqFaltando)}</div>` : ``}
+                                    ${expandida && descricao ? `<div class="muted" style="margin-top:8px; white-space:normal; line-height:1.45;">${escapeHtml(descricao)}</div>` : ``}
+                                </div>
+                                <div class="muted" style="font-size:12px; padding-top:2px;">${expandida ? "▲" : "▼"}</div>
+                            </div>
+                        </button>
+
+                        <input
+                            class="choice-checkbox"
+                            type="checkbox"
+                            ${checked ? "checked" : ""}
+                            ${disabled ? "disabled" : ""}
+                            onclick="event.stopPropagation()"
+                            onchange='toggleEscolhaClasseValor("${escolha.id}", ${JSON.stringify(opcao).replace(/'/g, "&apos;")}, ${quantidade})'
+                        >
+                    </div>
+                `;
+                }).join("")}
+              </div>
+            `
+          }
         </div>
       </div>
     </div>
@@ -11880,6 +12039,7 @@ function renderEscolhaClasseEvolucaoModal() {
     const selecionados = getEscolhaClasseValoresEvolucao(escolha.id);
     const quantidade = Number(escolha.quantidade) || 0;
     const opcoesBase = getOpcoesEscolha(escolha, f);
+    const buscaAtual = getFiltroEscolhaClasseAtual("evolucao");
 
     const opcoes = ordenarOpcoesParaExibicao(opcoesBase, (opcao) => {
         const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
@@ -11889,6 +12049,19 @@ function renderEscolhaClasseEvolucaoModal() {
 
     setTimeout(() => {
         document.body.classList.add("modal-open");
+
+        const campoBusca = document.getElementById("busca-escolha-classe-evolucao");
+        if (campoBusca) {
+            if (campoBusca.value !== buscaAtual) {
+                campoBusca.value = buscaAtual;
+            }
+
+            if (document.activeElement !== campoBusca) {
+                campoBusca.focus();
+            }
+        }
+
+        aplicarFiltroModalEscolhaClasse("evolucao", buscaAtual);
     }, 0);
 
     return `
@@ -11907,46 +12080,78 @@ function renderEscolhaClasseEvolucaoModal() {
         </div>
 
         <div class="overlay-body">
-          <div class="list">
-            ${opcoes.map(opcao => {
-        const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
-        const desbloqueada = escolhaClasseDesbloqueada(escolha);
-        const disabled = !checked && (!desbloqueada || !podeSelecionarOpcaoClasseEvolucao(escolha, opcao));
-        const expandida = opcaoEscolhaEstaExpandida("classe", escolha.id, opcao.id);
-        const titulo = getTituloOpcaoEscolha(opcao);
-        const descricao = String(opcao.descricao || "").trim();
-        const preReqFaltando = getPreRequisitoNaoAtendidoOpcao(opcao, f);
+          <div class="row-2" style="margin-bottom:12px; align-items:end;">
+            <div class="field" style="margin:0;">
+              <label>Buscar por nome</label>
+              <input
+                id="busca-escolha-classe-evolucao"
+                type="search"
+                value="${escapeAttr(buscaAtual)}"
+                placeholder="Digite o nome do poder ou magia"
+                oninput="agendarFiltroModalEscolhaClasse('evolucao', this.value)"
+                onkeydown="if (event.key === 'Enter') { event.preventDefault(); aplicarFiltroModalEscolhaClasse('evolucao', this.value); }"
+              >
+            </div>
 
-        return `
-        <div class="list-item" style="align-items:flex-start; gap:12px; ${disabled ? "opacity:.65;" : ""}">
-            <button
-                type="button"
-                class="btn ghost"
-                style="flex:1; text-align:left; justify-content:flex-start; padding:0; background:none; border:none;"
-                onclick="toggleExpansaoOpcaoEscolha('classe', '${escolha.id}', '${opcao.id}')"
-            >
-                <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px; width:100%;">
-                    <div style="flex:1;">
-                        <div class="list-item-title">${escapeHtml(titulo)}</div>
-                        ${preReqFaltando ? `<div class="list-item-sub">Pré-requisito: ${escapeHtml(preReqFaltando)}</div>` : ``}
-                        ${expandida && descricao ? `<div class="muted" style="margin-top:8px; white-space:normal; line-height:1.45;">${escapeHtml(descricao)}</div>` : ``}
-                    </div>
-                    <div class="muted" style="font-size:12px; padding-top:2px;">${expandida ? "▲" : "▼"}</div>
-                </div>
-            </button>
-
-            <input
-                class="choice-checkbox"
-                type="checkbox"
-                ${checked ? "checked" : ""}
-                ${disabled ? "disabled" : ""}
-                onclick="event.stopPropagation()"
-                onchange='toggleEscolhaClasseValorEvolucao("${escolha.id}", ${JSON.stringify(opcao).replace(/'/g, "&apos;")}, ${quantidade})'
-            >
-        </div>
-    `;
-    }).join("")}
+            <div class="actions" style="justify-content:flex-end; align-items:end;">
+              <button class="btn ghost" type="button" onclick="limparBuscaModalEscolhaClasse('evolucao')">
+                Limpar
+              </button>
+            </div>
           </div>
+
+          ${opcoes.length === 0
+            ? `<div class="empty">Nenhuma opção disponível para esta escolha.</div>`
+            : `
+              <div id="mensagem-sem-opcoes-classe-evolucao" class="empty" style="display:none; margin-bottom:12px;">Nenhuma opção encontrada para essa busca.</div>
+
+              <div class="list" id="lista-escolha-classe-evolucao">
+                ${opcoes.map(opcao => {
+                    const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
+                    const desbloqueada = escolhaClasseDesbloqueada(escolha);
+                    const disabled = !checked && (!desbloqueada || !podeSelecionarOpcaoClasseEvolucao(escolha, opcao));
+                    const expandida = opcaoEscolhaEstaExpandida("classe", escolha.id, opcao.id);
+                    const titulo = getTituloOpcaoEscolha(opcao);
+                    const descricao = String(opcao.descricao || "").trim();
+                    const preReqFaltando = getPreRequisitoNaoAtendidoOpcao(opcao, f);
+                    const textoBusca = normalizarTextoRegra(titulo || opcao.valor || opcao.label || "");
+
+                    return `
+                    <div
+                        class="list-item"
+                        style="align-items:flex-start; gap:12px; ${disabled ? "opacity:.65;" : ""}"
+                        data-escolha-classe-nome-normalizado="${escapeAttr(textoBusca)}"
+                    >
+                        <button
+                            type="button"
+                            class="btn ghost"
+                            style="flex:1; text-align:left; justify-content:flex-start; padding:0; background:none; border:none;"
+                            onclick="toggleExpansaoOpcaoEscolha('classe', '${escolha.id}', '${opcao.id}')"
+                        >
+                            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px; width:100%;">
+                                <div style="flex:1;">
+                                    <div class="list-item-title">${escapeHtml(titulo)}</div>
+                                    ${preReqFaltando ? `<div class="list-item-sub">Pré-requisito: ${escapeHtml(preReqFaltando)}</div>` : ``}
+                                    ${expandida && descricao ? `<div class="muted" style="margin-top:8px; white-space:normal; line-height:1.45;">${escapeHtml(descricao)}</div>` : ``}
+                                </div>
+                                <div class="muted" style="font-size:12px; padding-top:2px;">${expandida ? "▲" : "▼"}</div>
+                            </div>
+                        </button>
+
+                        <input
+                            class="choice-checkbox"
+                            type="checkbox"
+                            ${checked ? "checked" : ""}
+                            ${disabled ? "disabled" : ""}
+                            onclick="event.stopPropagation()"
+                            onchange='toggleEscolhaClasseValorEvolucao("${escolha.id}", ${JSON.stringify(opcao).replace(/'/g, "&apos;")}, ${quantidade})'
+                        >
+                    </div>
+                `;
+                }).join("")}
+              </div>
+            `
+          }
         </div>
       </div>
     </div>
@@ -14409,7 +14614,10 @@ ${renderInventarioSimples(f)}
   ${p.somenteTreinada ? " • Só treinada" : ""}
   ${p.penalidadeArmadura ? " • Pen. arm." : ""}
   • Total:
-  <span class="pericia-total">
+  <span
+    class="pericia-total"
+    style="color:#c62828; font-weight:800; font-family: Arial, Helvetica, sans-serif;"
+  >
     ${calcularTotalPericia(f, p)}
   </span>
 </div>
@@ -14440,7 +14648,7 @@ ${renderInventarioSimples(f)}
           </div>
 
           ${normalizarTextoRegra(p.nome) === normalizarTextoRegra("Ofício")
-              ? `
+                    ? `
       <div class="checkbox-line" style="margin-top:20px">
         <button
           class="btn ghost"
@@ -14452,7 +14660,7 @@ ${renderInventarioSimples(f)}
         </button>
       </div>
     `
-              : `
+                    : `
       <div class="checkbox-line">
         <input
           type="checkbox"
@@ -14462,7 +14670,7 @@ ${renderInventarioSimples(f)}
         <span>Treino</span>
       </div>
     `
-}
+                }
         </div>
       `).join("")}
     </div>
@@ -15030,6 +15238,52 @@ function renderMagiaModal() {
   `;
 }
 
+function agendarFiltroModalAdicionarHabilidade(valor) {
+    if (filtroAdicionarHabilidadeTimer) {
+        clearTimeout(filtroAdicionarHabilidadeTimer);
+    }
+
+    filtroAdicionarHabilidadeTimer = setTimeout(() => {
+        aplicarFiltroModalAdicionarHabilidade(valor);
+    }, 180);
+}
+
+function aplicarFiltroModalAdicionarHabilidade(valor = "") {
+    const lista = document.getElementById("lista-adicionar-habilidade");
+    if (!lista) return;
+
+    const termo = normalizarTextoRegra(valor);
+    let totalVisivel = 0;
+
+    Array.from(lista.querySelectorAll("[data-habilidade-nome-normalizado]")).forEach(item => {
+        const nomeNormalizado = item.getAttribute("data-habilidade-nome-normalizado") || "";
+        const exibir = !termo || nomeNormalizado.includes(termo);
+
+        item.style.display = exibir ? "" : "none";
+
+        if (exibir) {
+            totalVisivel += 1;
+        }
+    });
+
+    const mensagem = document.getElementById("mensagem-sem-habilidades-banco");
+    if (mensagem) {
+        mensagem.style.display = totalVisivel === 0 ? "block" : "none";
+        mensagem.textContent = termo
+            ? "Nenhum poder encontrado para essa busca."
+            : "Nenhum poder disponível no banco.";
+    }
+}
+
+function limparBuscaModalAdicionarHabilidade() {
+    const campo = document.getElementById("busca-adicionar-habilidade");
+    if (!campo) return;
+
+    campo.value = "";
+    aplicarFiltroModalAdicionarHabilidade("");
+    campo.focus();
+}
+
 function renderModalAdicionarHabilidade() {
     if (state.modal !== "habilidade_adicionar") return "";
 
@@ -15040,6 +15294,11 @@ function renderModalAdicionarHabilidade() {
 
     setTimeout(() => {
         document.body.classList.add("modal-open");
+
+        const campoBusca = document.getElementById("busca-adicionar-habilidade");
+        if (campoBusca && document.activeElement !== campoBusca) {
+            campoBusca.focus();
+        }
     }, 0);
 
     return `
@@ -15060,12 +15319,36 @@ function renderModalAdicionarHabilidade() {
             </button>
           </div>
 
+          <div class="row-2" style="margin-bottom:12px; align-items:end;">
+            <div class="field" style="margin:0;">
+              <label>Buscar por nome</label>
+              <input
+                id="busca-adicionar-habilidade"
+                type="search"
+                placeholder="Digite o nome do poder"
+                oninput="agendarFiltroModalAdicionarHabilidade(this.value)"
+                onkeydown="if (event.key === 'Enter') { event.preventDefault(); aplicarFiltroModalAdicionarHabilidade(this.value); }"
+              >
+            </div>
+
+            <div class="actions" style="justify-content:flex-end; align-items:end;">
+              <button class="btn ghost" type="button" onclick="limparBuscaModalAdicionarHabilidade()">
+                Limpar
+              </button>
+            </div>
+          </div>
+
           ${registros.length === 0
             ? `<div class="empty">Nenhum poder disponível no banco.</div>`
             : `
-              <div class="list">
+              <div id="mensagem-sem-habilidades-banco" class="empty" style="display:none; margin-bottom:12px;">Nenhum poder encontrado para essa busca.</div>
+
+              <div class="list" id="lista-adicionar-habilidade">
                 ${registros.map(registro => `
-                  <div class="list-item">
+                  <div
+                    class="list-item"
+                    data-habilidade-nome-normalizado="${escapeAttr(normalizarTextoRegra(registro.nome || ""))}"
+                  >
                     <div style="flex:1;">
                       <div class="list-item-title">${escapeHtml(registro.nome || "Sem nome")}</div>
                       <div class="list-item-sub">
@@ -15093,6 +15376,52 @@ function renderModalAdicionarHabilidade() {
   `;
 }
 
+function agendarFiltroModalAdicionarMagia(valor) {
+    if (filtroAdicionarMagiaTimer) {
+        clearTimeout(filtroAdicionarMagiaTimer);
+    }
+
+    filtroAdicionarMagiaTimer = setTimeout(() => {
+        aplicarFiltroModalAdicionarMagia(valor);
+    }, 180);
+}
+
+function aplicarFiltroModalAdicionarMagia(valor = "") {
+    const lista = document.getElementById("lista-adicionar-magia");
+    if (!lista) return;
+
+    const termo = normalizarTextoRegra(valor);
+    let totalVisivel = 0;
+
+    Array.from(lista.querySelectorAll("[data-magia-nome-normalizado]")).forEach(item => {
+        const nomeNormalizado = item.getAttribute("data-magia-nome-normalizado") || "";
+        const exibir = !termo || nomeNormalizado.includes(termo);
+
+        item.style.display = exibir ? "" : "none";
+
+        if (exibir) {
+            totalVisivel += 1;
+        }
+    });
+
+    const mensagem = document.getElementById("mensagem-sem-magias-banco");
+    if (mensagem) {
+        mensagem.style.display = totalVisivel === 0 ? "block" : "none";
+        mensagem.textContent = termo
+            ? "Nenhuma magia encontrada para essa busca."
+            : "Nenhuma magia disponível para este personagem.";
+    }
+}
+
+function limparBuscaModalAdicionarMagia() {
+    const campo = document.getElementById("busca-adicionar-magia");
+    if (!campo) return;
+
+    campo.value = "";
+    aplicarFiltroModalAdicionarMagia("");
+    campo.focus();
+}
+
 function renderModalAdicionarMagia() {
     if (state.modal !== "magia_adicionar") return "";
 
@@ -15103,6 +15432,11 @@ function renderModalAdicionarMagia() {
 
     setTimeout(() => {
         document.body.classList.add("modal-open");
+
+        const campoBusca = document.getElementById("busca-adicionar-magia");
+        if (campoBusca && document.activeElement !== campoBusca) {
+            campoBusca.focus();
+        }
     }, 0);
 
     return `
@@ -15123,12 +15457,36 @@ function renderModalAdicionarMagia() {
             </button>
           </div>
 
+          <div class="row-2" style="margin-bottom:12px; align-items:end;">
+            <div class="field" style="margin:0;">
+              <label>Buscar por nome</label>
+              <input
+                id="busca-adicionar-magia"
+                type="search"
+                placeholder="Digite o nome da magia"
+                oninput="agendarFiltroModalAdicionarMagia(this.value)"
+                onkeydown="if (event.key === 'Enter') { event.preventDefault(); aplicarFiltroModalAdicionarMagia(this.value); }"
+              >
+            </div>
+
+            <div class="actions" style="justify-content:flex-end; align-items:end;">
+              <button class="btn ghost" type="button" onclick="limparBuscaModalAdicionarMagia()">
+                Limpar
+              </button>
+            </div>
+          </div>
+
           ${registros.length === 0
             ? `<div class="empty">Nenhuma magia disponível para este personagem.</div>`
             : `
-              <div class="list">
+              <div id="mensagem-sem-magias-banco" class="empty" style="display:none; margin-bottom:12px;">Nenhuma magia encontrada para essa busca.</div>
+
+              <div class="list" id="lista-adicionar-magia">
                 ${registros.map(registro => `
-                  <div class="list-item">
+                  <div
+                    class="list-item"
+                    data-magia-nome-normalizado="${escapeAttr(normalizarTextoRegra(registro.nome || ""))}"
+                  >
                     <div style="flex:1;">
                       <div class="list-item-title">${escapeHtml(registro.nome || "Sem nome")}</div>
                       <div class="list-item-sub">
