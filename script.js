@@ -7868,6 +7868,9 @@ function adicionarHabilidadeNaFicha(ficha, habilidade, origemTipo, origemNome) {
         origem: origemTipo || "Raça",
         origemDetalhe: origemNome || "",
         registroId: habilidade.registroId || "",
+        tipoRegistro: habilidade.tipoRegistro || "",
+        filtros: habilidade.filtros || "",
+        origemBase: habilidade.origemBase || "",
         ativavel: habilidade.ativavel || false,
         permiteIntensificar: habilidade.permiteIntensificar || false,
         incrementos: habilidade.incrementos || [],
@@ -9531,6 +9534,16 @@ function addHabilidade() {
     const ficha = getFichaAtual();
     if (!ficha) return;
 
+    state.modal = "habilidade_adicionar";
+    state.modalPayload = {};
+    document.body.classList.add("modal-open");
+    render();
+}
+
+function adicionarHabilidadeManualNaFicha() {
+    const ficha = getFichaAtual();
+    if (!ficha) return;
+
     const nova = {
         id: uid(),
         nome: "",
@@ -9542,6 +9555,46 @@ function addHabilidade() {
     ficha.habilidades.push(nova);
     saveFichas();
     abrirDetalheHabilidade(nova.id);
+}
+
+function getPoderesDisponiveisParaAdicionarNaFicha() {
+    return (PODERES_MAGIAS_DB.registros || [])
+        .filter(registro => normalizarTextoRegra(registro?.tipoRegistro || "") === "poder")
+        .sort((a, b) => String(a?.nome || "").localeCompare(String(b?.nome || ""), "pt-BR"));
+}
+
+function adicionarPoderDoBancoNaFicha(registroId) {
+    const ficha = getFichaAtual();
+    if (!ficha) return;
+
+    const registro = getRegistroPoderMagiaPorId(registroId);
+    if (!registro) return;
+
+    adicionarHabilidadeNaFicha(
+        ficha,
+        {
+            registroId: registro.id,
+            nome: registro.nome || "",
+            descricao: registro.descricao || "",
+            custoPm: Number(registro.custoPm) || 0,
+            custoVida: Number(registro.custoVida) || 0,
+            custoPmPermanente: Number(registro.custoPmPermanente) || 0,
+            custoVidaPermanente: Number(registro.custoVidaPermanente) || 0,
+            resumoUso: registro.resumoUso || "",
+            ativavel: !!registro.ativavel,
+            permiteIntensificar: !!registro.permiteIntensificar,
+            incrementos: montarIncrementosDoRegistro(registro.id),
+            escolhas: montarEscolhasDoRegistro(registro.id),
+            tipoRegistro: "poder",
+            filtros: registro.filtros || "",
+            origemBase: registro.origemBase || ""
+        },
+        "Manual",
+        "Banco de poderes"
+    );
+
+    saveFichas();
+    fecharModal();
 }
 
 function abrirDetalheHabilidade(id) {
@@ -9572,14 +9625,11 @@ function habilidadeFichaEhPoder(habilidade) {
     const registro = getRegistroBancoDaHabilidadeFicha(habilidade);
     const tipoRegistro = normalizarTextoRegra(registro?.tipoRegistro || habilidade?.tipoRegistro || "");
 
+    if (tipoRegistro === "poder") return true;
+
     // Tudo que vem de classe, origem ou divindade vai para Poderes
     if (origem === "classe" || origem === "origem" || origem === "divindade") {
         return true;
-    }
-
-    // Se veio de raça, só vira poder quando o registro no banco for um poder
-    if (origem === "raca" || origem === "raça") {
-        if (tipoRegistro === "poder") return true;
     }
 
     return false;
@@ -14432,6 +14482,7 @@ ${renderInventarioSimples(f)}
       ${renderEquipamentoModal()}
       ${renderHabilidadeModal()}
       ${renderMagiaModal()}
+      ${renderModalAdicionarHabilidade()}
       ${renderModalAdicionarMagia()}
       ${renderModalAdicionarItemInventario()}
       ${renderWidgetDinheiroFlutuante()}
@@ -14973,6 +15024,69 @@ function renderMagiaModal() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderModalAdicionarHabilidade() {
+    if (state.modal !== "habilidade_adicionar") return "";
+
+    const ficha = getFichaAtual();
+    if (!ficha) return "";
+
+    const registros = getPoderesDisponiveisParaAdicionarNaFicha();
+
+    setTimeout(() => {
+        document.body.classList.add("modal-open");
+    }, 0);
+
+    return `
+    <div class="overlay" onclick="fecharModal()">
+      <div class="overlay-card" onclick="event.stopPropagation()">
+        <div class="overlay-header">
+          <div>
+            <div class="overlay-title">Adicionar habilidade</div>
+            <div class="subtitle">Você pode cadastrar manualmente ou escolher qualquer poder do banco.</div>
+          </div>
+          <button class="btn ghost" onclick="fecharModal()">Fechar</button>
+        </div>
+
+        <div class="overlay-body">
+          <div class="actions" style="margin-bottom:12px; gap:10px;">
+            <button class="btn" onclick="adicionarHabilidadeManualNaFicha()">
+              Adicionar manualmente
+            </button>
+          </div>
+
+          ${registros.length === 0
+            ? `<div class="empty">Nenhum poder disponível no banco.</div>`
+            : `
+              <div class="list">
+                ${registros.map(registro => `
+                  <div class="list-item">
+                    <div style="flex:1;">
+                      <div class="list-item-title">${escapeHtml(registro.nome || "Sem nome")}</div>
+                      <div class="list-item-sub">
+                        ${registro.origemBase ? escapeHtml(registro.origemBase) : "Poder"}
+                        ${registro.preRequisitos ? ` • Pré-requisito: ${escapeHtml(registro.preRequisitos)}` : ""}
+                      </div>
+                    </div>
+
+                    <div class="actions">
+                      <button
+                        class="btn primary"
+                        onclick="adicionarPoderDoBancoNaFicha('${escapeAttr(String(registro.id))}')"
+                      >
+                        Adicionar
+                      </button>
+                    </div>
+                  </div>
+                `).join("")}
+              </div>
+            `
+        }
         </div>
       </div>
     </div>
