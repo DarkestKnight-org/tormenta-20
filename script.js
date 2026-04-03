@@ -15631,6 +15631,8 @@ function render() {
     if (state.screen === "ficha") return renderFicha();
 }
 
-carregarTodosOsBancos().then(() => {
-    render();
-});
+render();
+
+setTimeout(() => {
+    carregarTodosOsBancos();
+}, 0);
