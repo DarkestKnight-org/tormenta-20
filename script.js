@@ -7784,11 +7784,8 @@ function excluirEquipamento(id) {
 }
 
 function custoSubirAtributo(valorAtual) {
-    if (valorAtual < 0) return 1;
-    if (valorAtual === 0) return 1;
-    if (valorAtual === 1) return 2;
-    if (valorAtual === 2) return 4;
-    return 7;
+    if (valorAtual < 2) return 1;
+    return valorAtual;
 }
 
 function subirAtributo(campo) {
