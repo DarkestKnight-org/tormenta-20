@@ -4103,7 +4103,7 @@ function getNiveisDeClasseNoContexto(ficha) {
     (ficha?.classesPersonagem || []).forEach(cp => {
         const id = cp.classeId || cp.id;
         if (!id) return;
-        mapa[id] = Number(cp.nivel) || 0;
+        mapa[id] = Number(cp.niveis ?? cp.nivel) || 0;
     });
 
     const classeCriacao = getClasseSelecionadaCriacao?.();
