@@ -6354,7 +6354,7 @@
   "tipoRegistro": "poder",
   "nome": "Poder Mágico",
   "filtros": "poder|poder_classe|poder_arcanista",
-  "descricao": "Você recebe +1 ponto de mana por nível de arcanista. Quando sobe de nível, os PM Familiares Arcanos Um familiar é uma criatura mágica. Em termos de jogo, é um parceiro especial com o qual você pode se comunicar telepaticamente em alcance longo. Ele obedece a suas ordens, mas ainda está limitado ao que uma criatura de sua espécie pode fazer. Se ele morrer, você fica atordoado por uma rodada. Você pode invocar um novo familiar com um ritual que exige um dia e T$ 100 em ingredientes.",
+  "descricao": "Você recebe +1 ponto de mana por nível de arcanista. Quando sobe de nível, os PM que recebe por este poder aumentam de acordo. Por exemplo, se escolher este poder no 4º nível, recebe 4 PM. Quando subir para o 5º nível, recebe +1 PM e assim por diante.",
   "custoPm": 0,
   "custoVida": 0,
   "custoPmPermanente": 0,
