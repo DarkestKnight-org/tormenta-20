@@ -729,6 +729,32 @@ async function carregarRacasDB() {
 
     RACAS_DB_CARREGADO = true;
 }
+function iconePericiaSomenteTreinada() {
+    return `
+      <span class="pericia-badge" title="Só treinada" aria-label="Só treinada">
+        <svg viewBox="0 0 24 24" class="pericia-icone pericia-icone-preenchido" aria-hidden="true">
+          <path d="M12 3.5l2.6 5.27 5.82.85-4.21 4.1.99 5.78L12 16.73 6.8 19.5l.99-5.78-4.21-4.1 5.82-.85z"></path>
+        </svg>
+      </span>
+    `;
+}
+
+function iconePericiaPenalidadeArmadura() {
+    return `
+      <span class="pericia-badge" title="Penalidade de armadura" aria-label="Penalidade de armadura">
+        <svg viewBox="0 0 24 24" class="pericia-icone-armadura" aria-hidden="true">
+          <path
+            class="pericia-escudo-preenchido"
+            d="M12 3l7 3v5c0 4.5-2.7 7.6-7 10-4.3-2.4-7-5.5-7-10V6z"
+          ></path>
+          <path
+            class="pericia-escudo-barra"
+            d="M5 19L19 5"
+          ></path>
+        </svg>
+      </span>
+    `;
+}
 function getOrigemSelecionadaCriacao() {
     return ORIGENS_DB.find(o => o.id === state.criacao.origemSelecionadaId) || null;
 }
@@ -14156,7 +14182,9 @@ function renderFicha() {
       </div>
 
       <div class="panel">
-  <div class="panel-title">CD Magias${f.atributoChaveMagias ? ` (${escapeHtml(({ inteligencia: "INT", sabedoria: "SAB", carisma: "CAR" }[f.atributoChaveMagias] || f.atributoChaveMagias))})` : ""}</div>
+  <div class="panel-title" style="font-size: 0.8rem;">
+  CD Magias${f.atributoChaveMagias ? ` (${escapeHtml(({ inteligencia: "INT", sabedoria: "SAB", carisma: "CAR" }[f.atributoChaveMagias] || f.atributoChaveMagias))})` : ""}
+</div>
 <div class="panel-body" style="display:flex;  align-items:center; justify-content:center; gap:8px;">
   <input style="text-align:center; width:50px;" type="number" value="${escapeAttr(f.cdMagias)}" onchange="updateFicha('cdMagias', Number(this.value))">
   <button class="btn ghost" onclick="recalcularCdMagiasFichaAtual()">Rc</button>
@@ -14411,7 +14439,7 @@ function renderFicha() {
               <div class="list-item">
                 <div style="display:flex; align-items:flex-start; gap:10px; flex:1;">
                   <input
-                    type="checkbox"
+                    type="checkbox" 
                     ${h.selecionada ? "checked" : ""}
                     onchange="updateHabilidade('${h.id}', 'selecionada', this.checked)"
                     style="margin-top:4px;"
@@ -14597,89 +14625,89 @@ ${renderInventarioSimples(f)}
                 </div>
               </div>
                        
-            <div>
+                        <div>
               <div class="panel">
-  <div class="panel-title">Perícias</div>
-  <div class="panel-body">
-    <div class="pericias-list">
-      ${f.pericias.map((p, i) => `
-        <div class="pericia-item">
-          <div>
-            <div class="pericia-name">${escapeHtml(p.nome)}</div>
-            <div class="subtitle">
-  ${escapeHtml(p.atributo)}
-  ${p.somenteTreinada ? " • Só treinada" : ""}
-  ${p.penalidadeArmadura ? " • Pen. arm." : ""}
-  • Total:
-  <span
-    class="pericia-total"
-    style="color:#c62828; font-weight:800; font-family: Arial, Helvetica, sans-serif;"
-  >
-    ${calcularTotalPericia(f, p)}
-  </span>
-</div>
-</div>
-                    <div class="row-2">
-            <div class="field">
-              <label>Racial</label>
-              <input
-                class="campo-pericia-centro"
-                type="number"
-                value="${escapeAttr(
-                (Number(p?.outrosRacial) || 0) + (Number(p?.outrosPoder) || 0)
-            )}"
-                disabled
-                readonly
-              >
-            </div>
+                <div class="panel-title">Perícias</div>
+                <div class="panel-body">
+                  <div class="pericias-tabela">
+                    <div class="pericias-head">
+                      <div class="pericias-head-nome"></div>
+                      <div class="pericias-head-col">TOTAL</div>
+                      <div class="pericias-head-col">RACIAL</div>
+                      <div class="pericias-head-col">OUTROS</div>
+                      <div class="pericias-head-col pericias-head-treino">TREINO</div>
+                    </div>
 
-            <div class="field">
-              <label>Outros</label>
-              <input
-                class="campo-pericia-centro"
-                type="number"
-                value="${escapeAttr(Number(p?.outros) || 0)}"
-                onchange="updatePericia(${i}, 'outros', this.value)"
-              >
-            </div>
-          </div>
+                    ${f.pericias.map((p, i) => `
+                      <div class="pericia-linha">
+                        <div class="pericia-col pericia-col-nome">
+                          <div class="pericia-nome">${escapeHtml(p.nome)}</div>
+                          <div class="pericia-attr-linha">
+                            <span class="pericia-attr">${escapeHtml(p.atributo)}</span>
+                            ${p.somenteTreinada ? ` ${iconePericiaSomenteTreinada()}` : ""}
+                            ${p.penalidadeArmadura ? ` ${iconePericiaPenalidadeArmadura()}` : ""}
+                          </div>
+                        </div>
 
-          ${normalizarTextoRegra(p.nome) === normalizarTextoRegra("Ofício")
-                    ? `
-      <div class="checkbox-line" style="margin-top:20px">
-        <button
-          class="btn ghost"
-          type="button"
-          style="min-height:auto; padding:8px 10px;"
-          onclick="abrirModalEspecializacoesOficioFicha(${i})"
-        >
-          Ofícios
-        </button>
-      </div>
-    `
-                    : `
-      <div class="checkbox-line">
-        <input
-          type="checkbox"
-          ${p.treinada ? "checked" : ""}
-          onchange="updatePericia(${i}, 'treinada', this.checked)"
-        />
-        <span>Treino</span>
-      </div>
-    `
-                }
-        </div>
-      `).join("")}
-    </div>
+                        <div class="pericia-col pericia-col-total">
+                          <span class="pericia-total-coluna">${calcularTotalPericia(f, p)}</span>
+                        </div>
 
-    <div style="margin-top:14px" class="notice">
-      Metade do nível: <strong>${getMetadeNivel(f)}</strong><br>
-      Bônus de treino atual: <strong>+${getBonusTreino(f)}</strong>
-    </div>
-  </div>
-</div>
+                        <div class="pericia-col pericia-col-racial">
+                          <input
+                            class="campo-pericia-centro"
+                            type="number"
+                            value="${escapeAttr(
+                                (Number(p?.outrosRacial) || 0) + (Number(p?.outrosPoder) || 0)
+                            )}"
+                            disabled
+                            readonly
+                          >
+                        </div>
 
-      <div class="side-buttons">        
+                        <div class="pericia-col pericia-col-outros">
+                          <input
+                            class="campo-pericia-centro"
+                            type="number"
+                            value="${escapeAttr(Number(p?.outros) || 0)}"
+                            onchange="updatePericia(${i}, 'outros', this.value)"
+                          >
+                        </div>
+
+                        <div class="pericia-col pericia-col-treino">
+                          ${normalizarTextoRegra(p.nome) === normalizarTextoRegra("Ofício")
+                            ? `
+                              <button
+                                class="btn ghost btn-oficios-pericia"
+                                type="button"
+                                style="margin-left: 10px;"
+                                onclick="abrirModalEspecializacoesOficioFicha(${i})"
+                              >
+                                Ofícios
+                              </button>
+                            `
+                            : `
+                              <input
+                              type="checkbox"
+                              style="margin-left: 10px;"
+                              ${p.treinada ? "checked" : ""}
+                              onchange="updatePericia(${i}, 'treinada', this.checked)"
+                            />
+                            `
+                        }
+                        </div>
+                      </div>
+                    `).join("")}
+                  </div>
+
+                  <div style="margin-top:14px" class="notice">
+                    Metade do nível: <strong>${getMetadeNivel(f)}</strong><br>
+                    Bônus de treino atual: <strong>+${getBonusTreino(f)}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="side-buttons">     
         <button class="btn primary floating" onclick="abrirModal('dados')">Dados</button>
       </div>
       
