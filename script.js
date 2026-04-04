@@ -942,6 +942,29 @@ let state = {
     screen: "home",
     fichas: loadFichas(),
     fichaAtualId: null,
+
+    auth: {
+        modo: "login",
+        email: "",
+        senha: "",
+        nomeExibicao: "",
+        confirmarNovaSenha: ""
+    },
+
+    mesaOnlineId: "",
+    mesaOnlineNome: "",
+
+    mestre: {
+        mesaId: "",
+        mesaNome: "",
+        fichas: [],
+        fichaSelecionadaId: "",
+        carregando: false,
+        sidebarAberta: true,
+        renderizandoFichaRemota: false,
+        mesasCriadas: []
+    },
+
     secoesFicha: {
         poderes: true,
         magias: true,
@@ -1019,7 +1042,6 @@ let state = {
         divindadePoderSelecionadoNome: ""
     },
 };
-
 const ETAPAS_CRIACAO = [
     "Identidade",
     "Atributos",
@@ -4103,7 +4125,7 @@ function getNiveisDeClasseNoContexto(ficha) {
     (ficha?.classesPersonagem || []).forEach(cp => {
         const id = cp.classeId || cp.id;
         if (!id) return;
-        mapa[id] = Number(cp.niveis ?? cp.nivel) || 0;
+        mapa[id] = Number(cp.nivel) || 0;
     });
 
     const classeCriacao = getClasseSelecionadaCriacao?.();
@@ -6035,7 +6057,676 @@ function loadFichas() {
 }
 
 function saveFichas() {
+    if (state.screen === "mestre" || state?.mestre?.renderizandoFichaRemota) {
+        return;
+    }
+
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state.fichas));
+
+    const mesaId = state.mesaOnlineId;
+    if (!mesaId || !window.T20Supabase) return;
+
+    const fichaAtiva = (state.fichas || []).find(f => f?.onlineAtivaMesaId === mesaId);
+    if (!fichaAtiva) return;
+
+    window.T20Supabase.agendarSyncFichaAtiva({
+        mesaId,
+        ficha: fichaAtiva,
+        wait: 900
+    });
+}
+async function alterarSenhaAuth() {
+    const novaSenha = String(state.auth.novaSenha || "");
+    const confirmar = String(state.auth.confirmarNovaSenha || "");
+
+    if (!novaSenha || !confirmar) {
+        alert("Preencha a nova senha e a confirmação.");
+        return;
+    }
+
+    if (novaSenha !== confirmar) {
+        alert("As senhas não conferem.");
+        return;
+    }
+
+    try {
+        await window.T20Supabase.alterarSenha(novaSenha);
+        state.auth.novaSenha = "";
+        state.auth.confirmarNovaSenha = "";
+        alert("Senha alterada com sucesso.");
+        render();
+    } catch (err) {
+        console.error(err);
+        alert(err?.message || "Não foi possível alterar a senha.");
+    }
+}
+function toggleSidebarMestre() {
+    state.mestre.sidebarAberta = !state.mestre.sidebarAberta;
+    render();
+}
+
+function abrirSidebarMestre() {
+    state.mestre.sidebarAberta = true;
+    render();
+}
+
+function fecharSidebarMestre() {
+    state.mestre.sidebarAberta = false;
+    render();
+}
+function montarHtmlFichaRemotaMestre() {
+    const fichaSelecionada = getFichaMestreSelecionada();
+    if (!fichaSelecionada?.ficha_json) {
+        return `<div class="empty">Selecione um jogador ativo.</div>`;
+    }
+
+    const screenAnterior = state.screen;
+    const flagAnterior = !!state.mestre.renderizandoFichaRemota;
+    const htmlAnterior = app.innerHTML;
+
+    state.mestre.renderizandoFichaRemota = true;
+    state.screen = "ficha";
+
+    renderFicha();
+    const htmlFicha = app.innerHTML;
+
+    state.screen = screenAnterior;
+    state.mestre.renderizandoFichaRemota = flagAnterior;
+
+    app.innerHTML = htmlAnterior;
+
+    return htmlFicha;
+}
+function aplicarModoSomenteLeituraMestre() {
+    const viewer = app.querySelector(".mestre-ficha-viewer");
+    if (!viewer) return;
+
+    viewer.querySelectorAll("input, select, textarea, button").forEach(el => {
+        el.disabled = true;
+        el.setAttribute("tabindex", "-1");
+    });
+
+    viewer.querySelectorAll("[onclick]").forEach(el => {
+        el.removeAttribute("onclick");
+    });
+
+    viewer.querySelectorAll(".topbar .actions, .floating-actions, .btn, .choice-checkbox").forEach(el => {
+        if (el.closest(".mestre-sidebar")) return;
+        el.style.pointerEvents = "none";
+    });
+}
+function definirMesaOnlineNome(nome) {
+    state.mesaOnlineNome = nome || "";
+    render();
+}
+
+async function conectarMesaPorNome() {
+    const nome = String(state.mesaOnlineNome || "").trim();
+    if (!nome) {
+        alert("Informe o nome da mesa.");
+        return;
+    }
+
+    try {
+        const mesa = await window.T20Supabase.buscarMesaPorNome(nome);
+        if (!mesa) {
+            alert("Mesa não encontrada.");
+            return;
+        }
+
+        state.mesaOnlineId = mesa.id;
+        state.mesaOnlineNome = mesa.nome;
+        saveFichas();
+        render();
+        alert(`Conectado à mesa: ${mesa.nome}`);
+    } catch (err) {
+        console.error(err);
+        alert(err?.message || "Não foi possível localizar a mesa.");
+    }
+}
+
+async function toggleFichaAtivaOnline(fichaId, checked) {
+    const mesaId = state.mesaOnlineId;
+    if (!mesaId) {
+        alert("Conecte primeiro uma mesa pelo nome.");
+        return;
+    }
+
+    if (!window.T20Supabase?.SUPA?.state?.user) {
+        alert("Faça login online antes de ativar uma ficha.");
+        return;
+    }
+
+    const ficha = (state.fichas || []).find(f => String(f.id) === String(fichaId));
+    if (!ficha) return;
+
+    try {
+        if (checked) {
+            (state.fichas || []).forEach(f => {
+                if (f) f.onlineAtivaMesaId = "";
+            });
+
+            ficha.onlineAtivaMesaId = mesaId;
+            saveFichas();
+
+            await window.T20Supabase.ativarFicha({
+                mesaId,
+                ficha
+            });
+        } else {
+            ficha.onlineAtivaMesaId = "";
+            saveFichas();
+
+            await window.T20Supabase.desativarFicha({
+                mesaId,
+                fichaLocalId: ficha.id
+            });
+        }
+
+        render();
+    } catch (err) {
+        console.error(err);
+        alert("Não foi possível alterar a ficha ativa online.");
+    }
+}
+function getFichaMestreSelecionada() {
+    const lista = state.mestre?.fichas || [];
+    const id = state.mestre?.fichaSelecionadaId || "";
+    return lista.find(item => String(item.id) === String(id)) || null;
+}
+
+async function carregarAreaDoMestre() {
+    const mesaId = String(state.mestre?.mesaId || "").trim();
+    if (!mesaId) {
+        alert("Informe o ID da mesa.");
+        return;
+    }
+
+    if (!window.T20Supabase?.SUPA?.state?.user) {
+        alert("Faça login online antes de abrir a Área do Mestre.");
+        return;
+    }
+
+    state.mestre.carregando = true;
+    render();
+
+    try {
+        const fichas = await window.T20Supabase.listarFichasAtivasDaMesa(mesaId);
+        state.mestre.fichas = fichas || [];
+
+        if (!state.mestre.fichaSelecionadaId && state.mestre.fichas.length) {
+            state.mestre.fichaSelecionadaId = state.mestre.fichas[0].id;
+        }
+
+        if (
+            state.mestre.fichaSelecionadaId &&
+            !state.mestre.fichas.some(f => String(f.id) === String(state.mestre.fichaSelecionadaId))
+        ) {
+            state.mestre.fichaSelecionadaId = state.mestre.fichas[0]?.id || "";
+        }
+
+        await window.T20Supabase.assinarMesaAtiva(mesaId, async () => {
+            const listaAtualizada = await window.T20Supabase.listarFichasAtivasDaMesa(mesaId);
+            state.mestre.fichas = listaAtualizada || [];
+
+            if (!state.mestre.fichaSelecionadaId && state.mestre.fichas.length) {
+                state.mestre.fichaSelecionadaId = state.mestre.fichas[0].id;
+            }
+
+            if (
+                state.mestre.fichaSelecionadaId &&
+                !state.mestre.fichas.some(f => String(f.id) === String(state.mestre.fichaSelecionadaId))
+            ) {
+                state.mestre.fichaSelecionadaId = state.mestre.fichas[0]?.id || "";
+            }
+
+            render();
+        });
+    } catch (err) {
+        console.error(err);
+        alert("Não foi possível carregar a Área do Mestre.");
+    } finally {
+        state.mestre.carregando = false;
+        render();
+    }
+}
+function selecionarFichaMestre(id) {
+    state.mestre.fichaSelecionadaId = id;
+    render();
+}
+async function carregarMinhasMesasMestre() {
+    if (!window.T20Supabase?.SUPA?.state?.user) {
+        state.mestre.mesasCriadas = [];
+        render();
+        return;
+    }
+
+    try {
+        state.mestre.mesasCriadas = await window.T20Supabase.listarMinhasMesas();
+    } catch (err) {
+        console.error(err);
+        state.mestre.mesasCriadas = [];
+    }
+
+    render();
+}
+
+async function selecionarMesaMestre(mesaId, mesaNome) {
+    state.mestre.mesaId = mesaId || "";
+    state.mestre.mesaNome = mesaNome || "";
+    state.mestre.fichas = [];
+    state.mestre.fichaSelecionadaId = "";
+    render();
+
+    await carregarAreaDoMestre();
+}
+
+async function criarMesaMestre() {
+    const nome = prompt("Nome da mesa:");
+    if (!nome) return;
+
+    try {
+        const mesaId = await window.T20Supabase.criarMesa(nome);
+        await carregarMinhasMesasMestre();
+
+        const mesa = (state.mestre.mesasCriadas || []).find(m => m.id === mesaId);
+        if (mesa) {
+            state.mestre.mesaId = mesa.id;
+            state.mestre.mesaNome = mesa.nome;
+        } else {
+            state.mestre.mesaId = mesaId;
+            state.mestre.mesaNome = nome;
+        }
+
+        await carregarAreaDoMestre();
+    } catch (err) {
+        console.error(err);
+        alert(err?.message || "Não foi possível criar a mesa.");
+    }
+}
+
+async function excluirMesaMestre() {
+    const mesaId = state.mestre.mesaId;
+    if (!mesaId) {
+        alert("Selecione uma mesa.");
+        return;
+    }
+
+    const ok = confirm("Excluir esta mesa? Essa ação não pode ser desfeita.");
+    if (!ok) return;
+
+    try {
+        await window.T20Supabase.excluirMesa(mesaId);
+        state.mestre.mesaId = "";
+        state.mestre.mesaNome = "";
+        state.mestre.fichas = [];
+        state.mestre.fichaSelecionadaId = "";
+        await carregarMinhasMesasMestre();
+        render();
+    } catch (err) {
+        console.error(err);
+        alert(err?.message || "Não foi possível excluir a mesa.");
+    }
+}
+function atualizarMesaMestre(valor) {
+    state.mestre.mesaId = valor || "";
+}
+function renderAvatarJogadorMestre(fichaRemota) {
+    const nome = fichaRemota?.nome || "Sem nome";
+    return escapeHtml(nome.charAt(0).toUpperCase() || "?");
+}
+
+function renderListaPills(lista) {
+    if (!Array.isArray(lista) || !lista.length) return `<div class="empty">Nenhum.</div>`;
+    return `
+      <div style="display:flex; flex-wrap:wrap; gap:8px;">
+        ${lista.map(item => `
+          <span style="padding:6px 10px; border-radius:999px; background:#f2f2f2; font-size:13px;">
+            ${escapeHtml(item?.nome || item || "—")}
+          </span>
+        `).join("")}
+      </div>
+    `;
+}
+
+function renderFichaMestreDetalhe(fichaRemota) {
+    const f = fichaRemota?.ficha_json || null;
+
+    if (!f) {
+        return `<div class="empty">Selecione um jogador à esquerda.</div>`;
+    }
+
+    const atributos = [
+        ["For", f.forca ?? f.forcaBase ?? 0],
+        ["Des", f.destreza ?? f.destrezaBase ?? 0],
+        ["Con", f.constituicao ?? f.constituicaoBase ?? 0],
+        ["Int", f.inteligencia ?? f.inteligenciaBase ?? 0],
+        ["Sab", f.sabedoria ?? f.sabedoriaBase ?? 0],
+        ["Car", f.carisma ?? f.carismaBase ?? 0]
+    ];
+
+    return `
+      <div class="panel">
+        <div class="panel-title">Ficha do Jogador</div>
+        <div class="panel-body">
+          <div style="display:grid; grid-template-columns: 1fr auto; gap:12px; align-items:start;">
+            <div>
+              <h2 style="margin:0 0 6px 0;">${escapeHtml(f.nome || fichaRemota.nome || "Sem nome")}</h2>
+              <div class="subtitle">
+                ${escapeHtml(f.raca || "—")} •
+                ${escapeHtml(f.classe || "—")} •
+                Nível ${escapeHtml(f.nivelTotal || f.nivel || 1)}
+              </div>
+            </div>
+            <div class="notice">
+              Atualizado em: ${escapeHtml(new Date(fichaRemota.updated_at).toLocaleString("pt-BR"))}
+            </div>
+          </div>
+
+          <div style="height:12px;"></div>
+
+          <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:10px;">
+            ${atributos.map(([rotulo, valor]) => `
+              <div class="panel" style="margin:0;">
+                <div class="panel-title">${rotulo}</div>
+                <div class="panel-body" style="text-align:center; font-size:22px; font-weight:700;">
+                  ${escapeHtml(valor)}
+                </div>
+              </div>
+            `).join("")}
+          </div>
+
+          <div style="height:12px;"></div>
+
+          <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px;">
+            <div class="panel" style="margin:0;">
+              <div class="panel-title">PV</div>
+              <div class="panel-body">${escapeHtml(f.pvAtual ?? f.pv ?? 0)} / ${escapeHtml(f.pvMax ?? f.pvTotal ?? f.pv ?? 0)}</div>
+            </div>
+            <div class="panel" style="margin:0;">
+              <div class="panel-title">PM</div>
+              <div class="panel-body">${escapeHtml(f.pmAtual ?? f.pm ?? 0)} / ${escapeHtml(f.pmMax ?? f.pmTotal ?? f.pm ?? 0)}</div>
+            </div>
+            <div class="panel" style="margin:0;">
+              <div class="panel-title">Defesa</div>
+              <div class="panel-body">${escapeHtml(f.defesa ?? 0)}</div>
+            </div>
+            <div class="panel" style="margin:0;">
+              <div class="panel-title">Deslocamento</div>
+              <div class="panel-body">${escapeHtml(f.deslocamento || "—")}</div>
+            </div>
+          </div>
+
+          <div style="height:12px;"></div>
+
+          <div class="panel" style="margin:0 0 12px 0;">
+            <div class="panel-title">Perícias</div>
+            <div class="panel-body">
+              ${(f.pericias || []).length
+            ? `
+                  <div style="display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:8px;">
+                    ${(f.pericias || []).map(p => `
+                      <div class="list-item" style="margin:0;">
+                        <div class="list-item-title">${escapeHtml(p.nome || "Perícia")}</div>
+                        <div class="list-item-sub">
+                          Total: ${escapeHtml(
+                p.total ??
+                p.bonusTotal ??
+                ((Number(p.atributo) || 0) + (Number(p.treino) || 0) + (Number(p.outros) || 0))
+            )}
+                          ${p.treinada ? " • Treinada" : ""}
+                        </div>
+                      </div>
+                    `).join("")}
+                  </div>
+                `
+            : `<div class="empty">Nenhuma perícia.</div>`
+        }
+            </div>
+          </div>
+
+          <div class="panel" style="margin:0 0 12px 0;">
+            <div class="panel-title">Poderes</div>
+            <div class="panel-body">
+              ${renderListaPills(f.poderes || f.habilidades || [])}
+            </div>
+          </div>
+
+          <div class="panel" style="margin:0 0 12px 0;">
+            <div class="panel-title">Magias</div>
+            <div class="panel-body">
+              ${renderListaPills(f.magias || [])}
+            </div>
+          </div>
+
+          <div class="panel" style="margin:0;">
+            <div class="panel-title">Inventário / Equipamentos</div>
+            <div class="panel-body">
+              ${(f.equipamentos || f.inventario || []).length
+            ? `
+                  <div class="list">
+                    ${(f.equipamentos || f.inventario || []).map(item => `
+                      <div class="list-item">
+                        <div class="list-item-title">${escapeHtml(item.nome || "Item")}</div>
+                        <div class="list-item-sub">
+                          Qtd: ${escapeHtml(item.quantidade || 1)}
+                          ${item.descricao ? ` • ${escapeHtml(item.descricao)}` : ""}
+                        </div>
+                      </div>
+                    `).join("")}
+                  </div>
+                `
+            : `<div class="empty">Nenhum item.</div>`
+        }
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+}
+function renderMestre() {
+    if (window.T20Supabase?.SUPA?.state?.user && !(state.mestre.mesasCriadas || []).length) {
+        carregarMinhasMesasMestre();
+    }
+
+    const fichaSelecionada = getFichaMestreSelecionada();
+    const fichaHtml = fichaSelecionada
+        ? montarHtmlFichaRemotaMestre()
+        : `<div class="empty">Nenhuma ficha ativa selecionada.</div>`;
+
+    app.innerHTML = `
+    <div class="screen" style="padding:0; min-height:100vh; position:relative; overflow:hidden;">
+      <style>
+        .mestre-layout {
+          position: relative;
+          min-height: 100vh;
+          background: #f5f6fa;
+        }
+
+        .mestre-ficha-viewer {
+          min-height: 100vh;
+          overflow: auto;
+          padding-left: 0;
+        }
+
+        .mestre-ficha-viewer > .screen > .topbar {
+          display: none !important;
+        }
+
+        .mestre-sidebar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 320px;
+          height: 100vh;
+          background: rgba(255,255,255,0.96);
+          backdrop-filter: blur(6px);
+          border-right: 1px solid #ddd;
+          box-shadow: 0 0 24px rgba(0,0,0,.08);
+          z-index: 50;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .mestre-sidebar-header {
+          padding: 16px;
+          border-bottom: 1px solid #eee;
+          background: rgba(250,250,250,0.96);
+        }
+
+        .mestre-sidebar-body {
+          flex: 1;
+          overflow: auto;
+          padding: 12px;
+        }
+
+        .mestre-sidebar-section {
+          margin-bottom: 18px;
+        }
+
+        .mestre-player-btn {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 10px;
+          border-radius: 14px;
+          border: 1px solid #ddd;
+          background: #fff;
+          cursor: pointer;
+          text-align: left;
+          margin-bottom: 10px;
+        }
+
+        .mestre-player-btn.ativo {
+          border: 2px solid #6d4aff;
+          background: #f7f4ff;
+        }
+
+        .mestre-player-avatar {
+          width: 42px;
+          height: 42px;
+          border-radius: 999px;
+          background: #6d4aff;
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          flex: 0 0 auto;
+        }
+
+        .mestre-view-topbar {
+          position: fixed;
+          top: 16px;
+          right: 16px;
+          z-index: 60;
+          display: flex;
+          gap: 10px;
+        }
+
+        .mestre-mesa-btn {
+          width: 100%;
+          display: block;
+          padding: 10px 12px;
+          border-radius: 12px;
+          border: 1px solid #ddd;
+          background: #fff;
+          text-align: left;
+          cursor: pointer;
+          margin-bottom: 8px;
+        }
+
+        .mestre-mesa-btn.ativa {
+          border: 2px solid #6d4aff;
+          background: #f7f4ff;
+        }
+      </style>
+
+      <div class="mestre-layout">
+        <div class="mestre-view-topbar">
+          <button class="btn ghost" onclick="go('home')">Voltar</button>
+        </div>
+
+        <aside class="mestre-sidebar">
+          <div class="mestre-sidebar-header">
+            <div style="font-size:20px; font-weight:700;">Área do Mestre</div>
+            <div class="subtitle" style="margin-top:4px;">
+              ${state.mestre.mesaNome
+            ? `Mesa: ${escapeHtml(state.mestre.mesaNome)}`
+            : "Gerencie suas mesas e veja as fichas ativas"}
+            </div>
+          </div>
+
+          <div class="mestre-sidebar-body">
+            <div class="mestre-sidebar-section">
+              <div class="list-item-title" style="margin-bottom:8px;">Minhas mesas</div>
+
+              <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+                <button class="btn primary" type="button" onclick="criarMesaMestre()">Criar mesa</button>
+                <button class="btn danger" type="button" onclick="excluirMesaMestre()">Excluir mesa</button>
+              </div>
+
+              ${!(state.mestre.mesasCriadas || []).length
+            ? `<div class="empty">Você ainda não criou mesas.</div>`
+            : `
+                  <div>
+                    ${(state.mestre.mesasCriadas || []).map(mesa => `
+                      <button
+                        class="mestre-mesa-btn ${String(mesa.id) === String(state.mestre.mesaId) ? "ativa" : ""}"
+                        type="button"
+                        onclick="selecionarMesaMestre('${mesa.id}', decodeURIComponent('${encodeURIComponent(mesa.nome)}'))"
+                      >
+                        <div class="list-item-title">${escapeHtml(mesa.nome)}</div>
+                        <div class="list-item-sub">
+                          Criada em ${escapeHtml(new Date(mesa.created_at).toLocaleDateString("pt-BR"))}
+                        </div>
+                      </button>
+                    `).join("")}
+                  </div>
+                `
+        }
+            </div>
+
+            <div class="mestre-sidebar-section">
+              <div class="list-item-title" style="margin-bottom:8px;">Jogadores ativos</div>
+
+              ${!(state.mestre.fichas || []).length
+            ? `<div class="empty">Nenhum jogador ativo.</div>`
+            : (state.mestre.fichas || []).map(item => {
+                const ativo = String(item.id) === String(state.mestre.fichaSelecionadaId);
+                const nome = item?.ficha_json?.nome || item?.nome || "Sem nome";
+                const classe = item?.ficha_json?.classesPersonagem?.[0]?.nome || item?.ficha_json?.classe || "Sem classe";
+                const nivel = item?.ficha_json?.nivelTotal || item?.ficha_json?.nivel || 1;
+                const inicial = escapeHtml((nome || "?").charAt(0).toUpperCase());
+
+                return `
+                      <button
+                        class="mestre-player-btn ${ativo ? "ativo" : ""}"
+                        type="button"
+                        onclick="selecionarFichaMestre('${item.id}')"
+                      >
+                        <div class="mestre-player-avatar">${inicial}</div>
+                        <div style="min-width:0;">
+                          <div class="list-item-title">${escapeHtml(nome)}</div>
+                          <div class="list-item-sub">${escapeHtml(classe)} • Nível ${escapeHtml(nivel)}</div>
+                        </div>
+                      </button>
+                    `;
+            }).join("")
+        }
+            </div>
+          </div>
+        </aside>
+
+        <div class="mestre-ficha-viewer">
+          ${fichaHtml}
+        </div>
+      </div>
+    </div>
+  `;
+
+    aplicarModoSomenteLeituraMestre();
 }
 function exportarFichasJson() {
     try {
@@ -6275,6 +6966,11 @@ function fichaVazia() {
 }
 
 function getFichaAtual() {
+    if (state?.mestre?.renderizandoFichaRemota || state.screen === "mestre") {
+        const remota = getFichaMestreSelecionada();
+        return remota?.ficha_json || null;
+    }
+
     return state.fichas.find(f => f.id === state.fichaAtualId);
 }
 
@@ -10490,10 +11186,12 @@ function updatePericia(index, field, value) {
 }
 
 function renderHome() {
+    const usuario = window.T20Supabase?.SUPA?.state?.user || null;
+
     app.innerHTML = `
     <div class="screen">
       <div class="topbar">
-        <div>
+        <div style="width:100%; text-align:center;">
           <h1 class="logo">Tormenta</h1>
           <div class="subtitle">Gerenciador de ficha, livro e dados</div>
         </div>
@@ -10503,12 +11201,175 @@ function renderHome() {
         <button class="menu-card" onclick="go('personagens')">
           <h3>Personagem</h3>
           <p>Criar, abrir e editar fichas salvas neste navegador.</p>
-        </button>        
+        </button>
 
         <button class="menu-card" onclick="go('dados')">
           <h3>Dados</h3>
         </button>
+
+        <button class="menu-card" onclick="go('mestre')">
+          <h3>Área do Mestre</h3>
+          <p>Acompanhar fichas ativas e gerenciar mesas.</p>
+        </button>
       </div>
+
+      <div style="display:flex; justify-content:center; margin-top:16px;">
+        <button class="menu-card" onclick="go('auth')" style="max-width:380px; width:100%;">
+          <h3>${usuario ? "Conta" : "Login / Cadastro"}</h3>
+          <p>${usuario ? escapeHtml(usuario.email || "Usuário logado") : "Entrar ou criar conta online."}</p>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function atualizarCampoAuth(campo, valor) {
+    state.auth[campo] = valor;
+}
+
+function alternarModoAuth(modo) {
+    state.auth.modo = modo;
+    render();
+}
+
+async function enviarAuth() {
+    const email = String(state.auth.email || "").trim();
+    const senha = String(state.auth.senha || "");
+    const nome = String(state.auth.nomeExibicao || "").trim();
+
+    if (!email || !senha) {
+        alert("Preencha email e senha.");
+        return;
+    }
+
+    try {
+        if (state.auth.modo === "cadastro") {
+            await window.T20Supabase.signUp(email, senha, nome || email.split("@")[0]);
+            alert("Cadastro realizado com sucesso.");
+        } else {
+            await window.T20Supabase.signIn(email, senha);
+            alert("Login realizado com sucesso.");
+        }
+
+        render();
+    } catch (err) {
+        console.error(err);
+        alert(err?.message || "Não foi possível autenticar.");
+    }
+}
+
+async function sairAuth() {
+    try {
+        await window.T20Supabase.signOut();
+        alert("Logout realizado.");
+        render();
+    } catch (err) {
+        console.error(err);
+        alert("Não foi possível sair.");
+    }
+}
+
+function renderAuth() {
+    const usuario = window.T20Supabase?.SUPA?.state?.user || null;
+    const modoCadastro = state.auth.modo === "cadastro";
+
+    app.innerHTML = `
+    <div class="screen">
+      <div class="topbar">
+        <div>
+          <h2>Login / Cadastro</h2>
+          <div class="subtitle">Entre para usar as mesas online.</div>
+        </div>
+
+        <div class="actions">
+          <button class="btn ghost" onclick="go('home')">Voltar</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Conta</div>
+        <div class="panel-body">
+          ${usuario ? `
+            <div class="notice" style="margin-bottom:16px;">
+              Logado como: ${escapeHtml(usuario.email || "Usuário")}
+            </div>
+
+            <button class="btn danger" onclick="sairAuth()">Sair</button>
+          ` : `
+            <div style="display:flex; gap:8px; margin-bottom:16px;">
+              <button class="btn ${!modoCadastro ? "primary" : "ghost"}" onclick="alternarModoAuth('login')">Login</button>
+              <button class="btn ${modoCadastro ? "primary" : "ghost"}" onclick="alternarModoAuth('cadastro')">Cadastro</button>
+            </div>
+
+            ${modoCadastro ? `
+              <div class="field">
+                <label>Nome de exibição</label>
+                <input
+                  type="text"
+                  value="${escapeAttr(state.auth.nomeExibicao || "")}"
+                  onchange="atualizarCampoAuth('nomeExibicao', this.value)"
+                >
+              </div>
+            ` : ""}
+
+            <div class="field">
+              <label>Email</label>
+              <input
+                type="email"
+                value="${escapeAttr(state.auth.email || "")}"
+                onchange="atualizarCampoAuth('email', this.value)"
+              >
+            </div>
+
+            <div class="field">
+              <label>Senha</label>
+              <input
+                type="password"
+                value="${escapeAttr(state.auth.senha || "")}"
+                onchange="atualizarCampoAuth('senha', this.value)"
+              >
+            </div>
+
+            <div style="margin-top:16px;">
+              <button class="btn primary" onclick="enviarAuth()">
+                ${modoCadastro ? "Criar conta" : "Entrar"}
+              </button>
+            </div>
+          `}
+        </div>
+      </div>
+
+      ${usuario ? `
+        <div class="panel" style="margin-top:16px;">
+          <div class="panel-title">Alterar senha</div>
+          <div class="panel-body">
+            <div class="field">
+              <label>Nova senha</label>
+              <input
+                type="password"
+                value="${escapeAttr(state.auth.novaSenha || "")}"
+                onchange="atualizarCampoAuth('novaSenha', this.value)"
+              >
+            </div>
+
+            <div class="field">
+              <label>Confirmar nova senha</label>
+              <input
+                type="password"
+                value="${escapeAttr(state.auth.confirmarNovaSenha || "")}"
+                onchange="atualizarCampoAuth('confirmarNovaSenha', this.value)"
+              >
+            </div>
+
+            <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn primary" onclick="alterarSenhaAuth()">Salvar nova senha</button>
+              <button class="btn ghost" onclick="atualizarCampoAuth('novaSenha', ''); atualizarCampoAuth('confirmarNovaSenha', ''); render();">
+                Limpar
+              </button>
+            </div>
+          </div>
+        </div>
+      ` : ""}
     </div>
   `;
 }
@@ -10536,6 +11397,37 @@ function renderPersonagens() {
         style="display:none"
         onchange="handleInputImportarFichas(this)"
       >
+
+      <div class="panel" style="margin-bottom:16px;">
+  <div class="panel-title">Mesa Online</div>
+  <div class="panel-body">
+    <div class="field">
+      <label>Nome da mesa</label>
+      <input
+        type="text"
+        value="${escapeAttr(state.mesaOnlineNome || "")}"
+        placeholder="Digite o nome da mesa"
+        onchange="definirMesaOnlineNome(this.value)"
+      >
+    </div>
+
+    <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+      <button class="btn primary" type="button" onclick="conectarMesaPorNome()">
+        Conectar mesa
+      </button>
+
+      ${state.mesaOnlineId ? `
+        <span class="subtitle" style="display:flex; align-items:center;">
+          Conectado
+        </span>
+      ` : ""}
+    </div>
+
+    <p class="subtitle" style="margin-top:8px;">
+      Só a ficha marcada como ativa para esta mesa será enviada ao mestre.
+    </p>
+  </div>
+</div>
 
       <div class="row-2">
         <div class="panel">
@@ -10567,6 +11459,15 @@ function renderPersonagens() {
                             ${f.raca ? " • " + escapeHtml(f.raca) : ""}
                             • Nível ${escapeHtml(getNivelTotalPersonagem(f))}
                           </div>
+
+                          <label style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+                            <input
+                              type="checkbox"
+                              ${f.onlineAtivaMesaId === state.mesaOnlineId && state.mesaOnlineId ? "checked" : ""}
+                              onchange="toggleFichaAtivaOnline('${f.id}', this.checked)"
+                            >
+                            <span>Ficha ativa online</span>
+                          </label>
                         </div>
 
                         <div class="actions">
@@ -15657,6 +16558,8 @@ function render() {
     if (state.screen === "evolucao") return renderEvolucao();
     if (state.screen === "dados") return renderDados();
     if (state.screen === "ficha") return renderFicha();
+    if (state.screen === "mestre") return renderMestre();
+    if (state.screen === "auth") return renderAuth();
 }
 
 render();
