@@ -315,7 +315,3 @@
     console.error('Erro ao inicializar Supabase:', err);
   });
 })(window);
-
-console.log('Supabase lib:', !!window.supabase);
-console.log('T20Supabase:', !!window.T20Supabase);
-console.log('Supabase client:', !!window.T20Supabase?.SUPA?.client);
