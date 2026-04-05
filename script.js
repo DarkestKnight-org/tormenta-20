@@ -14916,8 +14916,9 @@ function renderDados() {
               </div>
 
               <div style="margin-top:14px" class="notice">
-                Fórmula atual: <strong>${state.dados.grupos.map(g => `${g.quantidade}${g.tipo}`).join(" + ")}</strong>
-              </div>
+              Fórmula atual: <strong>${state.dados.grupos.map(g => `${g.quantidade}${g.tipo}`).join(" + ")}</strong><br>
+              Total de dados: <strong>${getTotalDadosSelecionados()}/50</strong>
+            </div>
             </div>
           </div>
 
@@ -16461,15 +16462,30 @@ function removeGrupoDado(id) {
     render();
 }
 
+function getTotalDadosSelecionados() {
+    return state.dados.grupos.reduce((total, grupo) => {
+        return total + (Number(grupo.quantidade) || 0);
+    }, 0);
+}
+
 function updateGrupoDado(id, field, value) {
     const grupo = state.dados.grupos.find(g => g.id === id);
     if (!grupo) return;
 
     if (field === "quantidade") {
-        grupo[field] = Math.max(1, Number(value) || 1);
-    } else {
-        grupo[field] = value;
+        const novaQuantidade = Math.max(1, Number(value) || 1);
+
+        const totalSemGrupo = state.dados.grupos.reduce((total, g) => {
+            if (g.id === id) return total;
+            return total + (Number(g.quantidade) || 0);
+        }, 0);
+
+        grupo.quantidade = Math.min(novaQuantidade, Math.max(1, 50 - totalSemGrupo));
+        render();
+        return;
     }
+
+    grupo[field] = value;
 }
 
 function rolarGrupo(quantidade, tipo) {
@@ -16489,6 +16505,13 @@ function rolarGrupo(quantidade, tipo) {
 }
 
 function rolarTodosDados() {
+    const totalDados = getTotalDadosSelecionados();
+
+    if (totalDados > 50) {
+        alert(`Você só pode rolar no máximo 50 dados no total. Atual: ${totalDados}.`);
+        return;
+    }
+
     const gruposRolados = state.dados.grupos.map(g =>
         rolarGrupo(g.quantidade, g.tipo)
     );
