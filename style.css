@@ -994,3 +994,356 @@ input[type="checkbox"] {
     font-size: 0.72rem;
     line-height: 1; 
 }
+.ameaca-sheet-wrap {
+    padding: 24px;
+}
+
+.ameaca-sheet {
+    background: var(--paper);
+    color: var(--ink);
+    padding: 22px 28px;
+    max-width: 920px;
+    margin: 0 auto;
+    font-family: Georgia, "Times New Roman", serif;
+}
+
+.ameaca-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.ameaca-titulo-wrap {
+    flex: 1;
+    border-bottom: 2px solid #b56a2d;
+    padding-bottom: 2px;
+}
+
+.ameaca-titulo {
+    color: #a75016;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-decoration: underline;
+    letter-spacing: 0.3px;
+    font-size: 16px;
+}
+
+.ameaca-nd-badge {
+    background: #a55a1d;
+    color: #fff;
+    font-weight: 700;
+    padding: 7px 12px;
+    clip-path: polygon(0 0, 90% 0, 100% 50%, 90% 100%, 0 100%);
+    white-space: nowrap;
+}
+
+.ameaca-subtipo {
+    font-style: italic;
+    margin-bottom: 16px;
+    font-size: 15px;
+}
+
+.ameaca-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 170px;
+    gap: 24px;
+    align-items: start;
+}
+
+.ameaca-main {
+    min-width: 0;
+}
+
+.ameaca-resumo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, max-content));
+    gap: 8px 28px;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.ameaca-info-pair {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.ameaca-info-pair--wide {
+    grid-column: span 2;
+}
+
+.ameaca-label {
+    color: #a75016;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.4px;
+}
+
+.ameaca-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    min-height: 22px;
+    padding: 1px 6px;
+    border: 1px solid #333;
+    background: #fff;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.ameaca-box-texto {
+    justify-content: flex-start;
+    max-width: 100%;
+    line-height: 1.2;
+}
+
+.ameaca-box-input {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    min-height: 22px;
+    padding: 1px 6px;
+    border: 1px solid #333;
+    background: #fff;
+    font-size: 14px;
+    line-height: 1;
+    text-align: center;
+    font-weight: 700;
+    border-radius: 0;
+}
+
+.ameaca-info-pair .ameaca-box-input {
+    width: 78px;
+}
+
+.ameaca-box-input-text {
+    text-align: left;
+    padding-inline: 8px;
+}
+
+.ameaca-box-input-wide {
+    width: 220px;
+    max-width: 100%;
+}
+
+.ameaca-box-input-side {
+    width: 30%;
+    max-width: 100%;
+}
+
+.ameaca-box-input::-webkit-outer-spin-button,
+.ameaca-box-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.ameaca-box-input[type=number] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.ameaca-atributos {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
+    margin: 16px auto 20px;
+    max-width: 540px;
+}
+
+.ameaca-attr {
+    border: 1px solid #555;
+    background: #ddd;
+    text-align: center;
+    overflow: hidden;
+    border-radius: 4px;
+    min-width: 0;
+}
+
+.ameaca-attr-top {
+    background: #a55a1d;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 0;
+}
+
+.ameaca-attr-controls {
+    display: grid;
+    grid-template-rows: 24px 1fr 24px;
+    align-items: stretch;
+    min-height: 78px;
+}
+
+.ameaca-attr-btn {
+    border: none;
+    background: #ece7df;
+    color: #222;
+    font-weight: 700;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    width: 100%;
+    height: 100%;
+}
+
+    .ameaca-attr-btn:hover {
+        background: #e0d8cc;
+    }
+
+.ameaca-attr-input {
+    width: 100%;
+    border: none;
+    border-top: 1px solid #777;
+    border-bottom: 1px solid #777;
+    background: #ddd;
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    outline: none;
+    padding: 6px 4px;
+    min-width: 0;
+}
+
+    .ameaca-attr-input::-webkit-outer-spin-button,
+    .ameaca-attr-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .ameaca-attr-input[type=number] {
+        appearance: textfield;
+        -moz-appearance: textfield;
+    }
+
+.ameaca-side {
+    display: grid;
+    gap: 8px;
+    align-self: start;
+    min-width: 0;
+    width: 190px;
+    overflow: hidden;
+    border: 1px solid #c97b3e;
+    padding: 12px 14px;
+    background: #f8f6f2;
+}
+
+.ameaca-side-linha {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.ameaca-side-extra {
+    font-size: 12px;
+    color: #333;
+    line-height: 1.35;
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.ameaca-side-bloco {
+    margin-top: 8px;
+    border: 1px solid #c97b3e;
+    background: #f8f6f2;
+    padding: 8px 10px;
+    min-width: 0;
+    width: 100%;
+}
+
+.ameaca-side-texto {
+    margin-top: 6px;
+    font-size: 14px;
+    line-height: 1.45;
+    white-space: normal;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.ameaca-secao {
+    border-top: 1px solid #c97b3e;
+    padding-top: 8px;
+    margin-top: 12px;
+}
+
+.ameaca-secao-titulo {
+    color: #a75016;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 6px;
+    letter-spacing: 0.4px;
+}
+
+.ameaca-secao-corpo {
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: normal;
+}
+
+.ameaca-linha-habilidade + .ameaca-linha-habilidade {
+    margin-top: 6px;
+}
+
+.ameaca-meta {
+    color: #a75016;
+    font-weight: 700;
+}
+
+.ameaca-texto-vazio {
+    color: var(--muted);
+}
+
+@media (max-width: 900px) {
+    .ameaca-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .ameaca-side {
+        max-width: 360px;
+        width: 100%;
+    }
+
+    .ameaca-side-bloco {
+        margin: 8px auto 0;
+        width: 100%;
+    }
+
+    .ameaca-resumo-grid {
+        grid-template-columns: repeat(2, minmax(0, max-content));
+    }
+}
+
+@media (max-width: 640px) {
+    .ameaca-sheet-wrap {
+        padding: 12px;
+    }
+
+    .ameaca-sheet {
+        padding: 16px;
+    }
+
+    .ameaca-topo {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .ameaca-resumo-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .ameaca-atributos {
+        max-width: 100%;
+    }
+}
