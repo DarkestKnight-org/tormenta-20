@@ -1347,3 +1347,16 @@ input[type="checkbox"] {
         max-width: 100%;
     }
 }
+.sheet,
+.panel,
+.row-2,
+.row-3,
+.row-4,
+.row-6,
+.small-grid {
+    min-width: 0;
+}
+
+.sheet {
+    overflow: hidden;
+}
