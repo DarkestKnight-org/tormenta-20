@@ -151,6 +151,62 @@ const GOLPE_PESSOAL_EFEITOS = [
     }
 ];
 
+let AMEACAS_DB = {
+    ameacas: [],
+    poderes: [],
+    magias: [],
+    equipamento: [],
+    tesouro: []
+};
+let AMEACAS_DB_CARREGADO = false;
+
+let REGRAS_DB = {};
+let REGRAS_DB_CARREGADO = false;
+
+async function carregarRegrasDB() {
+    if (REGRAS_DB_CARREGADO) return;
+
+    try {
+        const res = await fetch("regras.json");
+        if (!res.ok) throw new Error("regras.json não encontrado");
+
+        const data = await res.json();
+        REGRAS_DB = data && typeof data === "object" ? data : {};
+    } catch (err) {
+        console.warn("Erro carregando regras.json:", err);
+        REGRAS_DB = {};
+    }
+
+    REGRAS_DB_CARREGADO = true;
+}
+function garantirEstadoAmeacasMestre() {
+    if (!state.mestre) state.mestre = {};
+
+    if (!Array.isArray(state.mestre.ameacasEmCena)) {
+        state.mestre.ameacasEmCena = [];
+    }
+
+    if (typeof state.mestre.ameacaSelecionadaInstanciaId !== "string") {
+        state.mestre.ameacaSelecionadaInstanciaId = "";
+    }
+
+    if (typeof state.mestre.jogadoresAbertos !== "boolean") {
+        state.mestre.jogadoresAbertos = true;
+    }
+
+    if (typeof state.mestre.ameacasAbertas !== "boolean") {
+        state.mestre.ameacasAbertas = true;
+    }
+
+    if (!state.mestre.ameacasModal) {
+        state.mestre.ameacasModal = {
+            nd: "",
+            busca: "",
+            selecionadas: {}
+        };
+    }
+}
+
 const GOLPE_PESSOAL_ELEMENTOS = ["ácido", "eletricidade", "fogo", "frio"];
 const GOLPE_PESSOAL_ATRIBUTOS_MENTAIS = ["inteligencia", "sabedoria", "carisma"];
 
@@ -274,6 +330,36 @@ let ITENS_EQUIPAMENTOS_DB = {
     encantamentosRegras: []
 };
 let ITENS_EQUIPAMENTOS_DB_CARREGADO = false;
+
+async function carregarAmeacasDB() {
+    if (AMEACAS_DB_CARREGADO) return;
+
+    try {
+        const res = await fetch("ameacas.json");
+        if (!res.ok) throw new Error("ameacas.json não encontrado");
+
+        const data = await res.json();
+
+        AMEACAS_DB = {
+            ameacas: Array.isArray(data.ameacas) ? data.ameacas : [],
+            poderes: Array.isArray(data.ameacas_poderes) ? data.ameacas_poderes : [],
+            magias: Array.isArray(data.ameacas_magias) ? data.ameacas_magias : [],
+            equipamento: Array.isArray(data.ameacas_equipamento) ? data.ameacas_equipamento : [],
+            tesouro: Array.isArray(data.ameacas_tesouro) ? data.ameacas_tesouro : []
+        };
+    } catch (err) {
+        console.warn("Erro carregando ameacas.json:", err);
+        AMEACAS_DB = {
+            ameacas: [],
+            poderes: [],
+            magias: [],
+            equipamento: [],
+            tesouro: []
+        };
+    }
+
+    AMEACAS_DB_CARREGADO = true;
+}
 
 async function carregarClassesDB() {
     if (CLASSES_DB_CARREGADO) return;
@@ -632,6 +718,8 @@ async function carregarTodosOsBancos() {
     await carregarItensEquipamentosDB();
     await carregarOrigensDB();
     await carregarDivindadesDB();
+    await carregarAmeacasDB();
+    await carregarRegrasDB();
 }
 
 function getClasseSelecionadaCriacao() {
@@ -2359,7 +2447,7 @@ function renderWidgetDinheiroFlutuante() {
     const valor = getDinheiroFicha(ficha);
 
     return `
-      <div style="position:fixed; right:25px; bottom:70px; z-index:1200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
+      <div style="position:fixed; right:20px; bottom:125px; z-index:1200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
         <button class="btn" onclick="togglePainelDinheiro()">
           T$ ${escapeHtml(String(valor))}
         </button>
@@ -6057,7 +6145,10 @@ function loadFichas() {
 }
 
 function saveFichas() {
-    if (state.screen === "mestre" || state?.mestre?.renderizandoFichaRemota) {
+    const selecionadaMestre = state.screen === "mestre" ? getFichaMestreSelecionada() : null;
+    const bloqueadaNoMestre = state.screen === "mestre" && selecionadaMestre?.tipo !== "npc_local";
+
+    if (bloqueadaNoMestre || state?.mestre?.renderizandoFichaRemota) {
         return;
     }
 
@@ -6066,7 +6157,9 @@ function saveFichas() {
     const mesaId = state.mesaOnlineId;
     if (!mesaId || !window.T20Supabase) return;
 
-    const fichaAtiva = (state.fichas || []).find(f => f?.onlineAtivaMesaId === mesaId);
+    const fichaAtiva = (state.fichas || []).find(
+        f => f?.onlineAtivaMesaId === mesaId && f?.npcLocal !== true
+    );
     if (!fichaAtiva) return;
 
     window.T20Supabase.agendarSyncFichaAtiva({
@@ -6075,6 +6168,7 @@ function saveFichas() {
         wait: 900
     });
 }
+
 async function alterarSenhaAuth() {
     const novaSenha = String(state.auth.novaSenha || "");
     const confirmar = String(state.auth.confirmarNovaSenha || "");
@@ -6100,6 +6194,180 @@ async function alterarSenhaAuth() {
         alert(err?.message || "Não foi possível alterar a senha.");
     }
 }
+function garantirEstadoRegrasMestre() {
+    if (!state.mestre) state.mestre = {};
+
+    const abas = Object.keys(REGRAS_DB || {});
+    if (!state.mestre.regrasModal) {
+        state.mestre.regrasModal = {
+            abaSelecionada: abas[0] || ""
+        };
+    }
+
+    if (!state.mestre.regrasModal.abaSelecionada && abas.length) {
+        state.mestre.regrasModal.abaSelecionada = abas[0];
+    }
+}
+
+function getAbasRegrasDisponiveis() {
+    return Object.keys(REGRAS_DB || {});
+}
+
+function formatarNomeAbaRegras(chave) {
+    return String(chave || "")
+        .replaceAll("_", " ")
+        .replace(/\b\w/g, l => l.toUpperCase());
+}
+
+function getRegistrosAbaRegrasAtual() {
+    garantirEstadoRegrasMestre();
+
+    const aba = String(state.mestre.regrasModal?.abaSelecionada || "");
+    const lista = REGRAS_DB?.[aba];
+
+    return Array.isArray(lista) ? lista : [];
+}
+
+function abaRegrasEhTabela(chave) {
+    return String(chave || "").toLowerCase().includes("tabela");
+}
+
+function selecionarAbaRegrasModal(valor) {
+    garantirEstadoRegrasMestre();
+    state.mestre.regrasModal.abaSelecionada = String(valor || "");
+    render();
+}
+
+function abrirModalRegras() {
+    garantirEstadoRegrasMestre();
+    state.modal = "regras";
+    document.body.classList.add("modal-open");
+    render();
+}
+
+function fecharModalRegras() {
+    if (state.modal !== "regras") return;
+
+    state.modal = null;
+    document.body.classList.remove("modal-open");
+    render();
+}
+function renderConteudoRegrasLista(registros) {
+    if (!registros.length) {
+        return `<div class="empty">Nenhuma regra encontrada nesta aba.</div>`;
+    }
+
+    const grupos = new Map();
+
+    registros.forEach(item => {
+        const tipo = String(item?.tipo || "").trim() || "Outros";
+        if (!grupos.has(tipo)) grupos.set(tipo, []);
+        grupos.get(tipo).push(item);
+    });
+
+    return Array.from(grupos.entries()).map(([tipo, itens]) => `
+        <div style="margin-bottom:16px;">
+            ${tipo !== "Outros" && tipo !== "-" ? `
+                <div class="panel-title" style="border-radius:10px 10px 0 0;">${escapeHtml(tipo)}</div>
+            ` : ""}
+
+            <div class="list" style="margin-top:${tipo !== "Outros" && tipo !== "-" ? "0" : "8px"};">
+                ${itens.map(item => `
+                    <div class="list-item" style="display:block; align-items:initial;">
+                        <div class="list-item-title">${escapeHtml(item.nome || "Sem nome")}</div>
+
+                        ${item.tipo && item.tipo !== "-" && (tipo === "Outros" || tipo === "-") ? `
+                            <div class="list-item-sub" style="font-weight:700;">${escapeHtml(item.tipo)}</div>
+                        ` : ""}
+
+                        ${item.descricao ? `
+                            <div class="subtitle" style="margin-top:10px; color:var(--ink); line-height:1.55;">
+                                ${escapeHtml(item.descricao)}
+                            </div>
+                        ` : ""}
+                    </div>
+                `).join("")}
+            </div>
+        </div>
+    `).join("");
+}
+function renderConteudoRegrasTabela(registros) {
+    if (!registros.length) {
+        return `<div class="empty">Nenhuma regra encontrada nesta aba.</div>`;
+    }
+
+    const colunas = Array.from(
+        registros.reduce((set, item) => {
+            Object.keys(item || {}).forEach(chave => set.add(chave));
+            return set;
+        }, new Set())
+    );
+
+    return `
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        ${colunas.map(col => `<th>${escapeHtml(formatarNomeAbaRegras(col))}</th>`).join("")}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${registros.map(item => `
+                        <tr>
+                            ${colunas.map(col => `<td>${escapeHtml(item?.[col] ?? "")}</td>`).join("")}
+                        </tr>
+                    `).join("")}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+function renderModalRegras() {
+    if (state.modal !== "regras") return "";
+
+    garantirEstadoRegrasMestre();
+
+    const abas = getAbasRegrasDisponiveis();
+    const abaAtual = String(state.mestre.regrasModal?.abaSelecionada || "");
+    const registros = getRegistrosAbaRegrasAtual();
+    const ehTabela = abaRegrasEhTabela(abaAtual);
+
+    return `
+      <div class="overlay" onclick="fecharModalRegras()">
+        <div class="overlay-card" onclick="event.stopPropagation()">
+          <div class="overlay-header">
+            <div>
+              <div class="overlay-title">Regras</div>
+              <div class="subtitle">
+                Consulta rápida das regras cadastradas.
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn ghost" type="button" onclick="fecharModalRegras()">Fechar</button>
+            </div>
+          </div>
+
+          <div class="overlay-body">
+            <div class="field" style="max-width:340px; margin-bottom:14px;">
+              <label>Regra</label>
+              <select onchange="selecionarAbaRegrasModal(this.value)">
+                ${abas.map(aba => `
+                  <option value="${escapeAttr(aba)}" ${aba === abaAtual ? "selected" : ""}>
+                    ${escapeHtml(formatarNomeAbaRegras(aba))}
+                  </option>
+                `).join("")}
+              </select>
+            </div>
+
+            ${ehTabela
+            ? renderConteudoRegrasTabela(registros)
+            : renderConteudoRegrasLista(registros)}
+          </div>
+        </div>
+      </div>
+    `;
+}
 function toggleSidebarMestre() {
     state.mestre.sidebarAberta = !state.mestre.sidebarAberta;
     render();
@@ -6114,30 +6382,40 @@ function fecharSidebarMestre() {
     state.mestre.sidebarAberta = false;
     render();
 }
-function montarHtmlFichaRemotaMestre() {
-    const fichaSelecionada = getFichaMestreSelecionada();
-    if (!fichaSelecionada?.ficha_json) {
-        return `<div class="empty">Selecione um jogador ativo.</div>`;
+function montarHtmlFichaMestre() {
+    const selecionada = getFichaMestreSelecionada();
+    if (!selecionada) {
+        return `<div class="empty">Selecione uma ficha.</div>`;
     }
 
     const screenAnterior = state.screen;
     const flagAnterior = !!state.mestre.renderizandoFichaRemota;
+    const fichaAnterior = state.fichaAtualId;
     const htmlAnterior = app.innerHTML;
 
-    state.mestre.renderizandoFichaRemota = true;
-    state.screen = "ficha";
+    try {
+        state.screen = "ficha";
+        state.mestre.renderizandoFichaRemota = selecionada.tipo !== "npc_local";
 
-    renderFicha();
-    const htmlFicha = app.innerHTML;
+        if (selecionada.tipo === "npc_local") {
+            state.fichaAtualId = selecionada.ficha.id;
+        }
 
-    state.screen = screenAnterior;
-    state.mestre.renderizandoFichaRemota = flagAnterior;
-
-    app.innerHTML = htmlAnterior;
-
-    return htmlFicha;
+        renderFicha();
+        return app.innerHTML;
+    } finally {
+        state.screen = screenAnterior;
+        state.mestre.renderizandoFichaRemota = flagAnterior;
+        state.fichaAtualId = fichaAnterior;
+        app.innerHTML = htmlAnterior;
+    }
 }
 function aplicarModoSomenteLeituraMestre() {
+    const selecionada = getFichaMestreSelecionada();
+    if (!selecionada || selecionada.tipo === "npc_local") {
+        return;
+    }
+
     const viewer = app.querySelector(".mestre-ficha-viewer");
     if (!viewer) return;
 
@@ -6229,10 +6507,146 @@ async function toggleFichaAtivaOnline(fichaId, checked) {
         alert("Não foi possível alterar a ficha ativa online.");
     }
 }
+function toggleJogadoresAtivosMestre() {
+    garantirEstadoAmeacasMestre();
+    state.mestre.jogadoresAbertos = !state.mestre.jogadoresAbertos;
+    render();
+}
+
+function toggleAmeacasAtivasMestre() {
+    garantirEstadoAmeacasMestre();
+    state.mestre.ameacasAbertas = !state.mestre.ameacasAbertas;
+    render();
+}
+
 function getFichaMestreSelecionada() {
-    const lista = state.mestre?.fichas || [];
+    const lista = getListaFichasMestreComNpcs();
     const id = state.mestre?.fichaSelecionadaId || "";
     return lista.find(item => String(item.id) === String(id)) || null;
+}
+function getAmeacaAtivaMestreSelecionada() {
+    garantirEstadoAmeacasMestre();
+
+    const idSelecionado = String(state.mestre.ameacaSelecionadaInstanciaId || "").trim();
+    if (!idSelecionado) return null;
+
+    return (state.mestre.ameacasEmCena || []).find(
+        item => String(item.instanciaId || "") === idSelecionado
+    ) || null;
+}
+
+function selecionarAmeacaMestre(instanciaId) {
+    garantirEstadoAmeacasMestre();
+
+    state.mestre.ameacaSelecionadaInstanciaId = String(instanciaId || "");
+    render();
+}
+async function excluirTodasAmeacasMestre() {
+    garantirEstadoAmeacasMestre();
+
+    const lista = state.mestre.ameacasEmCena || [];
+    if (!lista.length) return;
+
+    const ok = confirm("Excluir todas as ameaças ativas da mesa?");
+    if (!ok) return;
+
+    try {
+        if (window.T20Supabase?.removerTodasAmeacasMestreDaMesa && state.mestre.mesaId) {
+            await window.T20Supabase.removerTodasAmeacasMestreDaMesa(state.mestre.mesaId);
+        }
+
+        state.mestre.ameacasEmCena = [];
+        state.mestre.ameacaSelecionadaInstanciaId = "";
+
+        render();
+    } catch (err) {
+        console.error(err);
+        alert(err?.message || "Não foi possível excluir as ameaças.");
+    }
+}
+async function removerAmeacaMestre(instanciaId) {
+    garantirEstadoAmeacasMestre();
+
+    const item = (state.mestre.ameacasEmCena || []).find(
+        a => String(a.instanciaId || "") === String(instanciaId || "")
+    );
+    if (!item) return;
+
+    const ok = confirm(`Remover a ameaça "${item.nome || "Ameaça"}" da mesa?`);
+    if (!ok) return;
+
+    const removidoId = String(instanciaId || "");
+
+    try {
+        if (window.T20Supabase?.removerAmeacaMestre && state.mestre.mesaId) {
+            await window.T20Supabase.removerAmeacaMestre({
+                mesaId: state.mestre.mesaId,
+                instanciaId: removidoId
+            });
+        }
+
+        state.mestre.ameacasEmCena = (state.mestre.ameacasEmCena || []).filter(
+            a => String(a.instanciaId || "") !== removidoId
+        );
+
+        if (String(state.mestre.ameacaSelecionadaInstanciaId || "") === removidoId) {
+            state.mestre.ameacaSelecionadaInstanciaId = "";
+        }
+
+        render();
+    } catch (err) {
+        console.error(err);
+        alert(err?.message || "Não foi possível remover a ameaça.");
+    }
+}
+
+function renderListaAmeacasAtivasMestre() {
+    garantirEstadoAmeacasMestre();
+
+    const lista = state.mestre.ameacasEmCena || [];
+    if (!lista.length) {
+        return `<div class="empty">Nenhuma ameaça ativa.</div>`;
+    }
+
+    const contadores = {};
+
+    return lista.map(item => {
+        const ativa = String(item.instanciaId || "") === String(state.mestre.ameacaSelecionadaInstanciaId || "");
+        const inicial = escapeHtml((item.nome || "?").charAt(0).toUpperCase());
+
+        const chave = String(item.ameacaId || item.nome || "");
+        contadores[chave] = (contadores[chave] || 0) + 1;
+        const indice = contadores[chave];
+
+        const nomeExibido = item.nome || "Ameaça";
+
+        return `
+          <div class="mestre-player-row">
+            <button
+              class="mestre-player-btn ${ativa ? "ativo" : ""}"
+              type="button"
+              onclick="selecionarAmeacaMestre('${escapeAttr(item.instanciaId)}')"
+            >
+              <div class="mestre-player-avatar">${inicial}</div>
+              <div style="min-width:0;">
+                <div class="list-item-title">${escapeHtml(nomeExibido)}</div>
+                <div class="list-item-sub">
+                   #${escapeHtml(indice)} • ND ${escapeHtml(item.nd || "-")}
+                </div>
+              </div>
+            </button>
+
+            <button
+              class="btn danger"
+              type="button"
+              onclick="removerAmeacaMestre('${escapeAttr(item.instanciaId)}')"
+              title="Remover ameaça"
+            >
+              ✕
+            </button>
+          </div>
+        `;
+    }).join("");
 }
 
 async function carregarAreaDoMestre() {
@@ -6247,16 +6661,30 @@ async function carregarAreaDoMestre() {
         return;
     }
 
+    garantirEstadoAmeacasMestre();
+
     state.mestre.carregando = true;
     render();
 
-    try {
-        const fichas = await window.T20Supabase.listarFichasAtivasDaMesa(mesaId);
-        state.mestre.fichas = fichas || [];
+    async function recarregarDadosMesa() {
+        const registros = await window.T20Supabase.listarFichasAtivasDaMesa(mesaId);
 
-        if (!state.mestre.fichaSelecionadaId && state.mestre.fichas.length) {
-            state.mestre.fichaSelecionadaId = state.mestre.fichas[0].id;
-        }
+        const fichasNormais = [];
+        const ameacas = [];
+
+        (registros || []).forEach(registro => {
+            const ficha = registro?.ficha_json || {};
+            const tipoRegistro = String(ficha?.tipoRegistro || "");
+
+            if (tipoRegistro === "ameaca_mestre") {
+                ameacas.push(ficha);
+            } else {
+                fichasNormais.push(registro);
+            }
+        });
+
+        state.mestre.fichas = fichasNormais;
+        state.mestre.ameacasEmCena = ameacas;
 
         if (
             state.mestre.fichaSelecionadaId &&
@@ -6265,21 +6693,27 @@ async function carregarAreaDoMestre() {
             state.mestre.fichaSelecionadaId = state.mestre.fichas[0]?.id || "";
         }
 
-        await window.T20Supabase.assinarMesaAtiva(mesaId, async () => {
-            const listaAtualizada = await window.T20Supabase.listarFichasAtivasDaMesa(mesaId);
-            state.mestre.fichas = listaAtualizada || [];
+        if (
+            state.mestre.ameacaSelecionadaInstanciaId &&
+            !state.mestre.ameacasEmCena.some(a => String(a.instanciaId) === String(state.mestre.ameacaSelecionadaInstanciaId))
+        ) {
+            state.mestre.ameacaSelecionadaInstanciaId = state.mestre.ameacasEmCena[0]?.instanciaId || "";
+        }
 
-            if (!state.mestre.fichaSelecionadaId && state.mestre.fichas.length) {
+        if (!state.mestre.fichaSelecionadaId && !state.mestre.ameacaSelecionadaInstanciaId) {
+            if (state.mestre.fichas.length) {
                 state.mestre.fichaSelecionadaId = state.mestre.fichas[0].id;
+            } else if (state.mestre.ameacasEmCena.length) {
+                state.mestre.ameacaSelecionadaInstanciaId = state.mestre.ameacasEmCena[0].instanciaId;
             }
+        }
+    }
 
-            if (
-                state.mestre.fichaSelecionadaId &&
-                !state.mestre.fichas.some(f => String(f.id) === String(state.mestre.fichaSelecionadaId))
-            ) {
-                state.mestre.fichaSelecionadaId = state.mestre.fichas[0]?.id || "";
-            }
+    try {
+        await recarregarDadosMesa();
 
+        await window.T20Supabase.assinarMesaAtiva(mesaId, async () => {
+            await recarregarDadosMesa();
             render();
         });
     } catch (err) {
@@ -6316,7 +6750,6 @@ async function selecionarMesaMestre(mesaId, mesaNome) {
     state.mestre.mesaNome = mesaNome || "";
     state.mestre.fichas = [];
     state.mestre.fichaSelecionadaId = "";
-    render();
 
     await carregarAreaDoMestre();
 }
@@ -6525,123 +6958,237 @@ function renderFichaMestreDetalhe(fichaRemota) {
     `;
 }
 function renderMestre() {
-    if (window.T20Supabase?.SUPA?.state?.user && !(state.mestre.mesasCriadas || []).length) {
-        carregarMinhasMesasMestre();
-    }
+    garantirEstadoAmeacasMestre();
 
-    const fichaSelecionada = getFichaMestreSelecionada();
-    const fichaHtml = fichaSelecionada
-        ? montarHtmlFichaRemotaMestre()
-        : `<div class="empty">Nenhuma ficha ativa selecionada.</div>`;
+    const fichaHtml = montarHtmlViewerMestre();
+    const listaFichas = getListaFichasMestreComNpcs();
 
     app.innerHTML = `
-    <div class="screen" style="padding:0; min-height:100vh; position:relative; overflow:hidden;">
+    <div class="screen" style="padding:0; min-height:100vh; position:relative; width:100%; max-width:none; overflow:visible;">
       <style>
-        .mestre-layout {
-          position: relative;
-          min-height: 100vh;
-          background: #f5f6fa;
-        }
+  .mestre-layout {
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    background: #f5f6fa;
+  }
 
-        .mestre-ficha-viewer {
-          min-height: 100vh;
-          overflow: auto;
-          padding-left: 0;
-        }
+  .mestre-ficha-viewer {
+    min-height: 100vh;
+    margin-left: 320px;
+    width: calc(100vw - 320px);
+    overflow: auto;
+    box-sizing: border-box;
+  }
 
-        .mestre-ficha-viewer > .screen > .topbar {
-          display: none !important;
-        }
+  .mestre-ficha-viewer > .screen > .topbar {
+    display: none !important;
+  }
 
-        .mestre-sidebar {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 320px;
-          height: 100vh;
-          background: rgba(255,255,255,0.96);
-          backdrop-filter: blur(6px);
-          border-right: 1px solid #ddd;
-          box-shadow: 0 0 24px rgba(0,0,0,.08);
-          z-index: 50;
-          display: flex;
-          flex-direction: column;
-        }
+  .mestre-dual-view {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    min-height: 100vh;
+    padding: 16px;
+    align-items: start;
+    width: 100%;
+    box-sizing: border-box;
+  }
 
-        .mestre-sidebar-header {
-          padding: 16px;
-          border-bottom: 1px solid #eee;
-          background: rgba(250,250,250,0.96);
-        }
+  .mestre-view-pane {
+    min-width: 0;
+    width: 100%;
+    min-height: calc(100vh - 32px);
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+  }
 
-        .mestre-sidebar-body {
-          flex: 1;
-          overflow: auto;
-          padding: 12px;
-        }
+  .mestre-view-pane-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.88);
+    border: 1px solid #ddd;
+    backdrop-filter: blur(4px);
+  }
 
-        .mestre-sidebar-section {
-          margin-bottom: 18px;
-        }
+  .mestre-view-pane-body {
+    min-width: 0;
+    width: 100%;
+    flex: 1;
+    overflow: auto;
+  }
 
-        .mestre-player-btn {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 10px;
-          border-radius: 14px;
-          border: 1px solid #ddd;
-          background: #fff;
-          cursor: pointer;
-          text-align: left;
-          margin-bottom: 10px;
-        }
+  .mestre-scale-wrap {
+    width: 100%;
+    overflow: auto;
+  }
 
-        .mestre-player-btn.ativo {
-          border: 2px solid #6d4aff;
-          background: #f7f4ff;
-        }
+  .mestre-scale-inner {
+    transform-origin: top left;
+    width: 100%;
+    zoom: 0.78;
+  }
 
-        .mestre-player-avatar {
-          width: 42px;
-          height: 42px;
-          border-radius: 999px;
-          background: #6d4aff;
-          color: #fff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 700;
-          flex: 0 0 auto;
-        }
+  .mestre-scale-inner .screen,
+  .mestre-scale-inner .sheet-wrap,
+  .mestre-scale-inner .ameaca-sheet-wrap,
+  .mestre-scale-inner .sheet,
+  .mestre-scale-inner .ameaca-sheet {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
 
-        .mestre-view-topbar {
-          position: fixed;
-          top: 16px;
-          right: 16px;
-          z-index: 60;
-          display: flex;
-          gap: 10px;
-        }
+  .mestre-scale-inner .screen {
+    padding: 0 !important;
+    min-height: auto !important;
+    overflow: visible !important;
+  }
 
-        .mestre-mesa-btn {
-          width: 100%;
-          display: block;
-          padding: 10px 12px;
-          border-radius: 12px;
-          border: 1px solid #ddd;
-          background: #fff;
-          text-align: left;
-          cursor: pointer;
-          margin-bottom: 8px;
-        }
+  .mestre-scale-inner .sheet-wrap,
+  .mestre-scale-inner .ameaca-sheet-wrap {
+    padding: 0 !important;
+  }
 
-        .mestre-mesa-btn.ativa {
-          border: 2px solid #6d4aff;
-          background: #f7f4ff;
-        }
-      </style>
+  .mestre-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 320px;
+    height: 100vh;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(6px);
+    border-right: 1px solid #ddd;
+    box-shadow: 0 0 24px rgba(0,0,0,.08);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mestre-sidebar-header {
+    padding: 16px;
+    border-bottom: 1px solid #eee;
+    background: rgba(250,250,250,0.96);
+  }
+
+  .mestre-sidebar-body {
+    flex: 1;
+    overflow: auto;
+    padding: 12px;
+  }
+
+  .mestre-sidebar-section {
+    margin-bottom: 18px;
+  }
+
+  .mestre-player-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 14px;
+    border: 1px solid #ddd;
+    background: #fff;
+    cursor: pointer;
+    text-align: left;
+    margin-bottom: 10px;
+  }
+
+  .mestre-player-btn.ativo {
+    border: 2px solid #6d4aff;
+    background: #f7f4ff;
+  }
+
+  .mestre-player-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    background: #6d4aff;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex: 0 0 auto;
+  }
+
+  .mestre-view-topbar {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 60;
+    display: flex;
+    gap: 10px;
+  }
+
+  .mestre-mesa-btn {
+    width: 100%;
+    display: block;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    background: #fff;
+    text-align: left;
+    cursor: pointer;
+    margin-bottom: 8px;
+  }
+
+  .mestre-mesa-btn.ativa {
+    border: 2px solid #6d4aff;
+    background: #f7f4ff;
+  }
+
+  .mestre-player-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .mestre-player-row .mestre-player-btn {
+    margin-bottom: 0;
+    flex: 1;
+  }
+
+  @media (min-width: 2200px) {
+    .mestre-scale-inner {
+      zoom: 1;
+    }
+  }
+
+  @media (max-width: 2199px) and (min-width: 2000px) {
+    .mestre-scale-inner {
+      zoom: 0.92;
+    }
+  }
+
+  @media (max-width: 1999px) and (min-width: 1800px) {
+    .mestre-scale-inner {
+      zoom: 0.86;
+    }
+  }
+
+  @media (max-width: 1799px) and (min-width: 1600px) {
+    .mestre-scale-inner {
+      zoom: 0.8;
+    }
+  }
+
+  @media (max-width: 1599px) {
+    .mestre-scale-inner {
+      zoom: 0.72;
+    }
+  }
+</style>
 
       <div class="mestre-layout">
         <div class="mestre-view-topbar">
@@ -6653,8 +7200,8 @@ function renderMestre() {
             <div style="font-size:20px; font-weight:700;">Área do Mestre</div>
             <div class="subtitle" style="margin-top:4px;">
               ${state.mestre.mesaNome
-            ? `Mesa: ${escapeHtml(state.mestre.mesaNome)}`
-            : "Gerencie suas mesas e veja as fichas ativas"}
+                ? `Mesa: ${escapeHtml(state.mestre.mesaNome)}`
+                : "Gerencie suas mesas e veja as fichas ativas"}
             </div>
           </div>
 
@@ -6665,11 +7212,14 @@ function renderMestre() {
               <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
                 <button class="btn primary" type="button" onclick="criarMesaMestre()">Criar mesa</button>
                 <button class="btn danger" type="button" onclick="excluirMesaMestre()">Excluir mesa</button>
+                <button class="btn" type="button" onclick="abrirModalNpcAleatorio()">Criar NPC aleatório</button>
+                <button class="btn" type="button" onclick="abrirModalAmeacas()">Ameaças</button>
+                <button class="btn" type="button" onclick="abrirModalRegras()">Regras</button>
               </div>
 
               ${!(state.mestre.mesasCriadas || []).length
-            ? `<div class="empty">Você ainda não criou mesas.</div>`
-            : `
+                ? `<div class="empty">Você ainda não criou mesas.</div>`
+                : `
                   <div>
                     ${(state.mestre.mesasCriadas || []).map(mesa => `
                       <button
@@ -6684,37 +7234,87 @@ function renderMestre() {
                       </button>
                     `).join("")}
                   </div>
-                `
-        }
+                `}
             </div>
 
             <div class="mestre-sidebar-section">
-              <div class="list-item-title" style="margin-bottom:8px;">Jogadores ativos</div>
+              <button
+                class="mestre-mesa-btn"
+                type="button"
+                onclick="toggleJogadoresAtivosMestre()"
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"
+              >
+                <span class="list-item-title" style="font-size:18px;">Jogadores ativos</span>
+                <span>${state.mestre.jogadoresAbertos ? "▾" : "▸"}</span>
+              </button>
 
-              ${!(state.mestre.fichas || []).length
-            ? `<div class="empty">Nenhum jogador ativo.</div>`
-            : (state.mestre.fichas || []).map(item => {
-                const ativo = String(item.id) === String(state.mestre.fichaSelecionadaId);
-                const nome = item?.ficha_json?.nome || item?.nome || "Sem nome";
-                const classe = item?.ficha_json?.classesPersonagem?.[0]?.nome || item?.ficha_json?.classe || "Sem classe";
-                const nivel = item?.ficha_json?.nivelTotal || item?.ficha_json?.nivel || 1;
-                const inicial = escapeHtml((nome || "?").charAt(0).toUpperCase());
+              ${state.mestre.jogadoresAbertos ? (
+                !listaFichas.length
+                  ? `<div class="empty">Nenhum jogador ativo.</div>`
+                  : listaFichas.map(item => {
+                      const ativo = String(item.id) === String(state.mestre.fichaSelecionadaId);
+                      const fichaBase = item.tipo === "npc_local" ? item.ficha : item.ficha_json;
+                      const nome = fichaBase?.nome || item?.nome || "Sem nome";
+                      const classe = fichaBase?.classesPersonagem?.[0]?.nome || fichaBase?.classe || "Sem classe";
+                      const nivel = fichaBase?.nivelTotal || fichaBase?.nivel || 1;
+                      const inicial = escapeHtml((nome || "?").charAt(0).toUpperCase());
 
-                return `
-                      <button
-                        class="mestre-player-btn ${ativo ? "ativo" : ""}"
-                        type="button"
-                        onclick="selecionarFichaMestre('${item.id}')"
-                      >
-                        <div class="mestre-player-avatar">${inicial}</div>
-                        <div style="min-width:0;">
-                          <div class="list-item-title">${escapeHtml(nome)}</div>
-                          <div class="list-item-sub">${escapeHtml(classe)} • Nível ${escapeHtml(nivel)}</div>
+                      return `
+                        <div class="mestre-player-row">
+                          <button
+                            class="mestre-player-btn ${ativo ? "ativo" : ""}"
+                            type="button"
+                            onclick="selecionarFichaMestre('${item.id}')"
+                          >
+                            <div class="mestre-player-avatar">${inicial}</div>
+                            <div style="min-width:0;">
+                              <div class="list-item-title">
+                                ${escapeHtml(nome)}
+                                ${item.tipo === "npc_local" ? `<span class="subtitle"> • NPC</span>` : ``}
+                              </div>
+                              <div class="list-item-sub">${escapeHtml(classe)} • Nível ${escapeHtml(nivel)}</div>
+                            </div>
+                          </button>
+
+                          ${item.tipo === "npc_local" ? `
+                            <button
+                              class="btn danger"
+                              type="button"
+                              onclick="excluirNpcLocalMestre('${item.ficha.id}')"
+                              title="Excluir NPC"
+                            >
+                              ✕
+                            </button>
+                          ` : ""}
                         </div>
-                      </button>
-                    `;
-            }).join("")
-        }
+                      `;
+                  }).join("")
+              ) : ""}
+            </div>
+
+            <div class="mestre-sidebar-section">
+              <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+                <button
+                  class="mestre-mesa-btn"
+                  type="button"
+                  onclick="toggleAmeacasAtivasMestre()"
+                  style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0; flex:1;"
+                >
+                  <span class="list-item-title" style="font-size:18px;">Ameaças ativas</span>
+                  <span>${state.mestre.ameacasAbertas ? "▾" : "▸"}</span>
+                </button>
+
+                <button
+                  class="btn danger"
+                  type="button"
+                  onclick="excluirTodasAmeacasMestre()"
+                  title="Excluir todas as ameaças"
+                >
+                  Limpar
+                </button>
+              </div>
+
+              ${state.mestre.ameacasAbertas ? renderListaAmeacasAtivasMestre() : ""}
             </div>
           </div>
         </aside>
@@ -6727,6 +7327,21 @@ function renderMestre() {
   `;
 
     aplicarModoSomenteLeituraMestre();
+
+    const modalNpcHtml = renderNpcAleatorioModal();
+    if (modalNpcHtml) {
+        app.insertAdjacentHTML("beforeend", modalNpcHtml);
+    }
+
+    const modalAmeacasHtml = renderModalAmeacas();
+    if (modalAmeacasHtml) {
+        app.insertAdjacentHTML("beforeend", modalAmeacasHtml);
+    }
+
+    const modalRegrasHtml = renderModalRegras();
+    if (modalRegrasHtml) {
+        app.insertAdjacentHTML("beforeend", modalRegrasHtml);
+    }
 }
 function exportarFichasJson() {
     try {
@@ -6964,16 +7579,1502 @@ function fichaVazia() {
         anotacoes: ""
     };
 }
+function escolherAleatorio(lista) {
+    if (!Array.isArray(lista) || !lista.length) return null;
+    return lista[Math.floor(Math.random() * lista.length)];
+}
 
+function embaralharLista(lista) {
+    const copia = [...(lista || [])];
+    for (let i = copia.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copia[i], copia[j]] = [copia[j], copia[i]];
+    }
+    return copia;
+}
+function abrirModalAmeacas() {
+    if (!state.mestre?.mesaId) {
+        alert("Selecione uma mesa antes de adicionar ameaças.");
+        return;
+    }
+
+    garantirEstadoAmeacasMestre();
+
+    state.modal = "ameacas";
+    state.mestre.ameacasModal = {
+        nd: "",
+        busca: "",
+        selecionadas: {}
+    };
+
+    document.body.classList.add("modal-open");
+    render();
+}
+
+function fecharModalAmeacas() {
+    if (state.modal !== "ameacas") return;
+
+    state.modal = null;
+    document.body.classList.remove("modal-open");
+    render();
+}
+function normalizarTextoBusca(texto) {
+    return String(texto || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+}
+let filtroAmeacasTimer = null;
+
+function setFiltroBuscaAmeacasAtual(valor) {
+    garantirEstadoAmeacasMestre();
+    state.mestre.ameacasModal.busca = String(valor || "");
+}
+
+function agendarFiltroModalAmeacas(valor) {
+    setFiltroBuscaAmeacasAtual(valor);
+
+    if (filtroAmeacasTimer) {
+        clearTimeout(filtroAmeacasTimer);
+    }
+
+    filtroAmeacasTimer = setTimeout(() => {
+        aplicarFiltroModalAmeacas(valor);
+    }, 180);
+}
+
+function aplicarFiltroModalAmeacas(valor = "") {
+    setFiltroBuscaAmeacasAtual(valor);
+
+    const lista = document.getElementById("lista-ameacas-modal");
+    if (!lista) return;
+
+    const termo = normalizarTextoBusca(valor);
+    let totalVisivel = 0;
+
+    Array.from(lista.querySelectorAll("[data-ameaca-nome-normalizado]")).forEach(item => {
+        const nomeNormalizado = item.getAttribute("data-ameaca-nome-normalizado") || "";
+        const exibir = !termo || nomeNormalizado.includes(termo);
+
+        item.style.display = exibir ? "" : "none";
+
+        if (exibir) {
+            totalVisivel += 1;
+        }
+    });
+
+    const mensagem = document.getElementById("mensagem-sem-ameacas-modal");
+    if (mensagem) {
+        mensagem.style.display = totalVisivel === 0 ? "block" : "none";
+        mensagem.textContent = termo
+            ? "Nenhuma ameaça encontrada para essa busca."
+            : "Nenhuma ameaça encontrada.";
+    }
+}
+
+function limparBuscaModalAmeacas() {
+    const campo = document.getElementById("busca-ameacas-modal");
+    setFiltroBuscaAmeacasAtual("");
+
+    if (!campo) {
+        aplicarFiltroModalAmeacas("");
+        return;
+    }
+
+    campo.value = "";
+    aplicarFiltroModalAmeacas("");
+    campo.focus();
+}
+function getNdsAmeacasDisponiveis() {
+    const unicos = [...new Set(
+        (AMEACAS_DB.ameacas || [])
+            .map(a => String(a.nd || "").trim())
+            .filter(Boolean)
+    )];
+
+    return unicos.sort((a, b) => a.localeCompare(b, "pt-BR", { numeric: true }));
+}
+
+function getAmeacasFiltradasModal() {
+    garantirEstadoAmeacasMestre();
+
+    const nd = String(state.mestre.ameacasModal?.nd || "").trim();
+
+    return (AMEACAS_DB.ameacas || []).filter(a => {
+        return !nd || String(a.nd || "").trim() === nd;
+    });
+}
+
+function alterarFiltroNdAmeacas(valor) {
+    garantirEstadoAmeacasMestre();
+    state.mestre.ameacasModal.nd = String(valor || "");
+    render();
+}
+
+function toggleSelecaoAmeaca(ameacaId, checked) {
+    garantirEstadoAmeacasMestre();
+
+    const id = String(ameacaId);
+
+    if (checked) {
+        if (!state.mestre.ameacasModal.selecionadas[id]) {
+            state.mestre.ameacasModal.selecionadas[id] = { quantidade: 1 };
+        }
+    } else {
+        delete state.mestre.ameacasModal.selecionadas[id];
+    }
+
+    render();
+}
+
+function alterarQuantidadeAmeacaSelecionada(ameacaId, valor) {
+    garantirEstadoAmeacasMestre();
+
+    const id = String(ameacaId);
+    const quantidade = Math.max(1, Number(valor) || 1);
+
+    if (!state.mestre.ameacasModal.selecionadas[id]) {
+        state.mestre.ameacasModal.selecionadas[id] = { quantidade: 1 };
+    }
+
+    state.mestre.ameacasModal.selecionadas[id].quantidade = quantidade;
+    render();
+}
+
+function getTotalAmeacasSelecionadasModal() {
+    garantirEstadoAmeacasMestre();
+
+    return Object.values(state.mestre.ameacasModal.selecionadas || {})
+        .reduce((acc, item) => acc + (Number(item.quantidade) || 0), 0);
+}
+async function adicionarAmeacasSelecionadas() {
+    garantirEstadoAmeacasMestre();
+
+    const selecionadas = state.mestre.ameacasModal.selecionadas || {};
+    const ids = Object.keys(selecionadas);
+
+    if (!ids.length) {
+        alert("Selecione pelo menos uma ameaça.");
+        return;
+    }
+
+    if (!state.mestre.mesaId) {
+        alert("Selecione uma mesa antes de adicionar ameaças.");
+        return;
+    }
+
+    const mapa = new Map(
+        (AMEACAS_DB.ameacas || []).map(a => [String(a.id || ""), a])
+    );
+
+    let ultimaInstanciaId = "";
+
+    try {
+        for (const id of ids) {
+            const base = mapa.get(String(id));
+            if (!base) continue;
+
+            const quantidade = Math.max(1, Number(selecionadas[id]?.quantidade) || 1);
+
+            for (let i = 0; i < quantidade; i++) {
+                const instanciaId = uid();
+                ultimaInstanciaId = instanciaId;
+
+                const instancia = {
+                    instanciaId,
+                    ameacaId: base.id,
+                    nome: base.nome,
+                    nd: base.nd,
+                    tipo: base.tipo,
+                    tamanho: base.tamanho || "",
+                    deslocamento: base.deslocamento || "",
+                    resumo: base.resumo || "",
+                    percepcaoBase: base.percepcao || "",
+                    vonBase: base.von || "",
+                    pericias: base.pericias || "—",
+                    pv: Number(base.pv ?? 0) || 0,
+                    pm: base.pm === "" || base.pm == null ? "" : Number(base.pm) || 0,
+                    defesa: Number(base.defesa ?? 0) || 0,
+                    iniciativa: Number(base.iniciativa ?? 0) || 0,
+                    fort: Number(base.fort ?? 0) || 0,
+                    ref: Number(base.ref ?? 0) || 0,
+                    von: Number(extrairValorEComplementoAmeaca(base.von).valor || 0) || 0,
+                    percepcao: Number(extrairValorEComplementoAmeaca(base.percepcao).valor || 0) || 0,
+                    for: Number(base.for ?? 0) || 0,
+                    des: Number(base.des ?? 0) || 0,
+                    con: Number(base.con ?? 0) || 0,
+                    int: Number(base.int ?? 0) || 0,
+                    sab: Number(base.sab ?? 0) || 0,
+                    car: Number(base.car ?? 0) || 0,
+                    edicao: {
+                        pv: Number(base.pv ?? 0) || 0,
+                        pm: base.pm === "" || base.pm == null ? "" : Number(base.pm) || 0,
+                        defesa: Number(base.defesa ?? 0) || 0,
+                        iniciativa: Number(base.iniciativa ?? 0) || 0,
+                        percepcao: Number(extrairValorEComplementoAmeaca(base.percepcao).valor || 0) || 0,
+                        fort: Number(base.fort ?? 0) || 0,
+                        ref: Number(base.ref ?? 0) || 0,
+                        von: Number(extrairValorEComplementoAmeaca(base.von).valor || 0) || 0,
+                        tamanho: base.tamanho || "",
+                        deslocamento: base.deslocamento || "",
+                        pericias: base.pericias || "—",
+                        for: Number(base.for ?? 0) || 0,
+                        des: Number(base.des ?? 0) || 0,
+                        con: Number(base.con ?? 0) || 0,
+                        int: Number(base.int ?? 0) || 0,
+                        sab: Number(base.sab ?? 0) || 0,
+                        car: Number(base.car ?? 0) || 0
+                    }
+                };
+
+                if (window.T20Supabase?.salvarAmeacaMestre) {
+                    await window.T20Supabase.salvarAmeacaMestre({
+                        mesaId: state.mestre.mesaId,
+                        ameaca: instancia
+                    });
+                }
+
+                state.mestre.ameacasEmCena.push(instancia);
+            }
+        }
+
+        state.mestre.ameacaSelecionadaInstanciaId = ultimaInstanciaId;
+        state.mestre.fichaSelecionadaId = "";
+
+        fecharModalAmeacas();
+    } catch (err) {
+        console.error(err);
+        alert(err?.message || "Não foi possível salvar as ameaças.");
+    }
+}
+function renderModalAmeacas() {
+    if (state.modal !== "ameacas") return "";
+
+    garantirEstadoAmeacasMestre();
+
+    const nds = getNdsAmeacasDisponiveis();
+    const lista = getAmeacasFiltradasModal();
+    const totalSelecionado = getTotalAmeacasSelecionadasModal();
+    const buscaAtual = state.mestre.ameacasModal.busca || "";
+
+    setTimeout(() => {
+        const campoBusca = document.getElementById("busca-ameacas-modal");
+        if (campoBusca) {
+            if (campoBusca.value !== buscaAtual) {
+                campoBusca.value = buscaAtual;
+            }
+
+            if (document.activeElement !== campoBusca) {
+                campoBusca.focus();
+            }
+        }
+
+        aplicarFiltroModalAmeacas(buscaAtual);
+    }, 0);
+
+    return `
+      <div class="overlay" onclick="fecharModalAmeacas()">
+        <div class="overlay-card" onclick="event.stopPropagation()">
+          <div class="overlay-header">
+            <div>
+              <div class="overlay-title">Adicionar ameaças</div>
+              <div class="subtitle">
+                Filtre por ND, busque por nome e defina a quantidade de cada inimigo.
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn ghost" type="button" onclick="fecharModalAmeacas()">Fechar</button>
+              <button class="btn primary" type="button" onclick="adicionarAmeacasSelecionadas()">
+                Adicionar (${totalSelecionado})
+              </button>
+            </div>
+          </div>
+
+          <div class="overlay-body">
+            <div class="row-2" style="margin-bottom:12px; align-items:end; grid-template-columns: 220px 1fr;">
+              <div class="field">
+                <label>ND</label>
+                <select onchange="alterarFiltroNdAmeacas(this.value)">
+                  <option value="">Todos</option>
+                  ${nds.map(nd => `
+                    <option value="${escapeAttr(nd)}" ${state.mestre.ameacasModal.nd === nd ? "selected" : ""}>
+                      ${escapeHtml(nd)}
+                    </option>
+                  `).join("")}
+                </select>
+              </div>
+
+              <div class="field">
+                    <label>Buscar por nome</label>
+                    <input
+                    id="busca-ameacas-modal"
+                    type="search"
+                    value="${escapeAttr(state.mestre.ameacasModal.busca || "")}"
+                    placeholder="Ex.: Goblin, Lobo, Dragão..."
+                    oninput="agendarFiltroModalAmeacas(this.value)"
+                    onkeydown="if (event.key === 'Enter') { event.preventDefault(); aplicarFiltroModalAmeacas(this.value); }"
+                    />
+                </div>
+
+                <div class="actions" style="justify-content:flex-end; align-items:end;">
+                    <button class="btn ghost" type="button" onclick="limparBuscaModalAmeacas()">
+                    Limpar
+                    </button>
+                </div>
+            </div>
+
+            <div id="mensagem-sem-ameacas-modal" class="empty" style="display:none; margin-bottom:12px;">
+  Nenhuma ameaça encontrada para essa busca.
+</div>
+
+<div class="list" id="lista-ameacas-modal">
+  ${!lista.length ? `
+    <div class="empty">Nenhuma ameaça encontrada.</div>
+  ` : lista.map(ameaca => {
+        const selecionada = state.mestre.ameacasModal.selecionadas[String(ameaca.id)];
+        const quantidade = Math.max(1, Number(selecionada?.quantidade) || 1);
+
+        return `
+                      <div
+                          class="list-item"
+                          data-ameaca-nome-normalizado="${escapeAttr(normalizarTextoBusca(ameaca.nome || ""))}"
+                          style="${selecionada ? "border-color:#b62222;" : ""}"
+                        >
+                        <label style="display:flex; gap:12px; align-items:flex-start; flex:1;">
+                          <input
+                            class="choice-checkbox"
+                            type="checkbox"
+                            ${selecionada ? "checked" : ""}
+                            onchange="toggleSelecaoAmeaca('${escapeAttr(ameaca.id)}', this.checked)"
+                          />
+
+                          <div class="choice-main">
+                            <div class="list-item-title">${escapeHtml(ameaca.nome)}</div>
+                            <div class="list-item-sub">
+                              ND ${escapeHtml(ameaca.nd || "-")}
+                              ${ameaca.tipo ? ` • ${escapeHtml(ameaca.tipo)}` : ""}
+                              ${ameaca.tamanho ? ` • ${escapeHtml(ameaca.tamanho)}` : ""}
+                            </div>
+                            ${ameaca.resumo ? `
+                              <div class="subtitle" style="margin-top:6px;">
+                                ${escapeHtml(ameaca.resumo)}
+                              </div>
+                            ` : ""}
+                          </div>
+                        </label>
+
+                        <div class="field" style="width:110px; flex:0 0 110px;">
+                          <label>Qtd.</label>
+                          <input
+                            type="number"
+                            min="1"
+                            value="${escapeAttr(quantidade)}"
+                            ${selecionada ? "" : "disabled"}
+                            onchange="alterarQuantidadeAmeacaSelecionada('${escapeAttr(ameaca.id)}', this.value)"
+                          />
+                        </div>
+                      </div>
+                    `;
+    }).join("")}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+}
+function renderResumoAmeacasEmCena() {
+    garantirEstadoAmeacasMestre();
+
+    if (!state.mestre.ameacasEmCena.length) {
+        return `<div class="empty">Nenhuma ameaça adicionada.</div>`;
+    }
+
+    return `
+      <div class="list">
+        ${state.mestre.ameacasEmCena.map(item => `
+          <div class="list-item">
+            <div>
+              <div class="list-item-title">${escapeHtml(item.nome)} × ${escapeHtml(item.quantidade)}</div>
+              <div class="list-item-sub">ND ${escapeHtml(item.nd || "-")}</div>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+}
+function getAmeacaCompletaPorId(ameacaId) {
+    const id = String(ameacaId || "").trim();
+    if (!id) return null;
+
+    const base = (AMEACAS_DB.ameacas || []).find(a => String(a.id || "").trim() === id);
+    if (!base) return null;
+
+    const poderes = (AMEACAS_DB.poderes || [])
+        .filter(p => String(p.ameaca_id || "").trim() === id)
+        .sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0));
+
+    const magias = (AMEACAS_DB.magias || [])
+        .filter(m => String(m.ameaca_id || "").trim() === id)
+        .sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0));
+
+    const equipamento = (AMEACAS_DB.equipamento || [])
+        .filter(e => String(e.ameaca_id || "").trim() === id)
+        .sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0))
+        .map(e => String(e.nome || "").trim())
+        .filter(Boolean)
+        .join(", ");
+
+    const tesouro = (AMEACAS_DB.tesouro || [])
+        .filter(t => String(t.ameaca_id || "").trim() === id)
+        .sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0))
+        .map(t => String(t.nome || "").trim())
+        .filter(Boolean)
+        .join(", ");
+
+    return {
+        ...base,
+        poderes,
+        magias,
+        equipamento,
+        tesouro
+    };
+}
+function extrairValorEComplementoAmeaca(texto) {
+    const bruto = String(texto || "").trim();
+    if (!bruto) {
+        return { valor: "", complemento: "" };
+    }
+
+    const partes = bruto.split(",");
+    const valor = String(partes.shift() || "").trim();
+    const complemento = partes.join(",").trim();
+
+    return { valor, complemento };
+}
+function formatarBonusAmeaca(valor) {
+    const texto = String(valor ?? "").trim();
+    if (!texto) return "—";
+    if (texto.startsWith("+") || texto.startsWith("-")) return texto;
+    return `+${texto}`;
+}
+function formatarLinhaHabilidadeAmeaca(item) {
+    if (!item) return "";
+
+    const meta = [
+        item.execucao,
+        item.custo_pm,
+        item.duracao
+    ].filter(Boolean).join(", ");
+
+    return `
+        <div class="ameaca-linha-habilidade">
+            <strong>${escapeHtml(item.nome || "")}</strong>
+            ${meta ? ` <span class="ameaca-meta">(${escapeHtml(meta)})</span>` : ""}
+            ${item.descricao ? ` ${escapeHtml(item.descricao)}` : ""}
+        </div>
+    `;
+}
+function getAmeacaInstanciaEditavelSelecionada() {
+    const item = getAmeacaAtivaMestreSelecionada();
+    if (!item) return null;
+
+    if (!item.edicao) {
+        const percepcao = extrairValorEComplementoAmeaca(item.percepcao ?? item.percepcaoBase ?? "");
+        const von = extrairValorEComplementoAmeaca(item.von ?? item.vonBase ?? "");
+
+        item.edicao = {
+            pv: Number(item.pv ?? 0) || 0,
+            pm: item.pm === "" || item.pm == null ? "" : Number(item.pm) || 0,
+            defesa: Number(item.defesa ?? 0) || 0,
+            iniciativa: Number(item.iniciativa ?? 0) || 0,
+            percepcao: Number(percepcao.valor || 0) || 0,
+            fort: Number(item.fort ?? 0) || 0,
+            ref: Number(item.ref ?? 0) || 0,
+            von: Number(von.valor || 0) || 0
+        };
+    }
+
+    return item;
+}
+
+function getValorEditavelAmeaca(ameaca, campo, fallback = "") {
+    const instancia = getAmeacaAtivaMestreSelecionada();
+    if (instancia && instancia.ameacaId === ameaca.id && instancia.edicao && campo in instancia.edicao) {
+        return instancia.edicao[campo];
+    }
+    return fallback;
+}
+function agendarSyncInstanciaAmeacaSelecionada(wait = 700) {
+    const instancia = getAmeacaAtivaMestreSelecionada();
+    if (!instancia) return;
+
+    const mesaId = String(state.mestre?.mesaId || "").trim();
+    if (!mesaId) return;
+
+    if (window.T20Supabase?.agendarSyncAmeacaMestre) {
+        window.T20Supabase.agendarSyncAmeacaMestre({
+            mesaId,
+            ameaca: instancia,
+            wait
+        });
+    }
+}
+function updateAmeacaSelecionadaCampo(campo, valor) {
+    const instancia = getAmeacaInstanciaEditavelSelecionada();
+    if (!instancia) return;
+
+    const camposNumero = [
+        "pv", "pm", "defesa", "iniciativa", "percepcao", "fort", "ref", "von",
+        "for", "des", "con", "int", "sab", "car"
+    ];
+
+    if (!instancia.edicao) instancia.edicao = {};
+
+    if (campo === "pm" && String(valor).trim() === "") {
+        instancia.edicao[campo] = "";
+    } else if (camposNumero.includes(campo)) {
+        instancia.edicao[campo] = Number(valor) || 0;
+    } else {
+        instancia.edicao[campo] = valor;
+    }
+
+    render();
+    agendarSyncInstanciaAmeacaSelecionada();
+}
+function alterarAtributoAmeaca(campo, delta) {
+    const instancia = getAmeacaInstanciaEditavelSelecionada();
+    if (!instancia) return;
+
+    if (!instancia.edicao) instancia.edicao = {};
+
+    const atual = Number(instancia.edicao[campo] ?? instancia[campo] ?? 0) || 0;
+    instancia.edicao[campo] = atual + delta;
+
+    render();
+    agendarSyncInstanciaAmeacaSelecionada();
+}
+function formatarPericiasAmeacaTexto(texto) {
+    return escapeHtml(String(texto || "—")).replace(/,\s*/g, ",<br>");
+}
+function montarHtmlFichaAmeaca(ameaca) {
+    if (!ameaca) {
+        return `<div class="empty">Ameaça não encontrada.</div>`;
+    }
+
+    const percepcao = extrairValorEComplementoAmeaca(ameaca.percepcao);
+    const von = extrairValorEComplementoAmeaca(ameaca.von);
+
+    return `
+        <div class="ameaca-sheet-wrap">
+            <div class="ameaca-sheet">
+                <div class="ameaca-topo">
+                    <div class="ameaca-titulo-wrap">
+                        <div class="ameaca-titulo">${escapeHtml(ameaca.nome || "Sem nome")}</div>
+                    </div>
+                    <div class="ameaca-nd-badge">ND ${escapeHtml(ameaca.nd || "-")}</div>
+                </div>
+
+                <div class="ameaca-subtipo">${escapeHtml(ameaca.tipo || "—")}</div>
+
+                <div class="ameaca-layout">
+                    <div class="ameaca-main">
+                        <div class="ameaca-resumo-grid">
+                            <div class="ameaca-info-pair">
+                                <span class="ameaca-label">Pontos de Vida</span>
+                                <input
+                                    class="ameaca-box-input"
+                                    type="number"
+                                    value="${escapeAttr(getValorEditavelAmeaca(ameaca, "pv", Number(ameaca.pv ?? 0) || 0))}"
+                                    onchange="updateAmeacaSelecionadaCampo('pv', this.value)"
+                                />
+                            </div>
+
+                            ${ameaca.pm != null && String(ameaca.pm).trim() !== "" ? `
+                                <div class="ameaca-info-pair">
+                                    <span class="ameaca-label">Pontos de Mana</span>
+                                    <input
+                                        class="ameaca-box-input"
+                                        type="number"
+                                        value="${escapeAttr(getValorEditavelAmeaca(ameaca, "pm", ameaca.pm === "" || ameaca.pm == null ? "" : Number(ameaca.pm) || 0))}"
+                                        onchange="updateAmeacaSelecionadaCampo('pm', this.value)"
+                                    />
+                                </div>
+                            ` : ""}
+
+                            <div class="ameaca-info-pair">
+                                <span class="ameaca-label">Defesa</span>
+                                <input
+                                    class="ameaca-box-input"
+                                    type="number"
+                                    value="${escapeAttr(getValorEditavelAmeaca(ameaca, "defesa", Number(ameaca.defesa ?? 0) || 0))}"
+                                    onchange="updateAmeacaSelecionadaCampo('defesa', this.value)"
+                                />
+                            </div>
+
+                            <div class="ameaca-info-pair">
+                                <span class="ameaca-label">Tamanho</span>
+                                <input
+                                    class="ameaca-box-input ameaca-box-input-text"
+                                    type="text"
+                                    value="${escapeAttr(getValorEditavelAmeaca(ameaca, "tamanho", ameaca.tamanho || ""))}"
+                                    onchange="updateAmeacaSelecionadaCampo('tamanho', this.value)"
+                                />
+                            </div>
+
+                            <div class="ameaca-info-pair ameaca-info-pair--wide">
+                                <span class="ameaca-label">Deslocamento</span>
+                                <input
+                                    class="ameaca-box-input ameaca-box-input-text ameaca-box-input-wide"
+                                    type="text"
+                                    value="${escapeAttr(getValorEditavelAmeaca(ameaca, "deslocamento", ameaca.deslocamento || ""))}"
+                                    onchange="updateAmeacaSelecionadaCampo('deslocamento', this.value)"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="ameaca-atributos">
+                            ${renderAtributoAmeaca("FOR", "for", ameaca.for)}
+                            ${renderAtributoAmeaca("DES", "des", ameaca.des)}
+                            ${renderAtributoAmeaca("CON", "con", ameaca.con)}
+                            ${renderAtributoAmeaca("INT", "int", ameaca.int)}
+                            ${renderAtributoAmeaca("SAB", "sab", ameaca.sab)}
+                            ${renderAtributoAmeaca("CAR", "car", ameaca.car)}
+                        </div>
+
+                        ${renderSecaoListaAmeaca("Poderes", ameaca.poderes)}
+                        ${renderSecaoListaAmeaca("Magias", ameaca.magias)}
+                        ${renderSecaoTextoAmeaca("Equipamento", ameaca.equipamento)}
+                        ${renderSecaoTextoAmeaca("Tesouro", ameaca.tesouro)}
+                    </div>
+
+                    <aside class="ameaca-side">
+                        <div class="ameaca-side-linha">
+                            <span class="ameaca-label">Iniciativa</span>
+                            <input
+                                class="ameaca-box-input ameaca-box-input-side"
+                                type="number"
+                                value="${escapeAttr(getValorEditavelAmeaca(ameaca, "iniciativa", Number(ameaca.iniciativa ?? 0) || 0))}"
+                                onchange="updateAmeacaSelecionadaCampo('iniciativa', this.value)"
+                            />
+                        </div>
+
+                        <div class="ameaca-side-linha">
+                            <span class="ameaca-label">Percepção</span>
+                            <input
+                                class="ameaca-box-input ameaca-box-input-side"
+                                type="number"
+                                value="${escapeAttr(getValorEditavelAmeaca(ameaca, "percepcao", Number(percepcao.valor || 0) || 0))}"
+                                onchange="updateAmeacaSelecionadaCampo('percepcao', this.value)"
+                            />
+                        </div>
+
+                        ${percepcao.complemento ? `
+                            <div class="ameaca-side-extra">${escapeHtml(percepcao.complemento)}</div>
+                        ` : ""}
+
+                        <div class="ameaca-side-linha">
+                            <span class="ameaca-label">Fort</span>
+                            <input
+                                class="ameaca-box-input ameaca-box-input-side"
+                                type="number"
+                                value="${escapeAttr(getValorEditavelAmeaca(ameaca, "fort", Number(ameaca.fort ?? 0) || 0))}"
+                                onchange="updateAmeacaSelecionadaCampo('fort', this.value)"
+                            />
+                        </div>
+
+                        <div class="ameaca-side-linha">
+                            <span class="ameaca-label">Ref</span>
+                            <input
+                                class="ameaca-box-input ameaca-box-input-side"
+                                type="number"
+                                value="${escapeAttr(getValorEditavelAmeaca(ameaca, "ref", Number(ameaca.ref ?? 0) || 0))}"
+                                onchange="updateAmeacaSelecionadaCampo('ref', this.value)"
+                            />
+                        </div>
+
+                        <div class="ameaca-side-linha">
+                            <span class="ameaca-label">Von</span>
+                            <input
+                                class="ameaca-box-input ameaca-box-input-side"
+                                type="number"
+                                value="${escapeAttr(getValorEditavelAmeaca(ameaca, "von", Number(von.valor || 0) || 0))}"
+                                onchange="updateAmeacaSelecionadaCampo('von', this.value)"
+                            />
+                        </div>
+
+                        ${von.complemento ? `
+                            <div class="ameaca-side-extra">${escapeHtml(von.complemento)}</div>
+                        ` : ""}
+
+                      <div class="ameaca-side-bloco">
+                        <div class="ameaca-label">Perícias</div>
+                        <div class="ameaca-side-texto">
+                            ${formatarPericiasAmeacaTexto(getValorEditavelAmeaca(ameaca, "pericias", ameaca.pericias || "—"))}
+                        </div>
+                    </div>
+                    </aside>
+                </div>
+            </div>
+        </div>
+    `;
+}
+function renderAtributoAmeaca(sigla, campo, valor) {
+    const valorAtual = getValorEditavelAmeaca(
+        { id: getAmeacaAtivaMestreSelecionada()?.ameacaId || "" },
+        campo,
+        Number(valor ?? 0) || 0
+    );
+
+    return `
+        <div class="ameaca-attr">
+            <div class="ameaca-attr-top">${escapeHtml(sigla)}</div>
+            <div class="ameaca-attr-controls">
+                <button type="button" class="ameaca-attr-btn" onclick="alterarAtributoAmeaca('${campo}', 1)">+</button>
+                <input
+                    type="number"
+                    class="ameaca-attr-input"
+                    value="${escapeAttr(valorAtual)}"
+                    onchange="updateAmeacaSelecionadaCampo('${campo}', this.value)"
+                />
+                <button type="button" class="ameaca-attr-btn" onclick="alterarAtributoAmeaca('${campo}', -1)">-</button>
+            </div>
+        </div>
+    `;
+}
+
+function renderSecaoListaAmeaca(titulo, itens) {
+    const lista = Array.isArray(itens) ? itens : [];
+
+    return `
+        <section class="ameaca-secao">
+            <div class="ameaca-secao-titulo">${escapeHtml(titulo)}</div>
+            <div class="ameaca-secao-corpo">
+                ${lista.length
+            ? lista.map(formatarLinhaHabilidadeAmeaca).join("")
+            : `<div class="ameaca-texto-vazio">...</div>`}
+            </div>
+        </section>
+    `;
+}
+
+function renderSecaoTextoAmeaca(titulo, texto) {
+    return `
+        <section class="ameaca-secao">
+            <div class="ameaca-secao-titulo">${escapeHtml(titulo)}</div>
+            <div class="ameaca-secao-corpo">
+                ${String(texto || "").trim()
+            ? escapeHtml(texto)
+            : `<div class="ameaca-texto-vazio">...</div>`}
+            </div>
+        </section>
+    `;
+}
+function montarHtmlViewerMestre() {
+    const fichaSelecionada = getFichaMestreSelecionada();
+    const ameacaSelecionada = getAmeacaAtivaMestreSelecionada();
+
+    const htmlFichaJogador = fichaSelecionada
+        ? montarHtmlFichaMestre()
+        : `<div class="empty">Nenhuma ficha ativa selecionada.</div>`;
+
+    const htmlFichaAmeaca = ameacaSelecionada
+        ? montarHtmlFichaAmeaca(getAmeacaCompletaPorId(ameacaSelecionada.ameacaId))
+        : `<div class="empty">Nenhuma ameaça ativa selecionada.</div>`;
+
+    return `
+      <div class="mestre-dual-view">
+        <section class="mestre-view-pane">
+          <div class="mestre-view-pane-header">
+            <div class="list-item-title">Ficha ativa</div>
+          </div>
+          <div class="mestre-view-pane-body">
+            <div class="mestre-scale-wrap">
+              <div class="mestre-scale-inner mestre-scale-jogador">
+                ${htmlFichaJogador}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mestre-view-pane">
+          <div class="mestre-view-pane-header">
+            <div class="list-item-title">Ameaça ativa</div>
+          </div>
+          <div class="mestre-view-pane-body">
+            <div class="mestre-scale-wrap">
+              <div class="mestre-scale-inner mestre-scale-ameaca">
+                ${htmlFichaAmeaca}
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    `;
+}
+function abrirModalNpcAleatorio() {
+    if (!state.mestre?.mesaId) {
+        alert("Selecione uma mesa antes de criar um NPC.");
+        return;
+    }
+
+    state.modal = "npc_aleatorio";
+    state.modalPayload = {
+        racaId: "",
+        classeId: "",
+        nivel: 1
+    };
+    document.body.classList.add("modal-open");
+    render();
+}
+
+function fecharModalNpcAleatorio() {
+    if (state.modal === "npc_aleatorio") {
+        state.modal = null;
+        state.modalPayload = null;
+        document.body.classList.remove("modal-open");
+        render();
+        return;
+    }
+
+    if (typeof fecharModal === "function") {
+        fecharModal();
+        return;
+    }
+
+    state.modal = null;
+    state.modalPayload = null;
+    document.body.classList.remove("modal-open");
+    render();
+}
+function renderNpcAleatorioModal() {
+    if (state.modal !== "npc_aleatorio") return "";
+
+    const payload = state.modalPayload || {};
+    const racas = (RACAS_DB || []).filter(r => r?.id);
+    const classes = (CLASSES_DB || []).filter(c => c?.id);
+
+    return `
+      <div class="overlay" onclick="fecharModalNpcAleatorio()">
+        <div class="overlay-card" onclick="event.stopPropagation()">
+          <div class="overlay-header">
+            <div>
+              <div class="overlay-title">Criar NPC aleatório</div>
+              <div class="overlay-subtitle">Escolha raça, classe e nível.</div>
+            </div>
+
+            <div class="actions" style="justify-content:flex-end;">
+              <button class="btn ghost" type="button" onclick="fecharModalNpcAleatorio()">Cancelar</button>
+              <button class="btn primary" type="button" onclick="confirmarCriacaoNpcAleatorio()">Criar</button>
+            </div>
+          </div>
+
+          <div class="overlay-body">
+            <div class="field">
+              <label>Raça</label>
+              <select onchange="state.modalPayload.racaId=this.value">
+                <option value="">Aleatória</option>
+                ${racas.map(r => `
+                  <option value="${escapeAttr(r.id)}" ${payload.racaId === r.id ? "selected" : ""}>
+                    ${escapeHtml(r.nome)}
+                  </option>
+                `).join("")}
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Classe</label>
+              <select onchange="state.modalPayload.classeId=this.value">
+                <option value="">Aleatória</option>
+                ${classes.map(c => `
+                  <option value="${escapeAttr(c.id)}" ${payload.classeId === c.id ? "selected" : ""}>
+                    ${escapeHtml(c.nome)}
+                  </option>
+                `).join("")}
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Nível</label>
+              <input
+                type="number"
+                min="1"
+                max="20"
+                value="${escapeAttr(payload.nivel || 1)}"
+                onchange="state.modalPayload.nivel=Math.max(1, Math.min(20, Number(this.value)||1))"
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+}
+function criarFichaBaseNpc() {
+    const ficha = fichaVazia();
+    ficha.nome = `NPC ${Math.floor(Math.random() * 900 + 100)}`;
+    ficha.jogador = "Mestre";
+    ficha.onlineAtivaMesaId = "";
+    return ficha;
+}
+function distribuirAtributosNpcAleatorio(ficha, nivel) {
+    const atributos = [
+        "forcaBase",
+        "destrezaBase",
+        "constituicaoBase",
+        "inteligenciaBase",
+        "sabedoriaBase",
+        "carismaBase"
+    ];
+
+    atributos.forEach(ch => {
+        ficha[ch] = 0;
+    });
+
+    const pontos = 6 + Math.max(0, Math.floor((Number(nivel) - 1) / 2));
+
+    for (let i = 0; i < pontos; i++) {
+        const chave = escolherAleatorio(atributos);
+        ficha[chave] = Number(ficha[chave] || 0) + 1;
+    }
+}
+
+function aplicarBonusRaciaisNpc(ficha, raca) {
+    const bonus = raca?.atributosFixos || {};
+
+    if (!ficha.modRacialAtributos) {
+        ficha.modRacialAtributos = {
+            forca: 0,
+            destreza: 0,
+            constituicao: 0,
+            inteligencia: 0,
+            sabedoria: 0,
+            carisma: 0
+        };
+    }
+
+    Object.keys(ficha.modRacialAtributos).forEach(ch => {
+        ficha.modRacialAtributos[ch] = Number(bonus[ch]) || 0;
+    });
+}
+function aplicarRacaNpcNaFicha(ficha, raca) {
+    if (!ficha || !raca) return;
+
+    ficha.raca = raca.nome || "";
+    ficha.racaId = raca.id || "";
+    ficha.tamanho = raca.tamanho || "";
+    ficha.deslocamento = raca.deslocamento || "";
+
+    if (!ficha.modRacialAtributos) {
+        ficha.modRacialAtributos = {
+            forca: 0,
+            destreza: 0,
+            constituicao: 0,
+            inteligencia: 0,
+            sabedoria: 0,
+            carisma: 0
+        };
+    }
+
+    const bonus = raca.atributosFixos || {};
+    Object.keys(ficha.modRacialAtributos).forEach(ch => {
+        ficha.modRacialAtributos[ch] = Number(bonus[ch]) || 0;
+    });
+
+    (raca.proficiencias || []).forEach(nome => {
+        adicionarProficienciaNaFicha(ficha, nome);
+    });
+
+    (raca.habilidades || []).forEach(habilidade => {
+        adicionarHabilidadeNaFicha(
+            ficha,
+            {
+                nome: habilidade.nome || "",
+                descricao: habilidade.descricao || "",
+                custoPm: Number(habilidade.custoPm) || 0,
+                custoVida: Number(habilidade.custoVida) || 0,
+                custoPmPermanente: Number(habilidade.custoPmPermanente) || 0,
+                custoVidaPermanente: Number(habilidade.custoVidaPermanente) || 0,
+                resumoUso: habilidade.resumoUso || "",
+                incrementos: habilidade.incrementos || [],
+                escolhas: habilidade.escolhas || []
+            },
+            "Raça",
+            raca.nome || ""
+        );
+    });
+}
+
+function escolherOrigemAleatoriaNpc() {
+    return escolherAleatorio((ORIGENS_DB || []).filter(o => o?.id));
+}
+
+function aplicarOrigemNpcNaFicha(ficha, origem) {
+    if (!ficha || !origem) return;
+
+    ficha.origem = origem.nome || "";
+    ficha.origemId = origem.id || "";
+    ficha.escolhasOrigemResolvidas = [];
+
+    parseListaPipe(origem.itensBancoFixos).forEach(nomeItem => {
+        const registro = (ITENS_EQUIPAMENTOS_DB.registros || []).find(r =>
+            normalizarTextoRegra(r.nome || "") === normalizarTextoRegra(nomeItem)
+        );
+        if (registro) {
+            adicionarItemInventarioNaFicha(ficha, registro.id);
+        } else {
+            adicionarItemCustomNaFicha(ficha, nomeItem, "Item concedido pela origem.");
+        }
+    });
+
+    parseListaPipe(origem.itensCustomFixos).forEach(nomeItem => {
+        adicionarItemCustomNaFicha(ficha, nomeItem, "Item concedido pela origem.");
+    });
+
+    const escolhas = getEscolhasOrigemDisponiveis(origem);
+
+    escolhas.forEach(escolha => {
+        const opcoes = getOpcoesEscolhaOrigem(escolha, ficha)
+            .filter(opcao => !opcaoPericiaIndisponivelNaOrigem(opcao, ficha));
+
+        const quantidade = Math.min(getQuantidadeEscolhaOrigem(escolha), opcoes.length);
+        const sorteadas = embaralharLista(opcoes).slice(0, quantidade);
+
+        ficha.escolhasOrigemResolvidas.push({
+            escolhaId: escolha.id,
+            selecionadas: sorteadas
+        });
+
+        sorteadas.forEach(opcao => {
+            if (opcao.tipoAplicacao === "pericia_treinada") {
+                aplicarTreinoPericiaNaFicha(ficha, opcao.valor, "Origem", origem.nome);
+            }
+
+            if (opcao.tipoAplicacao === "habilidade_adicionar") {
+                const registro = getRegistroPoderMagiaPorId(opcao.registroId);
+                if (registro) {
+                    adicionarHabilidadeNaFicha(
+                        ficha,
+                        {
+                            nome: registro.nome || "",
+                            descricao: registro.descricao || "",
+                            custoPm: Number(registro.custoPm) || 0
+                        },
+                        "Origem",
+                        origem.nome
+                    );
+                }
+            }
+
+            if (opcao.tipoAplicacao === "origem_item_banco_adicionar") {
+                adicionarItemInventarioNaFicha(ficha, opcao.itemBaseId);
+            }
+
+            if (opcao.tipoAplicacao === "origem_item_custom_adicionar") {
+                adicionarItemCustomNaFicha(ficha, opcao.valor, "Item escolhido da origem.");
+            }
+
+            if (opcao.tipoAplicacao === "origem_habilidade_adicionar") {
+                const habilidade =
+                    (origem.habilidades || []).find(h => String(h.id) === String(opcao.habilidadeOrigemId)) ||
+                    (ORIGENS_HABILIDADES_DB || []).find(h => String(h.id) === String(opcao.habilidadeOrigemId));
+
+                if (habilidade) {
+                    adicionarHabilidadeOrigemNaFicha(ficha, habilidade, origem.nome);
+
+                    (ORIGENS_EFEITOS_DB || [])
+                        .filter(e => String(e.habilidade_id || "") === String(habilidade.id))
+                        .forEach(efeito => aplicarEfeitoNaFicha(ficha, efeito, "Origem", origem.nome));
+                }
+            }
+        });
+    });
+}
+
+function escolherDivindadeAleatoriaNpc() {
+    return escolherAleatorio((DIVINDADES_DB || []).filter(d => d?.id));
+}
+function getNpcsLocaisDaMesaMestre() {
+    const mesaId = String(state.mestre?.mesaId || "");
+    return (state.fichas || [])
+        .filter(f => f?.npcLocal === true && String(f?.npcMesaId || "") === mesaId)
+        .map(f => ({
+            id: `npc_local:${f.id}`,
+            tipo: "npc_local",
+            ficha: f,
+            nome: f.nome || "NPC",
+            ficha_json: f
+        }));
+}
+
+function getListaFichasMestreComNpcs() {
+    const remotas = (state.mestre?.fichas || []).map(item => ({
+        ...item,
+        tipo: "remota"
+    }));
+
+    return [...remotas, ...getNpcsLocaisDaMesaMestre()];
+}
+function aplicarDivindadeNpcNaFicha(ficha, divindade) {
+    if (!ficha || !divindade) return;
+
+    ficha.divindade = divindade.nome || "";
+    ficha.divindadeId = divindade.id || "";
+    ficha.divindadeDados = divindade;
+    ficha.divindadePoderEscolhido = "";
+}
+
+function gerarPericiasAleatoriasNpc(ficha, classe) {
+    if (!ficha || !classe) return;
+
+    const nomesClasse = parseListaPipe(classe.periciasClasseTexto || "");
+    const quantidadeBase = Math.max(2, Number(classe.periciasBase) || 0);
+    const porInteligencia = Math.max(0, Number(getAtributoFinal(ficha, "inteligencia")) || 0);
+    const total = Math.min(nomesClasse.length, quantidadeBase + porInteligencia);
+
+    const embaralhadas = embaralharLista(nomesClasse).slice(0, total);
+    embaralhadas.forEach(nome => {
+        aplicarTreinoPericiaNaFicha(ficha, nome, "Classe", classe.nome);
+    });
+}
+function getPoderesAleatoriosDisponiveisParaClasse(ficha, classe) {
+    const poderesClasse = (classe?.poderes || [])
+        .map(montarOpcaoDeRegistroBanco)
+        .filter(Boolean);
+
+    const poderesGerais = filtrarForaPoderesConcedidos(
+        buscarPoderesPorFiltroFlexivel
+            ? buscarPoderesPorFiltroFlexivel("poder_geral")
+            : buscarPoderesPorFiltro("poder_geral")
+    )
+        .map(montarOpcaoDeRegistroBanco)
+        .filter(Boolean);
+
+    const todos = [...poderesClasse, ...poderesGerais];
+    const vistos = new Set();
+
+    return todos.filter(op => {
+        const chave = String(op.registroId || op.valor || op.id || "");
+        if (!chave || vistos.has(chave)) return false;
+        vistos.add(chave);
+        return !getPreRequisitoNaoAtendidoOpcao(op, ficha);
+    });
+}
+function adicionarPoderAleatorioNaFicha(ficha, opcao) {
+    if (!ficha || !opcao) return false;
+
+    const registroId = String(opcao.registroId || "");
+    const registro = registroId ? getRegistroPoderMagiaPorId(registroId) : null;
+    if (!registro) return false;
+
+    if (!Array.isArray(ficha.habilidades)) ficha.habilidades = [];
+    if (!Array.isArray(ficha.poderes)) ficha.poderes = [];
+
+    const nome = registro.nome || opcao.nomeCurto || opcao.valor || opcao.label || "Poder";
+
+    const jaExiste = ficha.habilidades.some(h =>
+        normalizarTextoRegra(h?.nome || "") === normalizarTextoRegra(nome)
+    );
+    if (jaExiste) return false;
+
+    adicionarHabilidadeNaFicha(
+        ficha,
+        {
+            nome: registro.nome || "",
+            descricao: registro.descricao || "",
+            custoPm: Number(registro.custoPm) || 0,
+            custoVida: Number(registro.custoVida) || 0,
+            custoPmPermanente: Number(registro.custoPmPermanente) || 0,
+            custoVidaPermanente: Number(registro.custoVidaPermanente) || 0,
+            resumoUso: registro.resumoUso || "",
+            registroId: registro.id || "",
+            tipoRegistro: registro.tipoRegistro || "",
+            filtros: registro.filtros || "",
+            ativavel: false,
+            permiteIntensificar: false,
+            incrementos: getIncrementosPoderMagia(registro.id),
+            escolhas: []
+        },
+        "Poder",
+        "NPC Aleatório"
+    );
+
+    ficha.poderes.push({
+        nome,
+        origem: "aleatorio",
+        registroId: registro.id || ""
+    });
+
+    return true;
+}
+
+function gerarPoderesAleatoriosNpc(ficha, classe, nivel) {
+    const quantidade = Math.max(1, Math.floor((Number(nivel) + 1) / 2));
+    let pool = getPoderesAleatoriosDisponiveisParaClasse(ficha, classe);
+    pool = embaralharLista(pool);
+
+    let adicionados = 0;
+
+    for (const opcao of pool) {
+        if (adicionados >= quantidade) break;
+        if (adicionarPoderAleatorioNaFicha(ficha, opcao)) {
+            adicionados++;
+        }
+    }
+}
+function getCirculoMaximoNpcPorNivel(nivel) {
+    const n = Math.max(1, Number(nivel) || 1);
+    if (n >= 17) return 5;
+    if (n >= 13) return 4;
+    if (n >= 9) return 3;
+    if (n >= 5) return 2;
+    return 1;
+}
+
+function getPrefixoMagiaDaClasse(classe) {
+    const tipo = normalizarTextoRegra(classe?.tipoMagia || "");
+
+    if (tipo.includes("arcana")) return "magia_arcana";
+    if (tipo.includes("divina")) return "magia_divina";
+    return "";
+}
+
+function adicionarMagiaAleatoriaNaFicha(ficha, opcao) {
+    if (!ficha || !opcao) return false;
+    if (!Array.isArray(ficha.magias)) ficha.magias = [];
+
+    const nome = opcao.nomeCurto || opcao.valor || opcao.label || "Magia";
+
+    if (ficha.magias.some(m => normalizarTextoRegra((m?.nome || m || "")) === normalizarTextoRegra(nome))) {
+        return false;
+    }
+
+    ficha.magias.push({
+        nome,
+        registroId: opcao.registroId || ""
+    });
+
+    return true;
+}
+
+function gerarMagiasAleatoriasNpc(ficha, classe, nivel) {
+    if (!classe || Number(classe.usaMagia) !== 1) return;
+
+    const prefixo = getPrefixoMagiaDaClasse(classe);
+    if (!prefixo) return;
+
+    const circuloMax = getCirculoMaximoNpcPorNivel(nivel);
+    const opcoes = embaralharLista(getOpcoesMagiasAteOCirculo(prefixo, circuloMax));
+    const quantidade = Math.max(2, Math.min(8, Math.floor(Number(nivel) / 2) + 2));
+
+    let adicionadas = 0;
+
+    for (const opcao of opcoes) {
+        if (adicionadas >= quantidade) break;
+        if (adicionarMagiaAleatoriaNaFicha(ficha, opcao)) {
+            adicionadas++;
+        }
+    }
+}
+function getItensBancoNpc() {
+    return Array.isArray(ITENS_EQUIPAMENTOS_DB?.registros)
+        ? ITENS_EQUIPAMENTOS_DB.registros
+        : [];
+}
+
+function filtrarItensPorCategoria(textosCategoria = []) {
+    const termos = textosCategoria.map(t => normalizarTextoRegra(t));
+
+    return getItensBancoNpc().filter(item => {
+        const texto = normalizarTextoRegra([
+            item.nome,
+            item.tipo,
+            item.categoria,
+            item.grupo,
+            item.subtipo
+        ].filter(Boolean).join(" "));
+
+        return termos.some(t => texto.includes(t));
+    });
+}
+
+function adicionarItemBancoNaFicha(ficha, itemBase, quantidade = 1) {
+    if (!ficha || !itemBase) return false;
+
+    if (!Array.isArray(ficha.inventario)) ficha.inventario = [];
+    if (!Array.isArray(ficha.equipamentos)) ficha.equipamentos = [];
+
+    const entrada = criarEntradaInventario(itemBase.id);
+    if (!entrada) return false;
+
+    entrada.quantidade = Number(quantidade) || Number(entrada.quantidade) || 1;
+
+    const existente = encontrarItemEmpilhavelNoInventario
+        ? encontrarItemEmpilhavelNoInventario(ficha, entrada)
+        : null;
+
+    if (existente) {
+        existente.quantidade = (Number(existente.quantidade) || 1) + (Number(entrada.quantidade) || 1);
+    } else {
+        ficha.inventario.push(entrada);
+    }
+
+    return true;
+}
+
+function gerarItensAleatoriosNpc(ficha, classe, nivel) {
+    const armas = filtrarItensPorCategoria(["arma"]);
+    const armaduras = filtrarItensPorCategoria(["armadura", "escudo"]);
+    const utilitarios = filtrarItensPorCategoria(["poção", "kit", "ferramenta", "item"]);
+
+    const armaValida = embaralharLista(armas).find(item =>
+        !item.proficienciaNecessaria || fichaTemProficiencia(ficha, item.proficienciaNecessaria)
+    );
+    if (armaValida) adicionarItemBancoNaFicha(ficha, armaValida, 1);
+
+    const armaduraValida = embaralharLista(armaduras).find(item =>
+        !item.proficienciaNecessaria || fichaTemProficiencia(ficha, item.proficienciaNecessaria)
+    );
+    if (armaduraValida && Number(nivel) >= 2) adicionarItemBancoNaFicha(ficha, armaduraValida, 1);
+
+    const qtdUtilitarios = Math.max(1, Math.min(3, Math.floor(Number(nivel) / 4) + 1));
+    const poolUtil = embaralharLista(utilitarios);
+
+    let adicionados = 0;
+    for (const item of poolUtil) {
+        if (adicionados >= qtdUtilitarios) break;
+        if (adicionarItemBancoNaFicha(ficha, item, 1)) {
+            adicionados++;
+        }
+    }
+}
+async function confirmarCriacaoNpcAleatorio() {
+    try {
+        if (!state.mestre?.mesaId) {
+            alert("Selecione uma mesa antes de criar um NPC.");
+            return;
+        }
+        await carregarTodosOsBancos();
+
+        const payload = state.modalPayload || {};
+        const nivel = Math.max(1, Math.min(20, Number(payload.nivel) || 1));
+
+        const raca = payload.racaId
+            ? (RACAS_DB || []).find(r => String(r.id) === String(payload.racaId))
+            : escolherAleatorio((RACAS_DB || []).filter(r => r?.id));
+
+        const classe = payload.classeId
+            ? (CLASSES_DB || []).find(c => String(c.id) === String(payload.classeId))
+            : escolherAleatorio((CLASSES_DB || []).filter(c => c?.id));
+
+        if (!raca || !classe) {
+            alert("Não foi possível determinar a raça e a classe do NPC.");
+            return;
+        }
+
+        const ficha = criarFichaBaseNpc();
+
+        ficha.npcLocal = true;
+        ficha.npcMesaId = state.mestre?.mesaId || "";
+
+        distribuirAtributosNpcAleatorio(ficha, nivel);
+        aplicarRacaNpcNaFicha(ficha, raca);
+
+        ficha.classesPersonagem = [{
+            classeId: classe.id,
+            nome: classe.nome || "",
+            niveis: nivel,
+            primeiraClasse: true
+        }];
+
+        atualizarNivelTotalFicha(ficha);
+        reaplicarProgressaoClasses(ficha);
+
+        const origem = escolherOrigemAleatoriaNpc();
+        if (origem) {
+            aplicarOrigemNpcNaFicha(ficha, origem);
+        }
+
+        const divindade = escolherDivindadeAleatoriaNpc();
+        if (divindade) {
+            aplicarDivindadeNpcNaFicha(ficha, divindade);
+        }
+
+        gerarPericiasAleatoriasNpc(ficha, classe);
+        gerarPoderesAleatoriosNpc(ficha, classe, nivel);
+        gerarMagiasAleatoriasNpc(ficha, classe, nivel);
+        gerarItensAleatoriosNpc(ficha, classe, nivel);
+
+        atualizarNivelTotalFicha(ficha);
+        reaplicarProgressaoClasses(ficha);
+
+        if (typeof atualizarCdMagiasNaFicha === "function") {
+            atualizarCdMagiasNaFicha(ficha, true);
+        }
+
+        if (typeof recalcularEquipamentosEFicha === "function") {
+            recalcularEquipamentosEFicha(ficha);
+        }
+
+        ficha.pvAtual = ficha.pvMax || ficha.pvAtual || 0;
+        ficha.pmAtual = ficha.pmMax || ficha.pmAtual || 0;
+
+        state.fichas.unshift(ficha);
+        state.fichaAtualId = ficha.id;
+        state.mestre.fichaSelecionadaId = `npc_local:${ficha.id}`;
+
+        saveFichas();
+        fecharModalNpcAleatorio();
+        render();
+    } catch (err) {
+        console.error(err);
+        alert(err?.message || "Não foi possível criar o NPC aleatório.");
+    }
+}
 function getFichaAtual() {
-    if (state?.mestre?.renderizandoFichaRemota || state.screen === "mestre") {
-        const remota = getFichaMestreSelecionada();
-        return remota?.ficha_json || null;
+    if (state.screen === "mestre") {
+        const selecionada = getFichaMestreSelecionada();
+        if (!selecionada) return null;
+
+        if (selecionada.tipo === "npc_local") {
+            return selecionada.ficha;
+        }
+
+        return selecionada?.ficha_json || null;
     }
 
     return state.fichas.find(f => f.id === state.fichaAtualId);
 }
+function excluirNpcLocalMestre(fichaId) {
+    const npc = (state.fichas || []).find(
+        f => String(f.id) === String(fichaId) && f?.npcLocal === true
+    );
+    if (!npc) return;
 
+    const ok = confirm(`Excluir o NPC "${npc.nome || "NPC"}"?`);
+    if (!ok) return;
+
+    const idRemovido = String(fichaId);
+
+    state.fichas = (state.fichas || []).filter(f => String(f.id) !== idRemovido);
+
+    if (String(state.fichaAtualId || "") === idRemovido) {
+        state.fichaAtualId = null;
+    }
+
+    if (String(state.mestre.fichaSelecionadaId || "") === `npc_local:${idRemovido}`) {
+        state.mestre.fichaSelecionadaId = "";
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.fichas));
+
+    const listaRestante = getListaFichasMestreComNpcs();
+    if (!state.mestre.fichaSelecionadaId && listaRestante.length) {
+        state.mestre.fichaSelecionadaId = listaRestante[0].id;
+    }
+
+    render();
+}
 function getNivelTotalPersonagem(ficha) {
     if (!ficha?.classesPersonagem?.length) return 0;
 
@@ -8363,6 +10464,11 @@ function concluirNivelClasseEvolucao() {
 
 function go(screen) {
     state.screen = screen;
+
+    if (screen === "mestre" && window.T20Supabase?.SUPA?.state?.user) {
+        carregarMinhasMesasMestre();
+    }
+
     render();
 }
 
@@ -12894,16 +15000,16 @@ function renderEscolhaClasseCriacaoModal() {
 
               <div class="list" id="lista-escolha-classe-criacao">
                 ${opcoes.map(opcao => {
-                    const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
-                    const desbloqueada = escolhaClasseDesbloqueada(escolha);
-                    const disabled = !checked && (!desbloqueada || !podeSelecionarOpcaoClasse(escolha, opcao));
-                    const expandida = opcaoEscolhaEstaExpandida("classe", escolha.id, opcao.id);
-                    const titulo = getTituloOpcaoEscolha(opcao);
-                    const descricao = String(opcao.descricao || "").trim();
-                    const preReqFaltando = getPreRequisitoNaoAtendidoOpcao(opcao, f);
-                    const textoBusca = normalizarTextoRegra(titulo || opcao.valor || opcao.label || "");
+                const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
+                const desbloqueada = escolhaClasseDesbloqueada(escolha);
+                const disabled = !checked && (!desbloqueada || !podeSelecionarOpcaoClasse(escolha, opcao));
+                const expandida = opcaoEscolhaEstaExpandida("classe", escolha.id, opcao.id);
+                const titulo = getTituloOpcaoEscolha(opcao);
+                const descricao = String(opcao.descricao || "").trim();
+                const preReqFaltando = getPreRequisitoNaoAtendidoOpcao(opcao, f);
+                const textoBusca = normalizarTextoRegra(titulo || opcao.valor || opcao.label || "");
 
-                    return `
+                return `
                     <div
                         class="list-item"
                         style="align-items:flex-start; gap:12px; ${disabled ? "opacity:.65;" : ""}"
@@ -12935,10 +15041,10 @@ function renderEscolhaClasseCriacaoModal() {
                         >
                     </div>
                 `;
-                }).join("")}
+            }).join("")}
               </div>
             `
-          }
+        }
         </div>
       </div>
     </div>
@@ -13031,16 +15137,16 @@ function renderEscolhaClasseEvolucaoModal() {
 
               <div class="list" id="lista-escolha-classe-evolucao">
                 ${opcoes.map(opcao => {
-                    const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
-                    const desbloqueada = escolhaClasseDesbloqueada(escolha);
-                    const disabled = !checked && (!desbloqueada || !podeSelecionarOpcaoClasseEvolucao(escolha, opcao));
-                    const expandida = opcaoEscolhaEstaExpandida("classe", escolha.id, opcao.id);
-                    const titulo = getTituloOpcaoEscolha(opcao);
-                    const descricao = String(opcao.descricao || "").trim();
-                    const preReqFaltando = getPreRequisitoNaoAtendidoOpcao(opcao, f);
-                    const textoBusca = normalizarTextoRegra(titulo || opcao.valor || opcao.label || "");
+                const checked = selecionados.some(item => item.id === opcao.id) || opcaoGenericaOficioTemEspecializacaoSelecionada(selecionados, opcao);
+                const desbloqueada = escolhaClasseDesbloqueada(escolha);
+                const disabled = !checked && (!desbloqueada || !podeSelecionarOpcaoClasseEvolucao(escolha, opcao));
+                const expandida = opcaoEscolhaEstaExpandida("classe", escolha.id, opcao.id);
+                const titulo = getTituloOpcaoEscolha(opcao);
+                const descricao = String(opcao.descricao || "").trim();
+                const preReqFaltando = getPreRequisitoNaoAtendidoOpcao(opcao, f);
+                const textoBusca = normalizarTextoRegra(titulo || opcao.valor || opcao.label || "");
 
-                    return `
+                return `
                     <div
                         class="list-item"
                         style="align-items:flex-start; gap:12px; ${disabled ? "opacity:.65;" : ""}"
@@ -13072,10 +15178,10 @@ function renderEscolhaClasseEvolucaoModal() {
                         >
                     </div>
                 `;
-                }).join("")}
+            }).join("")}
               </div>
             `
-          }
+        }
         </div>
       </div>
     </div>
@@ -15560,8 +17666,8 @@ ${renderInventarioSimples(f)}
                             class="campo-pericia-centro"
                             type="number"
                             value="${escapeAttr(
-                                (Number(p?.outrosRacial) || 0) + (Number(p?.outrosPoder) || 0)
-                            )}"
+                (Number(p?.outrosRacial) || 0) + (Number(p?.outrosPoder) || 0)
+            )}"
                             disabled
                             readonly
                           >
@@ -15578,7 +17684,7 @@ ${renderInventarioSimples(f)}
 
                         <div class="pericia-col pericia-col-treino">
                           ${normalizarTextoRegra(p.nome) === normalizarTextoRegra("Ofício")
-                            ? `
+                    ? `
                               <button
                                 class="btn ghost btn-oficios-pericia"
                                 type="button"
@@ -15588,7 +17694,7 @@ ${renderInventarioSimples(f)}
                                 Ofícios
                               </button>
                             `
-                            : `
+                    : `
                               <input
                               type="checkbox"
                               style="margin-left: 10px;"
@@ -15596,7 +17702,7 @@ ${renderInventarioSimples(f)}
                               onchange="updatePericia(${i}, 'treinada', this.checked)"
                             />
                             `
-                        }
+                }
                         </div>
                       </div>
                     `).join("")}
@@ -15609,24 +17715,26 @@ ${renderInventarioSimples(f)}
                 </div>
               </div>
 
-              <div class="side-buttons">     
-        <button class="btn primary floating" onclick="abrirModal('dados')">Dados</button>
-      </div>
-      
-      ${renderDadosModal()}
-      ${renderEquipamentoModal()}
-      ${renderHabilidadeModal()}
-      ${renderMagiaModal()}
-      ${renderModalAdicionarHabilidade()}
-      ${renderModalAdicionarMagia()}
-      ${renderModalAdicionarItemInventario()}
-      ${renderWidgetDinheiroFlutuante()}
-      ${renderModalDetalhesItemInventario()}
-      ${renderEscolhaDivindadeEvolucaoModal()}
-      ${renderProficienciasModal()}
-      ${renderModalEspecializacoesOficioFicha()}
-    </div>
-  `;
+              <div class="side-buttons">
+  <button class="btn primary floating" onclick="abrirModal('dados')">Dados</button>
+  <button class="btn primary floating" onclick="abrirModalRegras()">Regras</button>
+</div>
+
+${renderDadosModal()}
+${renderEquipamentoModal()}
+${renderHabilidadeModal()}
+${renderMagiaModal()}
+${renderModalAdicionarHabilidade()}
+${renderModalAdicionarMagia()}
+${renderModalAdicionarItemInventario()}
+${renderWidgetDinheiroFlutuante()}
+${renderModalDetalhesItemInventario()}
+${renderEscolhaDivindadeEvolucaoModal()}
+${renderProficienciasModal()}
+${renderModalEspecializacoesOficioFicha()}
+${renderModalRegras()}
+</div>
+`;
 }
 
 function renderDadosModal() {
