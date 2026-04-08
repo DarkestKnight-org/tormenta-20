@@ -7184,7 +7184,7 @@ function renderMestre() {
 
       <div class="mestre-layout">
         <div class="mestre-view-topbar">
-          <button class="btn ghost" onclick="go('home')">Voltar</button>
+          <button class="btn" onclick="go('home')">Voltar</button>
         </div>
 
         <aside class="mestre-sidebar">
@@ -13485,7 +13485,7 @@ function renderPersonagens() {
         <div class="actions">
           <button class="btn" onclick="exportarFichasJson()">Exportar fichas</button>
           <button class="btn" onclick="abrirSeletorImportacaoFichas()">Importar fichas</button>
-          <button class="btn ghost" onclick="go('home')">Voltar</button>
+          <button class="btn" onclick="go('home')">Voltar</button>
         </div>
       </div>
 
