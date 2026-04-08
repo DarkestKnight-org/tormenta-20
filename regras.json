@@ -1,0 +1,1740 @@
+{
+"tipos_acao":[
+ {
+  "nome": "Ação Padrão",
+  "tipo": "-",
+  "descricao": "Basicamente, uma ação padrão permite que você execute uma tarefa. Fazer um ataque ou lançar uma magia são as ações padrão mais comuns."
+ },
+ {
+  "nome": "Ação de Movimento",
+  "tipo": "-",
+  "descricao": "Esta ação representa algum tipo de movimento físico. Seu uso mais comum é percorrer uma distância igual a seu deslocamento. Levantar-se, sacar uma arma, pegar um item de sua mochila, abrir uma porta e subir numa montaria também são ações de movimento."
+ },
+ {
+  "nome": "Ação Completa",
+  "tipo": "-",
+  "descricao": "Este tipo de ação exige todo o tempo e esforço normal de uma rodada. Para uma ação completa, você deve abrir mão de sua ação padrão e de sua ação de movimento — mas, normalmente, você ainda pode realizar ações extras, ações livres e reações."
+ },
+ {
+  "nome": "Ação Livre",
+  "tipo": "-",
+  "descricao": "Esta ação não exige quase nenhum tempo e esforço, mas ainda só pode ser feita em seu turno. Jogar-se no chão ou gritar uma ordem são ações livres — mas o mestre pode decidir que algo é complicado demais para ser livre. Dar uma ordem curta é uma ação livre, explicar um plano inteiro, não!"
+ },
+ {
+  "nome": "Reação",
+  "tipo": "-",
+  "descricao": "Uma reação acontece em resposta a outra coisa. Como ações livres, reações tomam tão pouco tempo que você pode realizar qualquer quantidade delas. A diferença é que uma ação livre é uma escolha consciente, feita no seu turno. Já uma reação é uma resposta automática, que pode ocorrer mesmo fora do seu turno. Você pode reagir mesmo se não puder realizar ações, como por estar atordoado. Um teste de Percepção para perceber um troll escondido no pântano, ou um teste de Reflexos para escapar de uma explosão, são exemplos de reações."
+ },
+ {
+  "nome": "Manobras de Combate",
+  "tipo": "-",
+  "descricao": "Uma manobra é um ataque corpo a corpo para fazer algo diferente de causar dano — como arrancar a arma do oponente ou empurrá-lo para um abismo. Não é possível fazer manobras de combate com ataques à distância. Faça um teste de manobra (um teste de ataque corpo a corpo) oposto com a criatura. Mesmo que ela esteja usando uma arma de ataque à distância, deve fazer o teste usando seu valor de Luta. Em caso de empate, o personagem com o maior bônus vence. Se os bônus forem iguais, outro teste deve ser feito. Em geral, você pode usar qualquer arma corpo a corpo para fazer manobras de combate."
+ }
+],
+"manobras_combate":[
+ {
+  "nome": "Agarrar",
+  "tipo": "Ação Padrão",
+  "descricao": "Você segura uma criatura (por seu braço, sua roupa etc.). Uma criatura agarrada fica desprevenida e imóvel, sofre –2 nos testes de ataque e só pode atacar com armas leves. Ela pode se soltar com uma ação padrão, vencendo um teste de manobra oposto. Você só pode agarrar com um ataque desarmado ou arma natural e, enquanto agarra, fica com essa mão ou arma natural ocupada. Além disso, move-se metade do deslocamento normal, mas arrasta a criatura que estiver agarrando. Você pode soltá-la com uma ação livre. Você pode atacar uma criatura agarrada com sua mão livre. Se preferir, pode substituir um ataque por um teste de agarrar contra a criatura. Se vencer, causa dano de impacto igual a um ataque desarmado ou arma natural. Isso significa que você está esmagando ou sufocando o inimigo. Um personagem fazendo um ataque à distância contra um alvo envolvido na manobra agarrar tem 50% de chance de mirar no alvo errado!"
+ },
+ {
+  "nome": "Derrubar",
+  "tipo": "Ação Padrão",
+  "descricao": "Você deixa o alvo caído. Esta queda normalmente não causa dano. Se você vencer o teste oposto por 5 pontos ou mais, derruba o oponente com tanta força que também o empurra um quadrado em uma direção a sua escolha. Se isso o jogar além de um parapeito ou precipício, ele pode fazer um teste de Reflexos (CD 20) para se agarrar numa beirada."
+ },
+ {
+  "nome": "Desarmar",
+  "tipo": "Ação Padrão",
+  "descricao": "Você derruba um item que a criatura esteja segurando. Normalmente o item cai no mesmo lugar em que o alvo está (a menos que o alvo esteja voando, sobre uma ponte etc.). Se você vencer o teste oposto por 5 pontos ou mais, derruba o item com tanta força que também o empurra um quadrado em uma direção a sua escolha."
+ },
+ {
+  "nome": "Empurrar",
+  "tipo": "Ação Padrão",
+  "descricao": "Você empurra a criatura 1,5m. Para cada 5 pontos de diferença entre os testes, você empurra o alvo mais 1,5m. Você pode gastar uma ação de movimento para avançar junto com a criatura (até o limite do seu deslocamento)."
+ },
+ {
+  "nome": "Quebrar",
+  "tipo": "Ação Padrão",
+  "descricao": "Você atinge um item que a criatura esteja segurando. Veja as estatísticas de objetos na página"
+ }
+],
+"acoes":[
+ {
+  "nome": "Agredir",
+  "tipo": "Ação Padrão",
+  "descricao": "Você faz um ataque com uma arma corpo a corpo ou à distância. Com uma arma corpo a corpo, você pode atacar qualquer inimigo dentro de seu alcance natural (1,5m para criaturas Pequenas e Médias ou um inimigo adjacente no mapa). Personagens maiores, ou usando certas armas, podem atacar mais longe. Você pode substituir um ataque corpo a corpo por uma manobra de combate (veja a seguir). Com uma arma de ataque à distância, você pode atacar qualquer inimigo que consiga ver e que esteja no alcance da arma (ou até o dobro do alcance, sofrendo uma penalidade de –5). • Atirando em Combate Corpo a Corpo. Quando faz um ataque à distância contra uma criatura em combate corpo a corpo, você sofre –5 no teste de ataque. Uma criatura está em combate corpo a corpo se estiver dentro do alcance natural de qualquer inimigo (incluindo você)."
+ },
+ {
+  "nome": "Atropelar",
+  "tipo": "Ação Padrão",
+  "descricao": "Você usa uma ação padrão durante um movimento para avançar pelo espaço ocupado por uma criatura (normalmente, você não pode fazer uma ação padrão durante um movimento; isto é uma exceção). A criatura pode lhe dar passagem ou resistir. Se der passagem, você avança pelo espaço dela; ne- 233 Capítulo Cinco nhum teste é necessário. Se resistir, faça um teste de manobra oposto; se você vencer, deixa a criatura caída e continua seu avanço. Se o alvo vencer, continua de pé e detém seu avanço. Atropelar é uma ação livre se tentada durante uma investida."
+ },
+ {
+  "nome": "Fintar",
+  "tipo": "Ação Padrão",
+  "descricao": "Faça um teste de Enganação oposto ao teste de Reflexos de uma criatura em alcance curto. Se você passar, ela fica desprevenida contra seu próximo ataque, mas apenas até o fim de seu próximo turno."
+ },
+ {
+  "nome": "Lançar Uma Magia",
+  "tipo": "Ação Padrão\/Ação Completa",
+  "descricao": "A maioria das magias exige uma ação padrão para ser executada. Ao lançar magias com execução maior do que uma ação completa, você gasta uma ação completa a cada rodada"
+ },
+ {
+  "nome": "Preparar",
+  "tipo": "Ação Padrão",
+  "descricao": "Você prepara uma ação (padrão, de movimento ou livre) para realizar mais tarde, após seu turno, mas antes de seu turno na próxima rodada. Diga a ação que vai fazer e em quais circunstâncias (por exemplo, “disparar minha besta na primeira criatura que passar pela porta”). A qualquer momento antes de seu próximo turno, você pode fazer a ação preparada como uma reação a essas circunstâncias. Se, no seu próximo turno, você ainda não tiver realizado sua ação preparada, não pode mais realizá-la (embora possa preparar a mesma ação de novo). Pelo resto do combate, sua Iniciativa fica imediatamente acima da qual você fez a ação preparada."
+ },
+ {
+  "nome": "Usar Habilidade ou Item",
+  "tipo": "Ação Padrão",
+  "descricao": "Algumas habilidades e itens, como poções, exigem uma ação padrão para serem usadas."
+ },
+ {
+  "nome": "Levantar-se",
+  "tipo": "Ação de Movimento",
+  "descricao": "Levantar do chão (ou de uma cama, cadeira...) exige uma ação de movimento."
+ },
+ {
+  "nome": "Manipular Item",
+  "tipo": "Ação de Movimento",
+  "descricao": "Muitas vezes, manipular um item exige uma ação de movimento. Pegar um objeto em uma mochila, abrir ou fechar uma porta e atirar uma corda para alguém são ações de movimento."
+ },
+ {
+  "nome": "Mirar",
+  "tipo": "Ação de Movimento",
+  "descricao": "Você mira em um alvo que possa ver, dentro do alcance de sua arma. Isso anula a penalidade de –5 em testes de Pontaria realizados neste turno contra aquele alvo caso ele esteja engajado em combate corpo a corpo"
+ },
+ {
+  "nome": "Movimentar-se",
+  "tipo": "Ação de Movimento",
+  "descricao": "Você percorre uma distância igual a seu deslocamento (tipicamente 9m para raças de tamanho Médio). Outros movimentos, como nadar, escalar ou cavalgar, também usam esta ação"
+ },
+ {
+  "nome": "Sacar ou Guardar Item",
+  "tipo": "Ação de Movimento",
+  "descricao": "Sacar ou guardar um item exige uma ação de movimento. Se puder usar mais de uma arma (como por possuir Ambidestria), pode sacar todas elas."
+ },
+ {
+  "nome": "Corrida",
+  "tipo": "Ação Completa",
+  "descricao": "Você corre mais rapidamente que seu deslocamento normal. Veja a perícia Atletismo."
+ },
+ {
+  "nome": "Golpe De Misericórdia",
+  "tipo": "Ação Completa",
+  "descricao": "Você desfere um golpe letal em um oponente adjacente e indefeso. Um golpe de misericórdia é um acerto crítico automático. Além de sofrer dano, a vítima tem uma chance de morrer instantaneamente. Esta chance é de 25% (1 em 1d4) para personagens e NPCs importantes e de 75% (1 a 3 em 1d4) para NPCs secundários."
+ },
+ {
+  "nome": "Investida",
+  "tipo": "Ação Completa",
+  "descricao": "Você avança até o dobro de seu deslocamento (e no mínimo 3m) em linha reta e, no fim do movimento, faz um ataque corpo a corpo. Você recebe +2 no teste de ataque, mas sofre –2 na Defesa até o seu próximo turno, porque sua guarda fica aberta. Você não pode fazer uma investida em terreno difícil. Durante uma investida, você pode fazer a manobra atropelar como uma ação livre (mas não pode atropelar e atacar o mesmo alvo)."
+ },
+ {
+  "nome": "Atrasar",
+  "tipo": "Ação Livre",
+  "descricao": "Escolhendo atrasar sua ação, você age mais tarde na ordem de Iniciativa, em relação à Iniciativa que rolou. Isto é o mesmo que reduzir sua Iniciativa voluntariamente pelo resto do combate. Quando sua nova Iniciativa chegar, você age normalmente. Você pode especificar este novo valor de Iniciativa ou apenas esperar até algum momento e então agir, fixando sua nova Iniciativa neste ponto. Atrasar é útil para ver o que seus amigos ou inimigos farão, antes de decidir o que você mesmo fará. • Limites para atrasar. Você pode atrasar sua Iniciativa até –10 menos seu valor de Iniciativa. Quando a contagem de Iniciativa chega a esse ponto, você deve agir ou abrir mão de qualquer ação na rodada. Por exemplo, um personagem com um valor de Iniciativa +3 pode esperar até a contagem de Iniciativa chegar a –13. Nesse ponto, deve agir ou desistir de seu turno. Isso importa quando vários personagens atrasam suas ações. • Vários atrasos. Se vários personagens estão atrasando suas ações, aquele com o maior valor de Iniciativa (ou a maior Destreza, em caso de empate) tem a vantagem. Se dois ou mais personagens que estejam atrasando quiserem agir na mesma contagem de Iniciativa, aquele com o maior valor age primeiro. Se dois ou mais personagens estão tentando agir um depois do outro, aquele com o maior valor de Iniciativa tem o direito de agir depois."
+ },
+ {
+  "nome": "Falar",
+  "tipo": "Ação Livre",
+  "descricao": "Em geral, falar é uma ação livre. Lançar magias ou usar habilidades de classe que dependem da voz não são ações livres. O mestre também pode limitar aquilo que você consegue falar durante uma rodada (vinte palavras são o limite padrão)."
+ },
+ {
+  "nome": "Jogar-se no Chão",
+  "tipo": "Ação Livre",
+  "descricao": "Jogar-se no chão é uma ação livre. Você recebe os benefícios e penalidades normais por estar caído, mas normalmente não sofre dano ao se jogar no chão."
+ },
+ {
+  "nome": "Largar um Item",
+  "tipo": "Ação Livre",
+  "descricao": "Deixar cair um item que esteja segurando é uma ação livre. Mas deixar cair (ou jogar) um item com a intenção de acertar algo é uma ação padrão. E deixar cair (ou jogar) um item para que outra pessoa agarre é uma ação de movimento."
+ }
+],
+"elementos_masmorras":[
+ {
+  "nome": "Pisos",
+  "descricao": "Pisos planos (tablados de madeira, ladrilhos em bom estado...) não têm efeito em regras. Pisos irregulares (cavernas naturais, construções em ruínas...) exigem testes de Acrobacia (CD 10) para correr ou fazer uma investida. Piso escorregadio, seja por água, gelo ou mesmo sangue, também exige o uso de Acrobacia para se equilibrar. Um piso que seja irregular e escorregadio aumenta a CD do teste para 15. Por fim, pisos cobertos de escombros, entulhos ou outros obstáculos impactantes contam como terreno difícil."
+ },
+ {
+  "nome": "Paredes",
+  "descricao": "Paredes normalmente são de alvenaria ou pedra bruta (escavada ou natural), mas também podem ser de madeira. Paredes de alvenaria têm redução de dano 8 e 200 PV por trecho de 1,5m de lado. A CD de Atletismo para escalá-las é 20. Paredes de pedra bruta têm RD 8, 500 PV e CD 15 para escalar. Por fim, paredes de madeira possuem RD 5, 100 PV e CD 20 para escalar."
+ },
+ {
+  "nome": "Portas",
+  "descricao": "Podem ser de madeira (usada em casas comuns), madeira reforçada (encontrada em mansões, armazéns e outras construções protegidas), pedra (usada em templos e torres) e ferro (usada em salas de tesouro). Além de portas, muitos ambientes são fechados por grades de ferro, especialmente castelos, calabouços e esgotos. A tabela a seguir traz a redução de dano e os pontos de vida de cada tipo de porta. Também é possível abrir uma porta com um encontrão ou chute - em termos de jogo, uma ação padrão e um teste de Força. A dificuldade do teste aparece na tabela. Um personagem que falhe por 5 ou mais sofre 1d6 pontos de dano de impacto."
+ },
+ {
+  "nome": "Portas Secretas",
+  "descricao": "Encontrar uma dessas exige um teste de Investigação, com CD de 20 (portas escondidas atrás de estantes ou tapeçarias) a 30 (portas feitas para se mesclar perfeitamente às paredes)."
+ },
+ {
+  "nome": "Escadarias",
+  "descricao": "Subir uma escadaria conta como terreno difícil. Descer uma escadaria correndo ou fazendo uma investida exige um teste de Acrobacia (CD 10). Em caso de falha, você cai no chão, rola 1d4 x 1,5m para frente (ou até o fim da escada) e sofre 1d6 pontos de dano de impacto por 1,5m rolados."
+ },
+ {
+  "nome": "Pilares",
+  "descricao": "Pilares e colunas existem por motivos funcionais (suportar o peso do teto) e estéticos. Via de regra, quanto maior e mais profunda for uma sala, mais colunas ela terá. Pilares podem ser estreitos (com menos de 1,5m de largura) ou largos (com mais de 1,5m de largura). Um pilar estreito tem RD 8 e 100 PV. Um personagem pode ficar no mesmo espaço de um pilar estreito e receber cobertura leve por isso (+5 na Defesa). Um pilar largo possui RD 8 e 500 PV. Um personagem não pode ficar no mesmo espaço de um pilar largo, mas pode ficar atrás dele para ganhar cobertura leve. Estalagmites e estátuas contam como pilares estreitos ou largos, de acordo com seu tamanho."
+ },
+ {
+  "nome": "Tapeçarias",
+  "descricao": "Um elemento comum de muitas masmorras (especialmente templos e castelos antigos), tapeçarias podem ser úteis como esconderijo ou meio de alcançar um ponto mais alto. Uma tapeçaria com 1,5m de largura tem RD 0 e 10 PV. Um personagem atrás de uma tapeçaria possui camuflagem leve. A CD do teste de Atletismo para escalar uma tapeçaria é 15 (supondo que ela seja resistente o bastante para sustentar o peso do personagem)."
+ },
+ {
+  "nome": "Altares",
+  "descricao": "Outro elemento típico de masmorras são altares - normalmente, blocos de pedra retangulares que são o centro de um templo. Um altar comum ocupa um espaço de 1,5m por 3m, possui RD 8 e 200 PV e fornece cobertura leve a qualquer criatura atrás dele, embora altares maiores, menores e de outros materiais existam. Um altar também pode emanar uma aura mágica, especialmente as magias Consagrar e Profanar."
+ }
+],
+"clima":[
+ {
+  "nome": "Calor e Frio",
+  "descricao": "Um personagem em clima muito quente (acima de 50º C) ou muito frio (abaixo de -10º C) deve fazer um teste de Fortitude por dia (CD 15 +1 por teste anterior). Se falhar sofre 1d6 pontos de dano de fogo ou frio que só pode ser curado após sair do clima quente ou frio. Em calor ou frio extremos (acima de 60º C ou abaixo de -20º C) o teste deve ser feito por minuto."
+ },
+ {
+  "nome": "Neblina",
+  "descricao": "Fornece camuflagem. Neblina espessa fornece camuflagem leve a criaturas a 1,5m e camuflagem total a criaturas a mais de 1,5m."
+ },
+ {
+  "nome": "Chuva",
+  "descricao": "-5 em testes de Percepção e os mesmos efeitos de vento forte."
+ },
+ {
+  "nome": "Granizo",
+  "descricao": "Como chuva, mas no início de cada rodada, todas as criaturas sofrem 1 ponto de dano de impacto."
+ },
+ {
+  "nome": "Neve",
+  "descricao": "Como chuva, mas cria terreno difícil."
+ },
+ {
+  "nome": "Tempestade",
+  "descricao": "-10 em testes de Percepção e os mesmos efeitos de vendaval. No início de cada rodada, há 10% de chance de uma criatura aleatória ser atingida por um raio (8d10 pontos de dano de eletricidade)."
+ },
+ {
+  "nome": "Vento Forte",
+  "descricao": "-2 em testes de ataque à distância e 50% de chance por rodada de apagar chamas ou dissipar névoas."
+ },
+ {
+  "nome": "Vendaval",
+  "descricao": "-5 em testes de ataque à distância. Apaga chamas e dissipa névoas."
+ },
+ {
+  "nome": "Furacão",
+  "descricao": "Torna ataques à distância impossíveis, apaga chamas e dissipa névoas. No início de cada rodada, criaturas Médias ou menores devem passar em um teste de Fortitude (CD 15) ou caem, são arrastadas 1d4 x 1,5m na direção do vento e sofrem 1d6 pontos de dano de impacto para cada 1,5m."
+ },
+ {
+  "nome": "Tornado",
+  "descricao": "Torna ataques à distância impossíveis, apaga chamas e dissipa névoas. No início de cada rodada, criaturas Grandes ou menores devem passar em um teste de Fortitude (CD 25) ou caem, são arrastadas 1d12 x 1,5m em uma direção aleatória e sofrem 1d6 pontos de dano de impacto para cada 1,5m."
+ }
+],
+"terrenos":[
+ {
+  "nome": "Inclinação Suave",
+  "tipo": "Colinas",
+  "descricao": "Não afeta o movimento, mas personagens no lado superior recebem bônus por terreno elevado contra personagens no lado inferior."
+ },
+ {
+  "nome": "Inclinação Íngreme",
+  "tipo": "Colinas",
+  "descricao": "Conta como terreno difícil para subir. Descer uma inclinação íngreme correndo ou fazendo uma investida exige um teste de Acrobacia (ou Cavalgar, se você estiver montado; CD 10). Em caso de falha, você cai no chão, rola 1d4 x 1,5m para frente (ou até o fim da inclinação) e sofre 1d6 pontos de dano de impacto por 1,5m rolados."
+ },
+ {
+  "nome": "Penhasco",
+  "tipo": "Colinas",
+  "descricao": "Um rochedo alto e escarpado, um penhasco típico tem 1d6 x 3m de altura. Escalar um penhasco exige um teste de Atletismo (CD 15)."
+ },
+ {
+  "nome": "Dunas",
+  "tipo": "Desertos",
+  "descricao": "Formadas pela ação do vento sobre a areia, dunas funcionam como inclinações íngremes (veja Colinas, acima). Porém, cair e rolar de uma duna não causa dano."
+ },
+ {
+  "nome": "Árvores",
+  "tipo": "Florestas",
+  "descricao": "Podem ser estreitas (com menos de 1,5m de largura) ou largas (com mais de 1,5m de largura). Uma árvore estreita tem RD 5 e 100 PV. Um personagem pode ficar no mesmo espaço de uma árvore estreita e receber cobertura leve. Uma árvore larga possui RD 5 e 500 PV. Um personagem não pode ficar no mesmo espaço de uma árvore larga, mas pode ficar atrás dela para ganhar cobertura leve. Subir numa árvore exige um teste de Atletismo (CD 15). Um personagem no topo de uma árvore precisa se equilibrar (CD 15; veja Acrobacia, na página 115). Um personagem no topo de uma árvore larga recebe camuflagem leve contra criaturas no solo."
+ },
+ {
+  "nome": "Folhagens",
+  "tipo": "Florestas",
+  "descricao": "Moitas e arbustos contam como terreno difícil e fornecem camuflagem leve a criaturas dentro deles."
+ },
+ {
+  "nome": "Vegetação Rasteira",
+  "tipo": "Florestas",
+  "descricao": "Raízes, vinhas e outros tipos de vegetação rasteira contam como terreno difícil. Além disso, impõem penalidade de -2 em teste de Furtividade pelas folhas secas e galhos caídos."
+ },
+ {
+  "nome": "Abismo",
+  "tipo": "Montanhas",
+  "descricao": "Uma fenda no chão, normalmente com 1d4 x 1,5m de largura e 2d4 x 3m de profundidade. Escalar para fora de um abismo exige um teste de Atletismo (CD 20)."
+ },
+ {
+  "nome": "Altitude",
+  "tipo": "Montanhas",
+  "descricao": "A falta de oxigênio de grandes altitudes pode ser letal. Um personagem no cume de uma montanha deve fazer um teste de Fortitude (CD 15 + 1 por teste anterior) por dia. Em caso de falha, fica fatigado até descer (se já estava fatigado, fica exausto)."
+ },
+ {
+  "nome": "Paredão",
+  "tipo": "Montanhas",
+  "descricao": "Um penhasco vertical e muito alto, normalmente com 2d6 x 3m de altura. Escalar um paredão exige um teste de Atletismo (CD 25)."
+ },
+ {
+  "nome": "Seixos",
+  "tipo": "Montanhas",
+  "descricao": "Em montanhas, inclinações íngremes às vezes são cobertas de pedrinhas. Nesse caso, a CD do teste para descer a inclinação numa corrida ou investida aumenta para 15."
+ },
+ {
+  "nome": "Lodaçal",
+  "tipo": "Pântanos",
+  "descricao": "Poças com uma mistura de água e lama que atrapalha os movimentos. Um lodaçal conta como terreno difícil e impõe a condição vulnerável a qualquer personagem dentro dele."
+ },
+ {
+  "nome": "Trincheira",
+  "tipo": "Planícies",
+  "descricao": "Uma vala escavada no solo para proteger soldados. Um personagem em uma trincheira recebe cobertura leve contra ataques à distância. Sair de uma trincheira conta como terreno difícil. Essa regra pode ser usada para valas, leitos de rio secos e acidentes geográficos similares."
+ },
+ {
+  "nome": "Gelo",
+  "tipo": "Ártico",
+  "descricao": "Você pode andar no gelo à metade do seu deslocamento sem testes. Porém, andar em seu deslocamento normal, correr, fazer uma investida ou sofrer dano sobre o gelo exige um teste de Acrobacia (CD 15, no caso de movimento, ou igual ao dano sofrido). Em caso de falha, você cai e desliza 1d4 x 1,5m (para a frente, no caso de movimento, ou na direção do ataque, no caso de dano sofrido)."
+ },
+ {
+  "nome": "Rio Congelado",
+  "tipo": "Ártico",
+  "descricao": "Andar sobre um rio congelado é como andar sobre gelo. Se você cair e rolar 1 no d4 para determinar quanto desliza, o gelo quebra e você afunda. Se você afundar, sofre 1d6 pontos de dano de frio por rodada e precisa nadar. Sair exige estar debaixo de um buraco no gelo e gastar uma ação de movimento para se erguer. Abrir um buraco exige causar 10 pontos de dano de impacto ou fogo."
+ },
+ {
+  "nome": "Água Corrente",
+  "tipo": "Aquático",
+  "descricao": "A velocidade típica de uma correnteza é 1d6 x 3m por rodada. No fim de cada rodada, todos os personagens na água são arrastados nessa velocidade na direção da correnteza. A CD de testes de Atletismo para nadar em um rio é 15 (para correntezas de 9m por rodada ou menos) ou 20 (para correntezas mais rápidas). Sair de uma correnteza com velocidade de 15m ou mais exige chegar até a margem ou ponto de apoio (como um bote ou uma tábua flutuante), então gastar uma ação de movimento e passar num teste de Atletismo (CD 20) para agarrar alguma coisa (galho, raiz, corda...). Se falhar, o personagem não consegue agarrar nada (e, no fim da rodada, será levado pela correnteza)."
+ },
+ {
+  "nome": "Água Parada",
+  "tipo": "Aquático",
+  "descricao": "Água parada exige testes de Atletismo para nadar, conforme a descrição da perícia, mas não possui nenhum outro modificador."
+ },
+ {
+  "nome": "Personagens Submersos",
+  "tipo": "Aquático",
+  "descricao": "Criaturas debaixo d'água não podem falar (e, portanto, lançar magias) e sofrem -2 em testes de ataque e -5 em testes de Percepção. Eles só podem se deslocar fazendo testes de Atletismo para nadar. Criaturas com deslocamento de natação não sofrem essas penalidades. Armas de ataque à distância não podem ser usadas (com exceção de armas de arremesso de perfuração, bestas e redes) e armas de corte e impacto que não sejam armas naturais causam metade do dano debaixo d'água. Por fim, criaturas submersas recebem camuflagem e cobertura leves contra personagens fora d'água."
+ },
+ {
+  "nome": "Covil",
+  "tipo": "Ermos",
+  "descricao": "Da gruta de um urso-coruja ao fosso de um escorpião gigante, os ermos estão repletos de lares de monstros. Um covil pode ser avistado com testes de Percepção ou Sobrevivência, e esta última perícia pode ser usada para identificar o habitante do lugar (CD 15 + ND da criatura). Normalmente um monstro estará em seu covil, mas há 25% de chance de ele estar fora — e qualquer tesouro que ele possua estar desprotegido. Resta saber se os personagens conseguirão entrar e sair antes da criatura voltar..."
+ },
+ {
+  "nome": "Ruína",
+  "tipo": "Ermos",
+  "descricao": "Os ermos são repletos dos resquícios de eras passadas. Um personagem que entre em uma ruína deve rolar 1d6. Com um resultado 1 ou 2, a ruína possui apenas uma ameaça (normalmente uma armadilha ou monstro, a critério do mestre). Com um resultado 3 ou 4, estará vazia. Com um resultado 5, possui uma ameaça e um tesouro. Com um resultado 6, possui apenas um tesouro. As ameaças e os tesouros são apropriados para o nível do grupo. Essa mecânica serve para lugares pequenos — ruínas grandes são masmorras por si só!"
+ },
+ {
+  "nome": "Santuário",
+  "tipo": "Ermos",
+  "descricao": "Mesmo em regiões inóspitas é possível encontrar lugares consagrados aos deuses — uma estátua de Khalmyr, um círculo de flores para Allihanna, uma pedra manchada de sangue para Megalokk... Um teste de Religião (CD 20) indica a qual deus o santuário é consagrado. Tocar um santuário de seu deus patrono fornece o efeito de uma magia (normalmente Bênção, Curar Ferimentos, Físico Divino ou Vestimenta da Fé), mas apenas uma vez por dia. Porém, se o santuário for de um deus inimigo, você é amaldiçoado (veja Rogar Maldição) até o final do dia."
+ }
+],
+"movimentacao":[
+ {
+  "nome": "Deslocamento",
+  "descricao": "Esta é a medida de quantos metros você pode percorrer com uma ação de movimento. O deslocamento padrão é 9m, mas algumas habilidades de raça e classe podem mudá-lo."
+ },
+ {
+  "nome": "Atravessar um Espaço Ocupado",
+  "descricao": "Você pode atravessar um espaço ocupado por um aliado. No entanto, não pode atravessar um espaço ocupado por um inimigo, a menos que ele esteja caído ou indefeso, ou seja pelo menos três categorias de tamanho maior ou menor que você. Você também pode atravessar um espaço ocupado por um inimigo com Acrobacia ou a ação atropelar. Espaço ocupado por um inimigo conta como terreno difícil."
+ },
+ {
+  "nome": "Carga",
+  "descricao": "Se você estiver sobrecarregado (veja a página 141), seu deslocamento diminui em 3m."
+ },
+ {
+  "nome": "Diagonais",
+  "descricao": "Em um mapa, mover-se na diagonal custa o dobro. Ou seja, andar 1,5m (1 quadrado) na diagonal conta como 3m (2 quadrados)."
+ },
+ {
+  "nome": "Outros Tipos de Movimento",
+  "descricao": "Além de andar, você pode gastar uma ação de movimento para se mover de outras maneiras. Consulte as perícias Acrobacia e Atletismo."
+ },
+ {
+  "nome": "Subir ou Mergulhar",
+  "descricao": "Voando ou nadando, movimentar-se na vertical custa o dobro na subida (ou o triplo em diagonais) e metade na descida (ou o normal em diagonais). Ou seja, voar 1,5m para cima conta como 3m, enquanto voar 3m para baixo conta como 1,5m."
+ },
+ {
+  "nome": "Terreno Difícil",
+  "descricao": "Lugares onde é difícil andar, como uma floresta cheia de raízes, neve profunda, ruínas com destroços ou mesmo uma rua lotada de pessoas, são terreno difícil. Mover-se em terreno difícil custa o dobro. Ou seja, você se move metade do deslocamento normal - ou gasta 3m de deslocamento por quadrado, em vez de 1,5m."
+ }
+],
+"situacoes_especiais":[
+ {
+  "nome": "Camuflagem",
+  "descricao": "Você recebe camuflagem leve quando um efeito dificulta a visão dos inimigos. Pode ser escuridão leve, neblina, folhagens ou outro efeito similar no local onde você está ou no espaço entre você e o oponente. Ataques contra você têm 20% de chance de falha (ao fazer um ataque, o atacante rola 1d10 junto com o d20 do teste de ataque; se o resultado desse d10 for 1 ou 2, o ataque erra, independentemente do resultado do teste de ataque). Você recebe camuflagem total quando um efeito impede a visão dos inimigos - por exemplo, em uma câmara em escuridão total. A chance de falha em camuflagem total é 50% (1 a 5 no d10)."
+ },
+ {
+  "nome": "Cobertura",
+  "descricao": "Você recebe cobertura leve quando está atrás de algo que bloqueia o ataque dos inimigos, como uma árvore, uma muralha de castelo, a lateral de uma carroça ou uma criatura maior. Cobertura leve fornece +5 na Defesa. No mapa, o atacante e o alvo escolhem, cada um, um canto do quadrado onde estão. Trace uma linha reta entre os cantos. Se a linha é interrompida por um obstáculo ou criatura, o alvo tem cobertura leve. O alvo não recebe cobertura se a linha seguir ao longo de um obstáculo ou apenas tocar a ponta de um obstáculo. Você recebe cobertura total quando seus inimigos não podem alcançá-lo - por exemplo, se estiver atrás de uma parede. Cobertura total impede que você seja atacado."
+ },
+ {
+  "nome": "Flanquear",
+  "descricao": "Quando você luta corpo a corpo contra um oponente e um aliado faz o mesmo no lado oposto - ou seja, o inimigo está entre vocês - vocês estão flanqueando o alvo. Ambos recebem +2 em seus testes de ataque contra o alvo flanqueado. Não se pode flanquear à distância ou com ataques desarmados (a menos que você possua as habilidades Briga ou Estilo Desarmado)."
+ }
+],
+"tabela_situacoes_esp":[
+ {
+  "atacante_esta": "O atacante está caído",
+  "modificador_ataque_defesa": "-5 (apenas para corpo a corpo)"
+ },
+ {
+  "atacante_esta": "O atacante está ego",
+  "modificador_ataque_defesa": "50% de chance de falha"
+ },
+ {
+  "atacante_esta": "O atacante está em posição elevada",
+  "modificador_ataque_defesa": "+2"
+ },
+ {
+  "atacante_esta": "O atacante está flanqueando o alvo",
+  "modificador_ataque_defesa": "+2 (apenas para corpo a corpo)"
+ },
+ {
+  "atacante_esta": "O atacante está Invisível",
+  "modificador_ataque_defesa": "O alvo sofre -5 na Defesa"
+ },
+ {
+  "atacante_esta": "O atacante está  Ofuscado",
+  "modificador_ataque_defesa": "-2"
+ },
+ {
+  "atacante_esta": "O alvo está caído",
+  "modificador_ataque_defesa": "-5 contra ataques corpo a corpo, +5 contra ataques à distância"
+ },
+ {
+  "atacante_esta": "O alvo está cego",
+  "modificador_ataque_defesa": "-5"
+ },
+ {
+  "atacante_esta": "O alvo está desprevenido",
+  "modificador_ataque_defesa": "-5"
+ },
+ {
+  "atacante_esta": "O alvo está sob camuflagem leve",
+  "modificador_ataque_defesa": "20% de chance de falha"
+ },
+ {
+  "atacante_esta": "O alvo está sob camuflagem total",
+  "modificador_ataque_defesa": "50% de chance de falha"
+ },
+ {
+  "atacante_esta": "O alvo está sob cobertura leve",
+  "modificador_ataque_defesa": "+5"
+ },
+ {
+  "atacante_esta": "O alvo está sob cobertura total",
+  "modificador_ataque_defesa": "O alvo não pode ser atacado"
+ }
+],
+"tabela_estat_objetos-portas":[
+ {
+  "exemplo": "Pergaminho",
+  "tamanho": "Minusculo",
+  "def": 15,
+  "rd": 0,
+  "pv": 1
+ },
+ {
+  "exemplo": "Corda",
+  "tamanho": "Minusculo",
+  "def": 15,
+  "rd": 0,
+  "pv": 2
+ },
+ {
+  "exemplo": "Corrente",
+  "tamanho": "Minusculo",
+  "def": 15,
+  "rd": 10,
+  "pv": 2
+ },
+ {
+  "exemplo": "Cadeira",
+  "tamanho": "Pequeno",
+  "def": 12,
+  "rd": 5,
+  "pv": 5
+ },
+ {
+  "exemplo": "Barril",
+  "tamanho": "Médio",
+  "def": 10,
+  "rd": 5,
+  "pv": 10
+ },
+ {
+  "exemplo": "Porta de madeira",
+  "tamanho": "Grande",
+  "def": 8,
+  "rd": 5,
+  "pv": 20
+ },
+ {
+  "exemplo": "Porta de pedra",
+  "tamanho": "Grande",
+  "def": 8,
+  "rd": 8,
+  "pv": 100
+ },
+ {
+  "exemplo": "Porta de ferro",
+  "tamanho": "Grande",
+  "def": 8,
+  "rd": 10,
+  "pv": 100
+ },
+ {
+  "exemplo": "Carroça",
+  "tamanho": "Grande",
+  "def": 8,
+  "rd": 5,
+  "pv": 50
+ },
+ {
+  "exemplo": "Casebre",
+  "tamanho": "Enorme",
+  "def": 5,
+  "rd": 5,
+  "pv": 100
+ },
+ {
+  "exemplo": "Celeiro",
+  "tamanho": "Colossal",
+  "def": 0,
+  "rd": 5,
+  "pv": 200
+ },
+ {
+  "exemplo": "Arma leve de madeira (machadinha)",
+  "rd": 5,
+  "pv": 2
+ },
+ {
+  "exemplo": "Arma de uma mão de madeira (clava)",
+  "rd": 5,
+  "pv": 5
+ },
+ {
+  "exemplo": "Arma de duas mãos de madeira (bordão)",
+  "rd": 5,
+  "pv": 10
+ },
+ {
+  "exemplo": "Arma leve de metal (adaga)",
+  "rd": 10,
+  "pv": 2
+ },
+ {
+  "exemplo": "Arma de uma mão de metal (espada longa)",
+  "rd": 10,
+  "pv": 5
+ },
+ {
+  "exemplo": "Arma de duas mãos de metal (montante)",
+  "rd": 10,
+  "pv": 10
+ },
+ {
+  "exemplo": "Escudo leve",
+  "rd": 5,
+  "pv": 10
+ },
+ {
+  "exemplo": "Escudo pesado",
+  "rd": 10,
+  "pv": 20
+ },
+ {
+  "exemplo": "Armadura leve",
+  "rd": 5,
+  "pv": 20
+ },
+ {
+  "exemplo": "Armadura pesada",
+  "rd": 10,
+  "pv": 40
+ },
+ null,
+ {
+  "exemplo": "Madeira",
+  "def": 15,
+  "rd": 5,
+  "pv": 20
+ },
+ {
+  "exemplo": "Madeira reforçada",
+  "def": 20,
+  "rd": 5,
+  "pv": 30
+ },
+ {
+  "exemplo": "Pedra",
+  "def": 25,
+  "rd": 8,
+  "pv": 100
+ },
+ {
+  "exemplo": "Ferro",
+  "def": 25,
+  "rd": 10,
+  "pv": 100
+ },
+ {
+  "exemplo": "Grade",
+  "def": 20,
+  "rd": 10,
+  "pv": 60
+ }
+],
+"tabela_tesouro":[
+ {
+  "nd": "1\/4",
+  "d%": "01-30",
+  "dinheiro": "0",
+  "d%2": "01-50",
+  "itens": "0"
+ },
+ {
+  "nd": "1\/4",
+  "d%": "31-70",
+  "dinheiro": "1d6x10 TC",
+  "d%2": "51-75",
+  "itens": "Diverso"
+ },
+ {
+  "nd": "1\/4",
+  "d%": "71-95",
+  "dinheiro": "1d4x100 TC",
+  "d%2": "76-100",
+  "itens": "Equipamento"
+ },
+ {
+  "nd": "1\/4",
+  "d%": "96-100",
+  "dinheiro": "1d6x10 T$"
+ },
+ {
+  "nd": "1\/2",
+  "d%": "01-25",
+  "dinheiro": "0",
+  "d%2": "01-45",
+  "itens": "0"
+ },
+ {
+  "nd": "1\/2",
+  "d%": "26-70",
+  "dinheiro": "2d6x10 TC",
+  "d%2": "46-70",
+  "itens": "Diverso"
+ },
+ {
+  "nd": "1\/2",
+  "d%": "71-95",
+  "dinheiro": "2d8x10 T$",
+  "d%2": "71-100",
+  "itens": "Equipamento"
+ },
+ {
+  "nd": "1\/2",
+  "d%": "96-100",
+  "dinheiro": "1d4x100 T$"
+ },
+ {
+  "nd": "1",
+  "d%": "01-20",
+  "dinheiro": "0",
+  "d%2": "01-40",
+  "itens": "0"
+ },
+ {
+  "nd": "1",
+  "d%": "21-70",
+  "dinheiro": "3d8x10 T$",
+  "d%2": "41-65",
+  "itens": "Diverso"
+ },
+ {
+  "nd": "1",
+  "d%": "71-95",
+  "dinheiro": "4d12x10 T$",
+  "d%2": "66-90",
+  "itens": "Equipamento"
+ },
+ {
+  "nd": "1",
+  "d%": "96-100",
+  "dinheiro": "1 riqueza menor",
+  "d%2": "91-100",
+  "itens": "1 poção"
+ },
+ {
+  "nd": "2",
+  "d%": "01-15",
+  "dinheiro": "0",
+  "d%2": "01-30",
+  "itens": "0"
+ },
+ {
+  "nd": "2",
+  "d%": "16-55",
+  "dinheiro": "3d10x10 T$",
+  "d%2": "31-40",
+  "itens": "Diverso"
+ },
+ {
+  "nd": "2",
+  "d%": "56-85",
+  "dinheiro": "2d4x100 T$",
+  "d%2": "41-70",
+  "itens": "Equipamento"
+ },
+ {
+  "nd": "2",
+  "d%": "86-95",
+  "dinheiro": "2d6+1x100 T$",
+  "d%2": "71-90",
+  "itens": "1 poção"
+ },
+ {
+  "nd": "2",
+  "d%": "96-100",
+  "dinheiro": "1 riqueza menor",
+  "d%2": "91-100",
+  "itens": "Superior (1 melhoria)"
+ },
+ {
+  "nd": "3",
+  "d%": "01-10",
+  "dinheiro": "0",
+  "d%2": "01-25",
+  "itens": "0"
+ },
+ {
+  "nd": "3",
+  "d%": "11-20",
+  "dinheiro": "4d12x10 T$",
+  "d%2": "26-35",
+  "itens": "Diverso"
+ },
+ {
+  "nd": "3",
+  "d%": "21-60",
+  "dinheiro": "1d4x100 T$",
+  "d%2": "36-60",
+  "itens": "Equipamento"
+ },
+ {
+  "nd": "3",
+  "d%": "61-90",
+  "dinheiro": "1d8x10 TO",
+  "d%2": "61-85",
+  "itens": "1 poção"
+ },
+ {
+  "nd": "3",
+  "d%": "91-100",
+  "dinheiro": "1d3 riquezas menores",
+  "d%2": "86-100",
+  "itens": "Superior (1 melhoria)"
+ },
+ {
+  "nd": "4",
+  "d%": "01-10",
+  "dinheiro": "0",
+  "d%2": "01-20",
+  "itens": "0"
+ },
+ {
+  "nd": "4",
+  "d%": "11-50",
+  "dinheiro": "1d6x100 T$",
+  "d%2": "21-30",
+  "itens": "Diverso"
+ },
+ {
+  "nd": "4",
+  "d%": "51-80",
+  "dinheiro": "1d12x100 T$",
+  "d%2": "31-55",
+  "itens": "Equipamento 2D"
+ },
+ {
+  "nd": "4",
+  "d%": "81-90",
+  "dinheiro": "1 riqueza menor +%",
+  "d%2": "56-80",
+  "itens": "1 poção +%"
+ },
+ {
+  "nd": "4",
+  "d%": "91-100",
+  "dinheiro": "1d3 riquezas menores +%",
+  "d%2": "81-100",
+  "itens": "Superior (1 melhoria) 2D"
+ },
+ {
+  "nd": "5",
+  "d%": "01-15",
+  "dinheiro": "0",
+  "d%2": "01-20",
+  "itens": "0"
+ },
+ {
+  "nd": "5",
+  "d%": "16-65",
+  "dinheiro": "1d8x100 T$",
+  "d%2": "21-70",
+  "itens": "1 poção"
+ },
+ {
+  "nd": "5",
+  "d%": "66-95",
+  "dinheiro": "3d4x10 TO",
+  "d%2": "71-90",
+  "itens": "Superior (1 melhoria)"
+ },
+ {
+  "nd": "5",
+  "d%": "96-100",
+  "dinheiro": "1 riqueza média",
+  "d%2": "91-100",
+  "itens": "Superior (2 melhorias)"
+ },
+ {
+  "nd": "6",
+  "d%": "01-15",
+  "dinheiro": "0",
+  "d%2": "01-20",
+  "itens": "0"
+ },
+ {
+  "nd": "6",
+  "d%": "16-60",
+  "dinheiro": "2d6x100 T$",
+  "d%2": "21-65",
+  "itens": "1 poção +%"
+ },
+ {
+  "nd": "6",
+  "d%": "61-90",
+  "dinheiro": "2d10x100 T$",
+  "d%2": "66-95",
+  "itens": "Superior (1 melhoria)"
+ },
+ {
+  "nd": "6",
+  "d%": "91-100",
+  "dinheiro": "1d3+1 riquezas menores",
+  "d%2": "96-100",
+  "itens": "Superior (2 melhorias) 2D"
+ },
+ {
+  "nd": "7",
+  "d%": "01-10",
+  "dinheiro": "0",
+  "d%2": "01-20",
+  "itens": "0"
+ },
+ {
+  "nd": "7",
+  "d%": "11-60",
+  "dinheiro": "2d8x100 T$",
+  "d%2": "21-60",
+  "itens": "1d3 poções"
+ },
+ {
+  "nd": "7",
+  "d%": "61-90",
+  "dinheiro": "2d12x10 TO",
+  "d%2": "61-90",
+  "itens": "Superior (2 melhorias)"
+ },
+ {
+  "nd": "7",
+  "d%": "91-100",
+  "dinheiro": "1d4+1 riquezas menores",
+  "d%2": "91-100",
+  "itens": "Superior (3 melhorias)"
+ },
+ {
+  "nd": "8",
+  "d%": "01-10",
+  "dinheiro": "0",
+  "d%2": "01-20",
+  "itens": "0"
+ },
+ {
+  "nd": "8",
+  "d%": "11-55",
+  "dinheiro": "2d10x100 T$",
+  "d%2": "21-75",
+  "itens": "1d3 poções"
+ },
+ {
+  "nd": "8",
+  "d%": "56-95",
+  "dinheiro": "1d4+1 riquezas menores",
+  "d%2": "76-95",
+  "itens": "Superior (2 melhorias)"
+ },
+ {
+  "nd": "8",
+  "d%": "96-100",
+  "dinheiro": "1 riqueza média +%",
+  "d%2": "96-100",
+  "itens": "Superior (3 melhorias) 2D"
+ },
+ {
+  "nd": "9",
+  "d%": "01-10",
+  "dinheiro": "0",
+  "d%2": "01-20",
+  "itens": "0"
+ },
+ {
+  "nd": "9",
+  "d%": "11-35",
+  "dinheiro": "1 riqueza média",
+  "d%2": "21-70",
+  "itens": "1 poção +%"
+ },
+ {
+  "nd": "9",
+  "d%": "36-85",
+  "dinheiro": "4d6x100 T$",
+  "d%2": "71-95",
+  "itens": "Superior (3 melhorias)"
+ },
+ {
+  "nd": "9",
+  "d%": "86-100",
+  "dinheiro": "1d3 riquezas médias",
+  "d%2": "96-100",
+  "itens": "Mágico (menor)"
+ },
+ {
+  "nd": "10",
+  "d%": "01-10",
+  "dinheiro": "0",
+  "d%2": "01-50",
+  "itens": "0"
+ },
+ {
+  "nd": "10",
+  "d%": "11-30",
+  "dinheiro": "4d6x100 T$",
+  "d%2": "51-75",
+  "itens": "1d3+1 poções"
+ },
+ {
+  "nd": "10",
+  "d%": "31-85",
+  "dinheiro": "4d10x10 TO",
+  "d%2": "76-90",
+  "itens": "Superior (3 melhorias)"
+ },
+ {
+  "nd": "10",
+  "d%": "86-100",
+  "dinheiro": "1d3+1 riquezas médias",
+  "d%2": "91-100",
+  "itens": "Mágico (menor)"
+ },
+ {
+  "nd": "11",
+  "d%": "01-10",
+  "dinheiro": "0",
+  "d%2": "01-45",
+  "itens": "0"
+ },
+ {
+  "nd": "11",
+  "d%": "11-45",
+  "dinheiro": "2d4x1.000 T$",
+  "d%2": "46-70",
+  "itens": "1d4+1 poções"
+ },
+ {
+  "nd": "11",
+  "d%": "46-85",
+  "dinheiro": "1d3 riquezas médias",
+  "d%2": "71-90",
+  "itens": "Superior (3 melhorias)"
+ },
+ {
+  "nd": "11",
+  "d%": "86-100",
+  "dinheiro": "2d6x100 TO",
+  "d%2": "91-100",
+  "itens": "Mágico (menor) 2D"
+ },
+ {
+  "nd": "12",
+  "d%": "01-10",
+  "dinheiro": "0",
+  "d%2": "01-45",
+  "itens": "0"
+ },
+ {
+  "nd": "12",
+  "d%": "11-45",
+  "dinheiro": "1 riqueza média +%",
+  "d%2": "46-70",
+  "itens": "1d3+1 poções +%"
+ },
+ {
+  "nd": "12",
+  "d%": "46-80",
+  "dinheiro": "2d6x1.000 T$",
+  "d%2": "71-85",
+  "itens": "Superior (4 melhorias)"
+ },
+ {
+  "nd": "12",
+  "d%": "81-100",
+  "dinheiro": "1d4+1 riquezas médias",
+  "d%2": "86-100",
+  "itens": "Mágico (menor)"
+ },
+ {
+  "nd": "13",
+  "d%": "01-10",
+  "dinheiro": "0",
+  "d%2": "01-40",
+  "itens": "0"
+ },
+ {
+  "nd": "13",
+  "d%": "11-45",
+  "dinheiro": "4d4x1.000 T$",
+  "d%2": "41-65",
+  "itens": "1d4+1 poções +%"
+ },
+ {
+  "nd": "13",
+  "d%": "46-80",
+  "dinheiro": "1d3+1 riquezas médias",
+  "d%2": "66-95",
+  "itens": "Superior (4 melhorias)"
+ },
+ {
+  "nd": "13",
+  "d%": "81-100",
+  "dinheiro": "4d6x100 TO",
+  "d%2": "96-100",
+  "itens": "Mágico (médio)"
+ },
+ {
+  "nd": "14",
+  "d%": "01-10",
+  "dinheiro": "0",
+  "d%2": "01-40",
+  "itens": "0"
+ },
+ {
+  "nd": "14",
+  "d%": "11-45",
+  "dinheiro": "1d3+1 riquezas médias",
+  "d%2": "41-65",
+  "itens": "1d4+1 poções +%"
+ },
+ {
+  "nd": "14",
+  "d%": "46-80",
+  "dinheiro": "3d6x1.000 T$",
+  "d%2": "66-90",
+  "itens": "Superior (4 melhorias)"
+ },
+ {
+  "nd": "14",
+  "d%": "81-100",
+  "dinheiro": "1 riqueza maior",
+  "d%2": "91-100",
+  "itens": "Mágico (médio)"
+ },
+ {
+  "nd": "15",
+  "d%": "01-10",
+  "dinheiro": "0",
+  "d%2": "01-35",
+  "itens": "0"
+ },
+ {
+  "nd": "15",
+  "d%": "11-45",
+  "dinheiro": "1 riqueza média +%",
+  "d%2": "36-45",
+  "itens": "1d6+1 poções"
+ },
+ {
+  "nd": "15",
+  "d%": "46-80",
+  "dinheiro": "2d10x1.000 T$",
+  "d%2": "46-85",
+  "itens": "Superior (4 melhorias) 2D"
+ },
+ {
+  "nd": "15",
+  "d%": "81-100",
+  "dinheiro": "1d4x1.000 TO",
+  "d%2": "86-100",
+  "itens": "Mágico (médio)"
+ },
+ {
+  "nd": "16",
+  "d%": "01-10",
+  "dinheiro": "0",
+  "d%2": "01-35",
+  "itens": "0"
+ },
+ {
+  "nd": "16",
+  "d%": "11-40",
+  "dinheiro": "3d6x1.000 T$",
+  "d%2": "36-45",
+  "itens": "1d6+1 poções +%"
+ },
+ {
+  "nd": "16",
+  "d%": "41-75",
+  "dinheiro": "3d10x100 TO",
+  "d%2": "46-80",
+  "itens": "Superior (4 melhorias) 2D"
+ },
+ {
+  "nd": "16",
+  "d%": "76-100",
+  "dinheiro": "1d3 riquezas maiores",
+  "d%2": "81-100",
+  "itens": "Mágico (médio)"
+ },
+ {
+  "nd": "17",
+  "d%": "01-05",
+  "dinheiro": "0",
+  "d%2": "01-20",
+  "itens": "0"
+ },
+ {
+  "nd": "17",
+  "d%": "06-40",
+  "dinheiro": "4d6x1.000 T$",
+  "d%2": "21-40",
+  "itens": "Mágico (menor)"
+ },
+ {
+  "nd": "17",
+  "d%": "41-75",
+  "dinheiro": "1d3 riquezas médias +%",
+  "d%2": "41-80",
+  "itens": "Mágico (médio)"
+ },
+ {
+  "nd": "17",
+  "d%": "76-100",
+  "dinheiro": "2d4x1.000 TO",
+  "d%2": "81-100",
+  "itens": "Mágico (maior)"
+ },
+ {
+  "nd": "18",
+  "d%": "01-05",
+  "dinheiro": "0",
+  "d%2": "01-15",
+  "itens": "0"
+ },
+ {
+  "nd": "18",
+  "d%": "06-40",
+  "dinheiro": "4d10x1.000 T$",
+  "d%2": "16-40",
+  "itens": "Mágico (menor) 2D"
+ },
+ {
+  "nd": "18",
+  "d%": "41-75",
+  "dinheiro": "1 riqueza maior",
+  "d%2": "41-70",
+  "itens": "Mágico (médio)"
+ },
+ {
+  "nd": "18",
+  "d%": "76-100",
+  "dinheiro": "1d3+1 riquezas maiores",
+  "d%2": "71-100",
+  "itens": "Mágico (maior)"
+ },
+ {
+  "nd": "19",
+  "d%": "01-05",
+  "dinheiro": "0",
+  "d%2": "01-10",
+  "itens": "0"
+ },
+ {
+  "nd": "19",
+  "d%": "06-40",
+  "dinheiro": "4d12x1.000 T$",
+  "d%2": "11-40",
+  "itens": "Mágico (menor) 2D"
+ },
+ {
+  "nd": "19",
+  "d%": "41-75",
+  "dinheiro": "1 riqueza maior +%",
+  "d%2": "41-60",
+  "itens": "Mágico (médio) 2D"
+ },
+ {
+  "nd": "19",
+  "d%": "76-100",
+  "dinheiro": "1d12x1.000 TO",
+  "d%2": "61-100",
+  "itens": "Mágico (maior)"
+ },
+ {
+  "nd": "20",
+  "d%": "01-05",
+  "dinheiro": "0",
+  "d%2": "01-05",
+  "itens": "0"
+ },
+ {
+  "nd": "20",
+  "d%": "06-40",
+  "dinheiro": "2d4x1.000 TO",
+  "d%2": "06-40",
+  "itens": "Mágico (menor) 2D"
+ },
+ {
+  "nd": "20",
+  "d%": "41-75",
+  "dinheiro": "1d3 riquezas maiores",
+  "d%2": "41-50",
+  "itens": "Mágico (médio) 2D"
+ },
+ {
+  "nd": "20",
+  "d%": "76-100",
+  "dinheiro": "1d3+1 riquezas maiores +%",
+  "d%2": "51-100",
+  "itens": "Mágico (maior) 2D"
+ }
+],
+"tabela_riquezas":[
+ {
+  "menor": "01-25",
+  "media": "0",
+  "maior": "0",
+  "valor": "4d4 (10)",
+  "exemplos": "Ágata ou hematita (1\/2); barril de farinha ou gaiola com galinhas (5)."
+ },
+ {
+  "menor": "26-40",
+  "media": "0",
+  "maior": "0",
+  "valor": "1d4x10 (25)",
+  "exemplos": "Quartzo rosa ou topázio (1\/2); caixa de tabaco ou rolo de linho (1); jarro de especiarias, como canela, gorad, pimenta ou sal (2);"
+ },
+ {
+  "menor": "41-55",
+  "media": "01-10",
+  "maior": "0",
+  "valor": "2d4x10 (50)",
+  "exemplos": "Bracelete de ouro finamente trabalhado (1\/2); estatueta de osso ou marfim entalhado ou rolo de seda (1); vaso de prata (2)."
+ },
+ {
+  "menor": "56-70",
+  "media": "11-30",
+  "maior": "0",
+  "valor": "4d6x10 (140)",
+  "exemplos": "Ametista ou pérola branca (1\/2); lingote de prata ou cálice de prata com gemas de lápis-lazúli (1); tapeçaria grande e bem-feita de lã (5)."
+ },
+ {
+  "menor": "71-85",
+  "media": "31-50",
+  "maior": "01-05",
+  "valor": "1d6x100 (350)",
+  "exemplos": "Alexandrita ou pérola negra (1\/2); espada cerimonial ornada com prata e gema negra no cabo ou pente de prata com pedras preciosas (1)."
+ },
+ {
+  "menor": "86-95",
+  "media": "51-65",
+  "maior": "06-15",
+  "valor": "2d6x100 (700)",
+  "exemplos": "Pente em forma de dragão com olhos de gema vermelha (1); harpa de madeira exótica com ornamentos de zircão e marfim (5)."
+ },
+ {
+  "menor": "96-99",
+  "media": "66-80",
+  "maior": "16-25",
+  "valor": "2d8x100 (900)",
+  "exemplos": "Opala negra ou tapa-olho com um olho falso de safira (1\/2); luva bordada e adornada com gemas ou pingente de opala vermelha com corrente de ouro (1); lingote de ouro ou pintura antiga (2)."
+ },
+ {
+  "menor": "100",
+  "media": "81-90",
+  "maior": "26-40",
+  "valor": "4d10x100 (2.200)",
+  "exemplos": "Esmeralda verde ou pingente de safira (1\/2); caixinha de música de ouro ou tornozeleira com gemas (1); manto bordado em veludo e seda com inúmeras pedras preciosas (2)."
+ },
+ {
+  "menor": "0",
+  "media": "91-95",
+  "maior": "41-60",
+  "valor": "6d12x100 (3.900)",
+  "exemplos": "Anel de prata e safira ou correntinha com pequenas pérolas rosas, diamante branco (1\/2); ídolo de ouro puro maciço (5)."
+ },
+ {
+  "menor": "0",
+  "media": "96-99",
+  "maior": "61-75",
+  "valor": "2d10x1.000 (11.000)",
+  "exemplos": "Anel de ouro e rubi ou diamante vermelho (1\/2); conjunto de taças de ouro decoradas com esmeraldas (2)."
+ },
+ {
+  "menor": "0",
+  "media": "100",
+  "maior": "76-85",
+  "valor": "6d8x1.000 (27.000)",
+  "exemplos": "Coroa de ouro adornada com centenas de gemas, pertencente a um antigo monarca (1); baú de mitral com coleção de diamantes (2)."
+ },
+ {
+  "menor": "0",
+  "media": "0",
+  "maior": "86-95",
+  "valor": "1d10x10.000 (55.000)",
+  "exemplos": "Arca de madeira reforçada repleta de lingotes de prata e ouro, além de pedras preciosas de vários tipos (20)."
+ },
+ {
+  "menor": "0",
+  "media": "0",
+  "maior": "96-100",
+  "valor": "4d12x10.000 (260.000)",
+  "exemplos": "Uma sala forrada de moedas! Mover todo esse dinheiro exige trabalhadores e carroças (ou outra ideia por parte dos jogadores), além de atrair a atenção de bandidos, coletores de impostos e aproveitadores de vários tipos..."
+ }
+],
+"tabela_itens_diversos":[
+ {
+  "d%": "01-02",
+  "item": "Ácido"
+ },
+ {
+  "d%": "03-04",
+  "item": "Água benta"
+ },
+ {
+  "d%": "05",
+  "item": "Alaúde élfico"
+ },
+ {
+  "d%": "06",
+  "item": "Algemas"
+ },
+ {
+  "d%": "07-08",
+  "item": "Baga-de-fogo"
+ },
+ {
+  "d%": "09-23",
+  "item": "Bálsamo restaurador"
+ },
+ {
+  "d%": "24",
+  "item": "Bandana"
+ },
+ {
+  "d%": "25",
+  "item": "Bandoleira de poções"
+ },
+ {
+  "d%": "26-30",
+  "item": "Bomba"
+ },
+ {
+  "d%": "31",
+  "item": "Botas reforçadas"
+ },
+ {
+  "d%": "32",
+  "item": "Camisa bufante"
+ },
+ {
+  "d%": "33",
+  "item": "Capa esvoaçante"
+ },
+ {
+  "d%": "34",
+  "item": "Capa pesada"
+ },
+ {
+  "d%": "35",
+  "item": "Casaco longo"
+ },
+ {
+  "d%": "36",
+  "item": "Chapéu arcano"
+ },
+ {
+  "d%": "37-38",
+  "item": "Coleção de livros"
+ },
+ {
+  "d%": "39-40",
+  "item": "Cosmético"
+ },
+ {
+  "d%": "41-42",
+  "item": "Dente-de-dragão"
+ },
+ {
+  "d%": "43",
+  "item": "Enfeite de elmo"
+ },
+ {
+  "d%": "44",
+  "item": "Elixir do amor"
+ },
+ {
+  "d%": "45-46",
+  "item": "Equipamento de viagem"
+ },
+ {
+  "d%": "47-56",
+  "item": "Essência de mana"
+ },
+ {
+  "d%": "57",
+  "item": "Estojo de disfarces"
+ },
+ {
+  "d%": "58",
+  "item": "Farrapos de ermitão"
+ },
+ {
+  "d%": "59",
+  "item": "Flauta mística"
+ },
+ {
+  "d%": "60-66",
+  "item": "Fogo alquímico"
+ },
+ {
+  "d%": "67",
+  "item": "Gorro de ervas"
+ },
+ {
+  "d%": "68-69",
+  "item": "Líquen lilás"
+ },
+ {
+  "d%": "70",
+  "item": "Luneta"
+ },
+ {
+  "d%": "71",
+  "item": "Luva de pelica"
+ },
+ {
+  "d%": "72-73",
+  "item": "Maleta de medicamentos"
+ },
+ {
+  "d%": "74",
+  "item": "Manopla"
+ },
+ {
+  "d%": "75",
+  "item": "Manto eclesiástico"
+ },
+ {
+  "d%": "76-78",
+  "item": "Mochila de aventureiro"
+ },
+ {
+  "d%": "79-80",
+  "item": "Musgo púrpura"
+ },
+ {
+  "d%": "81",
+  "item": "Organizador de pergaminhos"
+ },
+ {
+  "d%": "82-83",
+  "item": "Ossos de monstro"
+ },
+ {
+  "d%": "84-85",
+  "item": "Pó de cristal"
+ },
+ {
+  "d%": "86-87",
+  "item": "Pó de giz"
+ },
+ {
+  "d%": "88",
+  "item": "Pó do desaparecimento"
+ },
+ {
+  "d%": "89",
+  "item": "Robe místico"
+ },
+ {
+  "d%": "90-91",
+  "item": "Saco de sal"
+ },
+ {
+  "d%": "92",
+  "item": "Sapatos de camurça"
+ },
+ {
+  "d%": "93-94",
+  "item": "Seixo de âmbar"
+ },
+ {
+  "d%": "95",
+  "item": "Sela"
+ },
+ {
+  "d%": "96",
+  "item": "Tabardo"
+ },
+ {
+  "d%": "97",
+  "item": "Traje da corte"
+ },
+ {
+  "d%": "98-99",
+  "item": "Terra de cemitério"
+ },
+ {
+  "d%": "100",
+  "item": "Veste de seda"
+ }
+],
+"tabela_equipamento":[
+ {
+  "d%": "01-03",
+  "arma": "Adaga",
+  "d%2": "01-05",
+  "armadura": "Couro",
+  "d%3": "01-10",
+  "esotérico": "Bolsa de pó"
+ },
+ {
+  "d%": "04-05",
+  "arma": "Alabarda",
+  "d%2": "06-10",
+  "armadura": "Brunea",
+  "d%3": "11-25",
+  "esotérico": "Cajado arcano"
+ },
+ {
+  "d%": "06-07",
+  "arma": "Alfange",
+  "d%2": "11-25",
+  "armadura": "Completa",
+  "d%3": "26-35",
+  "esotérico": "Cetro elemental"
+ },
+ {
+  "d%": "08-10",
+  "arma": "Arco curto",
+  "d%2": "26-30",
+  "armadura": "Cota de malha",
+  "d%3": "36-42",
+  "esotérico": "Costela de lich"
+ },
+ {
+  "d%": "11-13",
+  "arma": "Arco longo",
+  "d%2": "31-45",
+  "armadura": "Couraça",
+  "d%3": "43-50",
+  "esotérico": "Dedo de ente"
+ },
+ {
+  "d%": "14-15",
+  "arma": "Azagaia",
+  "d%2": "46-55",
+  "armadura": "Couro batido",
+  "d%3": "51-55",
+  "esotérico": "Luva de ferro"
+ },
+ {
+  "d%": "16",
+  "arma": "Balas (20)",
+  "d%2": "56-65",
+  "armadura": "Escudo leve",
+  "d%3": "56-65",
+  "esotérico": "Medalhão de prata"
+ },
+ {
+  "d%": "17-18",
+  "arma": "Besta leve",
+  "d%2": "66-80",
+  "armadura": "Escudo pesado",
+  "d%3": "66-75",
+  "esotérico": "Orbe cristalino"
+ },
+ {
+  "d%": "19-20",
+  "arma": "Besta pesada",
+  "d%2": "81-85",
+  "armadura": "Gibão de peles",
+  "d%3": "76-85",
+  "esotérico": "Tomo hermético"
+ },
+ {
+  "d%": "21-23",
+  "arma": "Bordão",
+  "d%2": "86-90",
+  "armadura": "Loriga segmentada",
+  "d%3": "86-100",
+  "esotérico": "Varinha arcana"
+ },
+ {
+  "d%": "24",
+  "arma": "Chicote",
+  "d%2": "91-100",
+  "armadura": "Meia armadura"
+ },
+ {
+  "d%": "25-27",
+  "arma": "Cimitarra"
+ },
+ {
+  "d%": "28-30",
+  "arma": "Clava"
+ },
+ {
+  "d%": "31",
+  "arma": "Corrente de espinhos"
+ },
+ {
+  "d%": "32-33",
+  "arma": "Espada bastarda"
+ },
+ {
+  "d%": "34-38",
+  "arma": "Espada curta"
+ },
+ {
+  "d%": "39-43",
+  "arma": "Espada longa"
+ },
+ {
+  "d%": "44-46",
+  "arma": "Flechas (20)"
+ },
+ {
+  "d%": "47-49",
+  "arma": "Florete"
+ },
+ {
+  "d%": "50-51",
+  "arma": "Foice"
+ },
+ {
+  "d%": "52-53",
+  "arma": "Funda"
+ },
+ {
+  "d%": "54-55",
+  "arma": "Gadanho"
+ },
+ {
+  "d%": "56",
+  "arma": "Katana"
+ },
+ {
+  "d%": "57-59",
+  "arma": "Lança"
+ },
+ {
+  "d%": "60",
+  "arma": "Lança montada"
+ },
+ {
+  "d%": "61-63",
+  "arma": "Maça"
+ },
+ {
+  "d%": "64-66",
+  "arma": "Machadinha"
+ },
+ {
+  "d%": "67",
+  "arma": "Machado anão"
+ },
+ {
+  "d%": "68-70",
+  "arma": "Machado de batalha"
+ },
+ {
+  "d%": "71-73",
+  "arma": "Machado de guerra"
+ },
+ {
+  "d%": "74",
+  "arma": "Machado táurico"
+ },
+ {
+  "d%": "75-76",
+  "arma": "Mangual"
+ },
+ {
+  "d%": "77",
+  "arma": "Marreta"
+ },
+ {
+  "d%": "78-80",
+  "arma": "Martelo de guerra"
+ },
+ {
+  "d%": "81-83",
+  "arma": "Montante"
+ },
+ {
+  "d%": "84",
+  "arma": "Mosquete"
+ },
+ {
+  "d%": "85",
+  "arma": "Pedras (20)"
+ },
+ {
+  "d%": "86-88",
+  "arma": "Picareta"
+ },
+ {
+  "d%": "89-90",
+  "arma": "Pique"
+ },
+ {
+  "d%": "91-92",
+  "arma": "Pistola"
+ },
+ {
+  "d%": "93",
+  "arma": "Rede"
+ },
+ {
+  "d%": "94-96",
+  "arma": "Tacape"
+ },
+ {
+  "d%": "97-98",
+  "arma": "Tridente"
+ },
+ {
+  "d%": "99-100",
+  "arma": "Virotes (20)"
+ }
+]
+}
