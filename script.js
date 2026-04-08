@@ -6957,104 +6957,6 @@ function renderFichaMestreDetalhe(fichaRemota) {
       </div>
     `;
 }
-let mestreResponsiveCleanup = null;
-let mestreResponsiveRaf = 0;
-
-function pararResponsividadeMestre() {
-    if (typeof mestreResponsiveCleanup === "function") {
-        mestreResponsiveCleanup();
-        mestreResponsiveCleanup = null;
-    }
-
-    if (mestreResponsiveRaf) {
-        cancelAnimationFrame(mestreResponsiveRaf);
-        mestreResponsiveRaf = 0;
-    }
-}
-
-function calcularLayoutMestre() {
-    const layout = document.querySelector(".mestre-layout");
-    if (!layout) return;
-
-    const viewportWidth = window.visualViewport?.width || window.innerWidth || document.documentElement.clientWidth || 0;
-
-    let sidebarWidth;
-    if (viewportWidth >= 2100) sidebarWidth = 320;
-    else if (viewportWidth >= 1800) sidebarWidth = 300;
-    else if (viewportWidth >= 1550) sidebarWidth = 280;
-    else if (viewportWidth >= 1300) sidebarWidth = 260;
-    else if (viewportWidth >= 1100) sidebarWidth = 240;
-    else sidebarWidth = 220;
-
-    let paneGap;
-    if (viewportWidth >= 1800) paneGap = 16;
-    else if (viewportWidth >= 1300) paneGap = 12;
-    else paneGap = 10;
-
-    let panePadding;
-    if (viewportWidth >= 1800) panePadding = 16;
-    else if (viewportWidth >= 1300) panePadding = 12;
-    else panePadding = 10;
-
-    const viewerWidth = Math.max(320, viewportWidth - sidebarWidth);
-    const larguraUtil = Math.max(240, viewerWidth - (panePadding * 2) - paneGap);
-    const paneWidth = larguraUtil / 2;
-
-    // 900 é o “alvo confortável” para cada ficha.
-    // Quando a coluna fica menor que isso, o zoom começa a reduzir.
-    let escala = paneWidth / 900;
-
-    // limita para não ficar gigante nem pequeno demais
-    escala = Math.min(1, escala);
-    escala = Math.max(0.62, escala);
-
-    layout.style.setProperty("--mestre-sidebar-width", `${sidebarWidth}px`);
-    layout.style.setProperty("--mestre-pane-gap", `${paneGap}px`);
-    layout.style.setProperty("--mestre-pane-padding", `${panePadding}px`);
-    layout.style.setProperty("--mestre-scale", escala.toFixed(4));
-}
-
-function agendarLayoutMestre() {
-    if (mestreResponsiveRaf) {
-        cancelAnimationFrame(mestreResponsiveRaf);
-    }
-
-    mestreResponsiveRaf = requestAnimationFrame(() => {
-        calcularLayoutMestre();
-    });
-}
-
-function iniciarResponsividadeMestre() {
-    pararResponsividadeMestre();
-
-    const onResize = () => agendarLayoutMestre();
-    window.addEventListener("resize", onResize);
-
-    let viewport = null;
-    let onViewportResize = null;
-
-    if (window.visualViewport) {
-        viewport = window.visualViewport;
-        onViewportResize = () => agendarLayoutMestre();
-        viewport.addEventListener("resize", onViewportResize);
-        viewport.addEventListener("scroll", onViewportResize);
-    }
-
-    agendarLayoutMestre();
-    setTimeout(agendarLayoutMestre, 0);
-    setTimeout(agendarLayoutMestre, 50);
-    setTimeout(agendarLayoutMestre, 150);
-    setTimeout(agendarLayoutMestre, 300);
-
-    mestreResponsiveCleanup = () => {
-        window.removeEventListener("resize", onResize);
-
-        if (viewport && onViewportResize) {
-            viewport.removeEventListener("resize", onViewportResize);
-            viewport.removeEventListener("scroll", onViewportResize);
-        }
-    };
-}
 function renderMestre() {
     garantirEstadoAmeacasMestre();
 
@@ -7062,205 +6964,213 @@ function renderMestre() {
     const listaFichas = getListaFichasMestreComNpcs();
 
     app.innerHTML = `
-    <div class="screen" style="padding:0; min-height:100vh; position:relative; width:100%; max-width:none; overflow:visible;">
+    <div class="screen" style="padding:0; min-height:100vh; position:relative; width:max-content; max-width:none; overflow:visible;">
       <style>
-  .mestre-layout {
-    position: relative;
-    min-height: 100vh;
-    width: 100%;
-    background: #f5f6fa;
-    --mestre-sidebar-width: 320px;
-    --mestre-pane-gap: 16px;
-    --mestre-pane-padding: 16px;
-    --mestre-scale: 0.78;
-  }
+        html, body {
+          overflow: auto;
+        }
 
-  .mestre-ficha-viewer {
-    min-height: 100vh;
-    margin-left: var(--mestre-sidebar-width);
-    width: calc(100vw - var(--mestre-sidebar-width));
-    overflow: auto;
-    box-sizing: border-box;
-  }
+        #app {
+          min-height: 100vh;
+          overflow: visible;
+        }
 
-  .mestre-ficha-viewer > .screen > .topbar {
-    display: none !important;
-  }
+        .mestre-layout {
+          position: relative;
+          min-height: 100vh;
+          width: max-content;
+          min-width: 2548px;
+          background: #f5f6fa;
+          overflow: visible;
+        }
 
-  .mestre-dual-view {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--mestre-pane-gap);
-    min-height: 100vh;
-    padding: var(--mestre-pane-padding);
-    align-items: start;
-    width: 100%;
-    box-sizing: border-box;
-  }
+        .mestre-sidebar {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 320px;
+          min-width: 320px;
+          height: 100%;
+          min-height: 100vh;
+          background: rgba(255,255,255,0.96);
+          backdrop-filter: blur(6px);
+          border-right: 1px solid #ddd;
+          box-shadow: 0 0 24px rgba(0,0,0,.08);
+          z-index: 20;
+          display: flex;
+          flex-direction: column;
+        }
 
-  .mestre-view-pane {
-    min-width: 0;
-    width: 100%;
-    min-height: calc(100vh - (var(--mestre-pane-padding) * 2));
-    background: transparent;
-    display: flex;
-    flex-direction: column;
-  }
+        .mestre-sidebar-header {
+          padding: 16px;
+          border-bottom: 1px solid #eee;
+          background: rgba(250,250,250,0.96);
+        }
 
-  .mestre-view-pane-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
-    margin-bottom: 8px;
-    border-radius: 12px;
-    background: rgba(255,255,255,0.88);
-    border: 1px solid #ddd;
-    backdrop-filter: blur(4px);
-  }
+        .mestre-sidebar-body {
+          flex: 1;
+          overflow: auto;
+          padding: 12px;
+        }
 
-  .mestre-view-pane-body {
-    min-width: 0;
-    width: 100%;
-    flex: 1;
-    overflow: auto;
-  }
+        .mestre-sidebar-section {
+          margin-bottom: 18px;
+        }
 
-  .mestre-scale-wrap {
-    width: 100%;
-    overflow: auto;
-  }
+        .mestre-ficha-viewer {
+          margin-left: 320px;
+          min-height: 100vh;
+          width: 2228px;
+          overflow: visible;
+          box-sizing: border-box;
+        }
 
-  .mestre-scale-inner {
-    transform-origin: top left;
-    width: 100%;
-    zoom: var(--mestre-scale);
-  }
+        .mestre-ficha-viewer > .screen > .topbar {
+          display: none !important;
+        }
 
-  .mestre-scale-inner .screen,
-  .mestre-scale-inner .sheet-wrap,
-  .mestre-scale-inner .ameaca-sheet-wrap,
-  .mestre-scale-inner .sheet,
-  .mestre-scale-inner .ameaca-sheet {
-    width: 100% !important;
-    max-width: none !important;
-    min-width: 0 !important;
-    margin: 0 !important;
-    box-sizing: border-box !important;
-  }
+        .mestre-dual-view {
+          display: grid;
+          grid-template-columns: 1100px 1100px;
+          gap: 16px;
+          min-height: 100vh;
+          padding: 16px;
+          align-items: start;
+          width: max-content;
+          min-width: 2216px;
+          box-sizing: border-box;
+        }
 
-  .mestre-scale-inner .screen {
-    padding: 0 !important;
-    min-height: auto !important;
-    overflow: visible !important;
-  }
+        .mestre-view-pane {
+          width: 1100px;
+          min-width: 1100px;
+          background: transparent;
+          display: flex;
+          flex-direction: column;
+        }
 
-  .mestre-scale-inner .sheet-wrap,
-  .mestre-scale-inner .ameaca-sheet-wrap {
-    padding: 0 !important;
-  }
+        .mestre-view-pane-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 8px 12px;
+          margin-bottom: 8px;
+          border-radius: 12px;
+          background: rgba(255,255,255,0.88);
+          border: 1px solid #ddd;
+          backdrop-filter: blur(4px);
+        }
 
-  .mestre-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: var(--mestre-sidebar-width);
-    height: 100vh;
-    background: rgba(255,255,255,0.96);
-    backdrop-filter: blur(6px);
-    border-right: 1px solid #ddd;
-    box-shadow: 0 0 24px rgba(0,0,0,.08);
-    z-index: 50;
-    display: flex;
-    flex-direction: column;
-  }
+        .mestre-view-pane-body {
+          width: 100%;
+          overflow: visible;
+          flex: 1;
+        }
 
-  .mestre-sidebar-header {
-    padding: 14px;
-    border-bottom: 1px solid #eee;
-    background: rgba(250,250,250,0.96);
-  }
+        .mestre-scale-wrap {
+          width: 100%;
+          overflow: visible;
+        }
 
-  .mestre-sidebar-body {
-    flex: 1;
-    overflow: auto;
-    padding: 10px;
-  }
+        .mestre-scale-inner {
+          width: 100%;
+          zoom: 1;
+          transform: none;
+        }
 
-  .mestre-sidebar-section {
-    margin-bottom: 16px;
-  }
+        .mestre-scale-inner .screen,
+        .mestre-scale-inner .sheet-wrap,
+        .mestre-scale-inner .ameaca-sheet-wrap,
+        .mestre-scale-inner .sheet,
+        .mestre-scale-inner .ameaca-sheet {
+          width: 100% !important;
+          max-width: none !important;
+          min-width: 0 !important;
+          margin: 0 !important;
+          box-sizing: border-box !important;
+        }
 
-  .mestre-player-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 9px;
-    border-radius: 14px;
-    border: 1px solid #ddd;
-    background: #fff;
-    cursor: pointer;
-    text-align: left;
-    margin-bottom: 10px;
-  }
+        .mestre-scale-inner .screen {
+          padding: 0 !important;
+          min-height: auto !important;
+          overflow: visible !important;
+        }
 
-  .mestre-player-btn.ativo {
-    border: 2px solid #6d4aff;
-    background: #f7f4ff;
-  }
+        .mestre-scale-inner .sheet-wrap,
+        .mestre-scale-inner .ameaca-sheet-wrap {
+          padding: 0 !important;
+        }
 
-  .mestre-player-avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: 999px;
-    background: #6d4aff;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    flex: 0 0 auto;
-  }
+        .mestre-player-btn {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 10px;
+          border-radius: 14px;
+          border: 1px solid #ddd;
+          background: #fff;
+          cursor: pointer;
+          text-align: left;
+          margin-bottom: 10px;
+        }
 
-  .mestre-view-topbar {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    z-index: 60;
-    display: flex;
-    gap: 10px;
-  }
+        .mestre-player-btn.ativo {
+          border: 2px solid #6d4aff;
+          background: #f7f4ff;
+        }
 
-  .mestre-mesa-btn {
-    width: 100%;
-    display: block;
-    padding: 9px 10px;
-    border-radius: 12px;
-    border: 1px solid #ddd;
-    background: #fff;
-    text-align: left;
-    cursor: pointer;
-    margin-bottom: 8px;
-  }
+        .mestre-player-avatar {
+          width: 42px;
+          height: 42px;
+          border-radius: 999px;
+          background: #6d4aff;
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          flex: 0 0 auto;
+        }
 
-  .mestre-mesa-btn.ativa {
-    border: 2px solid #6d4aff;
-    background: #f7f4ff;
-  }
+        .mestre-view-topbar {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          z-index: 30;
+          display: flex;
+          gap: 10px;
+        }
 
-  .mestre-player-row {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    margin-bottom: 10px;
-  }
+        .mestre-mesa-btn {
+          width: 100%;
+          display: block;
+          padding: 10px 12px;
+          border-radius: 12px;
+          border: 1px solid #ddd;
+          background: #fff;
+          text-align: left;
+          cursor: pointer;
+          margin-bottom: 8px;
+        }
 
-  .mestre-player-row .mestre-player-btn {
-    margin-bottom: 0;
-    flex: 1;
-  }
-</style>
+        .mestre-mesa-btn.ativa {
+          border: 2px solid #6d4aff;
+          background: #f7f4ff;
+        }
+
+        .mestre-player-row {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          margin-bottom: 10px;
+        }
+
+        .mestre-player-row .mestre-player-btn {
+          margin-bottom: 0;
+          flex: 1;
+        }
+      </style>
 
       <div class="mestre-layout">
         <div class="mestre-view-topbar">
@@ -7414,7 +7324,6 @@ function renderMestre() {
     if (modalRegrasHtml) {
         app.insertAdjacentHTML("beforeend", modalRegrasHtml);
     }
-    iniciarResponsividadeMestre();
 }
 function exportarFichasJson() {
     try {
@@ -17167,7 +17076,6 @@ function renderDados() {
 }
 
 function renderFicha() {
-     pararResponsividadeMestre();
     const f = getFichaAtual();
     if (!f) {
         go("personagens");
