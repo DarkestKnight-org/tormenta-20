@@ -1,6 +1,8 @@
 const STORAGE_KEY = "t20_fichas_v1";
 const DADOS_HISTORY_KEY = "t20_dados_history_v1";
+const MESTRE_INICIATIVA_STORAGE_KEY = "t20_mestre_iniciativa_v1";
 const app = document.getElementById("app");
+const MESTRE_MODAL_BASE_DPR = window.devicePixelRatio || 1;
 const PROFICIENCIAS_DISPONIVEIS = [
     "Armas simples",
     "Armas marciais",
@@ -196,6 +198,17 @@ function garantirEstadoAmeacasMestre() {
 
     if (typeof state.mestre.ameacasAbertas !== "boolean") {
         state.mestre.ameacasAbertas = true;
+    }
+
+    if (typeof state.mestre.iniciativaAberta !== "boolean") {
+        state.mestre.iniciativaAberta = false;
+    }
+
+    if (!Array.isArray(state.mestre.iniciativaOrdem)) {
+        state.mestre.iniciativaOrdem = [];
+    }
+    if (typeof state.mestre.iniciativaMinimizada !== "boolean") {
+        state.mestre.iniciativaMinimizada = false;
     }
 
     if (!state.mestre.ameacasModal) {
@@ -6402,7 +6415,7 @@ function montarHtmlFichaMestre() {
         }
 
         renderFicha();
-        return app.innerHTML;
+        return removerFlutuantesDaFichaNoMestre(app.innerHTML);
     } finally {
         state.screen = screenAnterior;
         state.mestre.renderizandoFichaRemota = flagAnterior;
@@ -6410,6 +6423,7 @@ function montarHtmlFichaMestre() {
         app.innerHTML = htmlAnterior;
     }
 }
+
 function aplicarModoSomenteLeituraMestre() {
     const selecionada = getFichaMestreSelecionada();
     if (!selecionada || selecionada.tipo === "npc_local") {
@@ -6420,17 +6434,80 @@ function aplicarModoSomenteLeituraMestre() {
     if (!viewer) return;
 
     viewer.querySelectorAll("input, select, textarea, button").forEach(el => {
+        if (el.closest(".mestre-sidebar")) return;
         el.disabled = true;
         el.setAttribute("tabindex", "-1");
     });
 
     viewer.querySelectorAll("[onclick]").forEach(el => {
+        if (el.closest(".mestre-sidebar")) return;
         el.removeAttribute("onclick");
     });
 
     viewer.querySelectorAll(".topbar .actions, .floating-actions, .btn, .choice-checkbox").forEach(el => {
         if (el.closest(".mestre-sidebar")) return;
         el.style.pointerEvents = "none";
+    });
+
+    // remove bloco lateral dos botões flutuantes de Dados/Regras
+    viewer.querySelectorAll(".side-buttons").forEach(el => {
+        if (el.closest(".mestre-sidebar")) return;
+        el.remove();
+    });
+
+    // remove botões flutuantes soltos de Dados/Regras
+    viewer.querySelectorAll(".btn.primary.floating").forEach(el => {
+        if (el.closest(".mestre-sidebar")) return;
+
+        const onclick = String(el.getAttribute("onclick") || "");
+        const texto = String(el.textContent || "").trim().toLowerCase();
+
+        if (
+            onclick.includes("abrirModal('dados')") ||
+            onclick.includes('abrirModal("dados")') ||
+            onclick.includes("abrirModalRegras()") ||
+            texto === "dados" ||
+            texto === "regras"
+        ) {
+            el.remove();
+        }
+    });
+
+    // remove qualquer elemento restante ligado aos modais de dados e regras
+    viewer.querySelectorAll(`
+        [onclick*="abrirModal('dados')"],
+        [onclick*='abrirModal("dados")'],
+        [onclick*="abrirModalRegras()"]
+    `).forEach(el => {
+        if (el.closest(".mestre-sidebar")) return;
+        el.remove();
+    });
+
+    // remove widget flutuante de dinheiro por classes comuns/fallback
+    viewer.querySelectorAll(`
+        .widget-dinheiro-flutuante,
+        .dinheiro-flutuante,
+        .money-widget-floating,
+        .floating-money,
+        .money-floating-btn
+    `).forEach(el => {
+        if (el.closest(".mestre-sidebar")) return;
+        el.remove();
+    });
+
+    // fallback extra para blocos de dinheiro que venham sem classe padronizada
+    viewer.querySelectorAll("button, div, section, aside").forEach(el => {
+        if (el.closest(".mestre-sidebar")) return;
+
+        const texto = String(el.textContent || "").trim().toLowerCase();
+        const cls = String(el.className || "").toLowerCase();
+
+        if (
+            (texto === "dinheiro" || texto.includes("tibares") || texto.includes("to")) &&
+            (cls.includes("floating") || cls.includes("dinheiro") || cls.includes("money"))
+        ) {
+            el.remove();
+        }
     });
 }
 function definirMesaOnlineNome(nome) {
@@ -6751,6 +6828,10 @@ async function selecionarMesaMestre(mesaId, mesaNome) {
     state.mestre.fichas = [];
     state.mestre.fichaSelecionadaId = "";
 
+    state.mestre.iniciativaOrdem = [];
+    state.mestre.iniciativaAberta = false;
+    state.mestre._iniciativaCarregada = false;
+
     await carregarAreaDoMestre();
 }
 
@@ -6957,11 +7038,360 @@ function renderFichaMestreDetalhe(fichaRemota) {
       </div>
     `;
 }
+function getMestreScale() {
+    const BASE_WIDTH = 2548;
+    const MIN_SCALE = 0.38;
+    const MAX_SCALE = 0.72;
+    const HORIZONTAL_MARGIN = 24;
+
+    const larguraJanela = window.innerWidth || document.documentElement.clientWidth || BASE_WIDTH;
+    const escalaCalculada = (larguraJanela - HORIZONTAL_MARGIN) / BASE_WIDTH;
+
+    return Math.max(MIN_SCALE, Math.min(MAX_SCALE, escalaCalculada));
+}
+function atualizarEscalaModalIniciativaMestre() {
+    const modal = document.querySelector(".mestre-iniciativa-modal");
+    if (!modal) return;
+
+    const scaleBase = getMestreScale();
+
+    const BONUS_SCALE = 0.08;
+    const MIN_SCALE = 0.52;
+    const MAX_SCALE = 0.82;
+
+    const dprAtual = window.devicePixelRatio || 1;
+    const fatorZoom = dprAtual / MESTRE_MODAL_BASE_DPR;
+
+    // quanto maior o zoom, maior o fatorZoom, então menor fica a escala final
+    const scaleCompensadaZoom = (scaleBase + BONUS_SCALE) / fatorZoom;
+
+    const scale = Math.max(
+        MIN_SCALE,
+        Math.min(MAX_SCALE, scaleCompensadaZoom)
+    );
+
+    modal.style.setProperty("--mestre-modal-scale", String(scale));
+}
+function atualizarEscalaMestre() {
+    const mestreLayout = document.querySelector(".mestre-layout");
+    const scale = getMestreScale();
+
+    if (mestreLayout) {
+        mestreLayout.style.setProperty("--mestre-scale", String(scale));
+    }
+
+    atualizarEscalaModalIniciativaMestre();
+}
+
+let resizeMestreRegistrado = false;
+
+function garantirResizeMestre() {
+    if (resizeMestreRegistrado) return;
+    resizeMestreRegistrado = true;
+
+    let rafId = null;
+
+    const recalcular = () => {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+            atualizarEscalaMestre();
+        });
+    };
+
+    window.addEventListener("resize", recalcular);
+    window.addEventListener("orientationchange", recalcular);
+
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", recalcular);
+    }
+}
+function getIniciativaStorageKey() {
+    const mesaId = String(state?.mestre?.mesaId || "sem_mesa");
+    return `${MESTRE_INICIATIVA_STORAGE_KEY}:${mesaId}`;
+}
+
+function carregarIniciativaMestreDoStorage() {
+    garantirEstadoAmeacasMestre();
+
+    try {
+        const raw = localStorage.getItem(getIniciativaStorageKey());
+        state.mestre.iniciativaOrdem = raw ? JSON.parse(raw) : [];
+    } catch (err) {
+        console.warn("Não foi possível carregar a iniciativa do navegador:", err);
+        state.mestre.iniciativaOrdem = [];
+    }
+}
+
+function salvarIniciativaMestreNoStorage() {
+    garantirEstadoAmeacasMestre();
+
+    try {
+        localStorage.setItem(
+            getIniciativaStorageKey(),
+            JSON.stringify(state.mestre.iniciativaOrdem || [])
+        );
+    } catch (err) {
+        console.warn("Não foi possível salvar a iniciativa no navegador:", err);
+    }
+}
+
+function getItensAtivosIniciativaMestre() {
+    garantirEstadoAmeacasMestre();
+
+    const jogadores = (getListaFichasMestreComNpcs() || []).map(item => {
+        const fichaBase = item.tipo === "npc_local" ? item.ficha : item.ficha_json;
+        const nome = fichaBase?.nome || item?.nome || "Sem nome";
+        const classe = fichaBase?.classesPersonagem?.[0]?.nome || fichaBase?.classe || "Sem classe";
+        const nivel = fichaBase?.nivelTotal || fichaBase?.nivel || 1;
+
+        return {
+            uid: `jogador:${String(item.id)}`,
+            origem: "jogador",
+            idOriginal: String(item.id),
+            nome,
+            subtitulo: `${classe} • Nível ${nivel}`,
+            inicial: (nome || "?").charAt(0).toUpperCase()
+        };
+    });
+
+    const contadoresAmeacas = {};
+    const ameacas = (state.mestre.ameacasEmCena || []).map(item => {
+        const chave = String(item.ameacaId || item.nome || "");
+        contadoresAmeacas[chave] = (contadoresAmeacas[chave] || 0) + 1;
+        const indice = contadoresAmeacas[chave];
+
+        const nomeBase = item.nome || "Ameaça";
+        const nome = indice > 1 ? `${nomeBase} ${indice}` : nomeBase;
+
+        return {
+            uid: `ameaca:${String(item.instanciaId)}`,
+            origem: "ameaca",
+            idOriginal: String(item.instanciaId),
+            nome,
+            subtitulo: "Ameaça ativa",
+            inicial: (nomeBase || "?").charAt(0).toUpperCase()
+        };
+    });
+
+    return [...jogadores, ...ameacas];
+}
+
+function sincronizarIniciativaMestre() {
+    garantirEstadoAmeacasMestre();
+
+    const itensAtivos = getItensAtivosIniciativaMestre();
+    const ativosMap = new Map(itensAtivos.map(item => [item.uid, item]));
+    const ordemAtual = Array.isArray(state.mestre.iniciativaOrdem) ? state.mestre.iniciativaOrdem : [];
+
+    const ordemFiltrada = ordemAtual.filter(uid => ativosMap.has(uid));
+    const faltantes = itensAtivos
+        .map(item => item.uid)
+        .filter(uid => !ordemFiltrada.includes(uid));
+
+    state.mestre.iniciativaOrdem = [...ordemFiltrada, ...faltantes];
+    salvarIniciativaMestreNoStorage();
+
+    return state.mestre.iniciativaOrdem
+        .map(uid => ativosMap.get(uid))
+        .filter(Boolean);
+}
+
+function abrirIniciativaMestre() {
+    garantirEstadoAmeacasMestre();
+    sincronizarIniciativaMestre();
+    state.mestre.iniciativaAberta = true;
+    render();
+}
+function toggleIniciativaMinimizadaMestre() {
+    garantirEstadoAmeacasMestre();
+    state.mestre.iniciativaMinimizada = !state.mestre.iniciativaMinimizada;
+    render();
+}
+function fecharIniciativaMestre() {
+    garantirEstadoAmeacasMestre();
+    state.mestre.iniciativaAberta = false;
+    render();
+}
+function moverItemIniciativaMestre(fromIndex, toIndex) {
+    garantirEstadoAmeacasMestre();
+
+    const ordem = [...(state.mestre.iniciativaOrdem || [])];
+    if (
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= ordem.length ||
+        toIndex >= ordem.length ||
+        fromIndex === toIndex
+    ) {
+        return;
+    }
+
+    const [item] = ordem.splice(fromIndex, 1);
+    ordem.splice(toIndex, 0, item);
+
+    state.mestre.iniciativaOrdem = ordem;
+    salvarIniciativaMestreNoStorage();
+    render();
+}
+
+function iniciarDragIniciativaMestre(index) {
+    window.__dragIniciativaMestreIndex = index;
+}
+
+function permitirDropIniciativaMestre(event) {
+    event.preventDefault();
+}
+
+function soltarItemIniciativaMestre(index) {
+    const fromIndex = Number(window.__dragIniciativaMestreIndex);
+    const toIndex = Number(index);
+
+    if (Number.isNaN(fromIndex) || Number.isNaN(toIndex)) return;
+
+    moverItemIniciativaMestre(fromIndex, toIndex);
+    window.__dragIniciativaMestreIndex = null;
+}
+
+function finalizarDragIniciativaMestre() {
+    window.__dragIniciativaMestreIndex = null;
+}
+function removerFlutuantesDaFichaNoMestre(html) {
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = String(html || "");
+
+    // remove o container lateral de botões
+    wrapper.querySelectorAll(".side-buttons").forEach(el => el.remove());
+
+    // remove botões flutuantes de dados e regras
+    wrapper.querySelectorAll(".btn.primary.floating").forEach(el => {
+        const onclick = String(el.getAttribute("onclick") || "");
+        const texto = String(el.textContent || "").trim().toLowerCase();
+
+        if (
+            onclick.includes("abrirModal('dados')") ||
+            onclick.includes('abrirModal("dados")') ||
+            onclick.includes("abrirModalRegras()") ||
+            texto === "dados" ||
+            texto === "regras"
+        ) {
+            el.remove();
+        }
+    });
+
+    // remove qualquer elemento ligado a dados, regras e dinheiro
+    wrapper.querySelectorAll(`
+        [onclick*="abrirModal('dados')"],
+        [onclick*='abrirModal("dados")'],
+        [onclick*="abrirModalRegras()"],
+        [onclick*="togglePainelDinheiro()"],
+        .widget-dinheiro-flutuante,
+        .dinheiro-flutuante,
+        .money-widget-floating,
+        .floating-money,
+        .money-floating-btn
+    `).forEach(el => el.remove());
+
+    // fallback extra para botões/blocos que vierem sem classe padronizada
+    wrapper.querySelectorAll("button, div, section, aside").forEach(el => {
+        const texto = String(el.textContent || "").trim().toLowerCase();
+        const cls = String(el.className || "").toLowerCase();
+
+        if (
+            texto === "dados" ||
+            texto === "regras" ||
+            texto === "t$ 0" ||
+            texto.startsWith("t$") ||
+            texto.includes("t$")
+        ) {
+            el.remove();
+            return;
+        }
+
+        if (
+            (texto === "dinheiro" || texto.includes("tibares") || texto.includes("to")) &&
+            (cls.includes("floating") || cls.includes("dinheiro") || cls.includes("money"))
+        ) {
+            el.remove();
+        }
+    });
+
+    return wrapper.innerHTML;
+}
+
+function renderModalIniciativaMestre() {
+    garantirEstadoAmeacasMestre();
+
+    if (!state.mestre.iniciativaAberta) return "";
+
+    const itens = sincronizarIniciativaMestre();
+    const minimizada = !!state.mestre.iniciativaMinimizada;
+
+    return `
+      <div class="mestre-iniciativa-modal ${minimizada ? "is-minimizada" : ""}">
+        <div class="mestre-iniciativa-header">
+          <div class="mestre-iniciativa-title">Iniciativa</div>
+
+          <div class="mestre-iniciativa-header-actions">
+            <button
+              class="mestre-iniciativa-minimize"
+              type="button"
+              onclick="toggleIniciativaMinimizadaMestre()"
+              title="${minimizada ? "Expandir iniciativa" : "Minimizar iniciativa"}"
+            >
+              ${minimizada ? "▢" : "—"}
+            </button>
+
+            <button
+              class="mestre-iniciativa-close"
+              type="button"
+              onclick="fecharIniciativaMestre()"
+              title="Fechar iniciativa"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        ${minimizada ? "" : `
+          <div class="mestre-iniciativa-body">
+            ${itens.length ? `
+              <div class="mestre-iniciativa-lista">
+                ${itens.map((item, index) => `
+                  <div
+                    class="mestre-iniciativa-item"
+                    draggable="true"
+                    ondragstart="iniciarDragIniciativaMestre(${index})"
+                    ondragover="permitirDropIniciativaMestre(event)"
+                    ondrop="soltarItemIniciativaMestre(${index})"
+                    ondragend="finalizarDragIniciativaMestre()"
+                  >
+                    <div class="mestre-iniciativa-handle">☰</div>
+                    <div class="mestre-iniciativa-avatar">${escapeHtml(item.inicial)}</div>
+                    <div class="mestre-iniciativa-info">
+                      <div class="mestre-iniciativa-nome">${escapeHtml(item.nome)}</div>
+                      <div class="mestre-iniciativa-sub">${escapeHtml(item.subtitulo)}</div>
+                    </div>
+                  </div>
+                `).join("")}
+              </div>
+            ` : `
+              <div class="empty">Nenhum participante ativo.</div>
+            `}
+          </div>
+        `}
+      </div>
+    `;
+}
 function renderMestre() {
     garantirEstadoAmeacasMestre();
+    if (!state.mestre._iniciativaCarregada) {
+        carregarIniciativaMestreDoStorage();
+        state.mestre._iniciativaCarregada = true;
+    }
 
     const fichaHtml = montarHtmlViewerMestre();
     const listaFichas = getListaFichasMestreComNpcs();
+    sincronizarIniciativaMestre();
 
     app.innerHTML = `
     <div class="screen" style="padding:0; margin:0; width:100vw; height:100vh; max-width:none; overflow:auto; position:relative;">
@@ -6977,20 +7407,21 @@ function renderMestre() {
         }
 
          .mestre-viewport {
-          width: 1274px;
-          min-width: 1274px;
+          width: 100%;
+          min-width: 100%;
           height: 100%;
           position: relative;
         }
-        
+
         .mestre-layout {
+          --mestre-scale: 0.5;
           position: relative;
-          min-height: 100vh;
+          min-height: calc(100vh / var(--mestre-scale));
           width: 2548px;
           min-width: 2548px;
           background: #f5f6fa;
           overflow: visible;
-          transform: scale(0.5);
+          transform: scale(var(--mestre-scale));
           transform-origin: top left;
         }
 
@@ -7192,8 +7623,8 @@ function renderMestre() {
             <div style="font-size:20px; font-weight:700;">Área do Mestre</div>
             <div class="subtitle" style="margin-top:4px;">
               ${state.mestre.mesaNome
-                ? `Mesa: ${escapeHtml(state.mestre.mesaNome)}`
-                : "Gerencie suas mesas e veja as fichas ativas"}
+            ? `Mesa: ${escapeHtml(state.mestre.mesaNome)}`
+            : "Gerencie suas mesas e veja as fichas ativas"}
             </div>
           </div>
 
@@ -7201,17 +7632,19 @@ function renderMestre() {
             <div class="mestre-sidebar-section">
               <div class="list-item-title" style="margin-bottom:8px;">Minhas mesas</div>
 
-              <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+              <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; justify-content:center;">
                 <button class="btn primary" type="button" onclick="criarMesaMestre()">Criar mesa</button>
                 <button class="btn danger" type="button" onclick="excluirMesaMestre()">Excluir mesa</button>
                 <button class="btn" type="button" onclick="abrirModalNpcAleatorio()">Criar NPC aleatório</button>
+                <button class="btn" type="button" onclick="abrirIniciativaMestre()">Iniciativa</button>
                 <button class="btn" type="button" onclick="abrirModalAmeacas()">Ameaças</button>
                 <button class="btn" type="button" onclick="abrirModalRegras()">Regras</button>
+                <button class="btn" type="button" onclick="abrirModal('dados')">Dados</button>
               </div>
 
               ${!(state.mestre.mesasCriadas || []).length
-                ? `<div class="empty">Você ainda não criou mesas.</div>`
-                : `
+            ? `<div class="empty">Você ainda não criou mesas.</div>`
+            : `
                   <div>
                     ${(state.mestre.mesasCriadas || []).map(mesa => `
                       <button
@@ -7241,17 +7674,17 @@ function renderMestre() {
               </button>
 
               ${state.mestre.jogadoresAbertos ? (
-                !listaFichas.length
-                  ? `<div class="empty">Nenhum jogador ativo.</div>`
-                  : listaFichas.map(item => {
-                      const ativo = String(item.id) === String(state.mestre.fichaSelecionadaId);
-                      const fichaBase = item.tipo === "npc_local" ? item.ficha : item.ficha_json;
-                      const nome = fichaBase?.nome || item?.nome || "Sem nome";
-                      const classe = fichaBase?.classesPersonagem?.[0]?.nome || fichaBase?.classe || "Sem classe";
-                      const nivel = fichaBase?.nivelTotal || fichaBase?.nivel || 1;
-                      const inicial = escapeHtml((nome || "?").charAt(0).toUpperCase());
+            !listaFichas.length
+                ? `<div class="empty">Nenhum jogador ativo.</div>`
+                : listaFichas.map(item => {
+                    const ativo = String(item.id) === String(state.mestre.fichaSelecionadaId);
+                    const fichaBase = item.tipo === "npc_local" ? item.ficha : item.ficha_json;
+                    const nome = fichaBase?.nome || item?.nome || "Sem nome";
+                    const classe = fichaBase?.classesPersonagem?.[0]?.nome || fichaBase?.classe || "Sem classe";
+                    const nivel = fichaBase?.nivelTotal || fichaBase?.nivel || 1;
+                    const inicial = escapeHtml((nome || "?").charAt(0).toUpperCase());
 
-                      return `
+                    return `
                         <div class="mestre-player-row">
                           <button
                             class="mestre-player-btn ${ativo ? "ativo" : ""}"
@@ -7280,8 +7713,8 @@ function renderMestre() {
                           ` : ""}
                         </div>
                       `;
-                  }).join("")
-              ) : ""}
+                }).join("")
+        ) : ""}
             </div>
 
             <div class="mestre-sidebar-section">
@@ -7315,11 +7748,16 @@ function renderMestre() {
           ${fichaHtml}
         </div>
           </div>
+          ${renderDadosModal()}
+          ${renderModalIniciativaMestre()}
       </div>
     </div>
   `;
+    garantirResizeMestre();
+    atualizarEscalaMestre();
 
     aplicarModoSomenteLeituraMestre();
+
 
     const modalNpcHtml = renderNpcAleatorioModal();
     if (modalNpcHtml) {
@@ -7334,7 +7772,7 @@ function renderMestre() {
     const modalRegrasHtml = renderModalRegras();
     if (modalRegrasHtml) {
         app.insertAdjacentHTML("beforeend", modalRegrasHtml);
-    }
+    }    
 }
 function exportarFichasJson() {
     try {
