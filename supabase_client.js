@@ -215,7 +215,110 @@
     if (error) throw error;
     return true;
   }
+    async function salvarAmeacaMestre({ mesaId, ameaca }) {
+        const client = ensureClient();
+        if (!SUPA.state.user) throw new Error("Usuário não autenticado.");
 
+        const payloadFicha = {
+            ...ameaca,
+            tipoRegistro: "ameaca_mestre",
+            origem: "mestre"
+        };
+
+        const payload = {
+            owner_user_id: SUPA.state.user.id,
+            mesa_id: mesaId,
+            nome: ameaca.nome || "Ameaça",
+            ficha_local_id: `ameaca:${String(ameaca.instanciaId)}`,
+            ficha_json: payloadFicha,
+            is_active: true
+        };
+
+        const { data, error } = await client
+            .from("characters")
+            .upsert(payload, { onConflict: "owner_user_id,ficha_local_id" })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+    function agendarSyncAmeacaMestre({ mesaId, ameaca, wait = 700 }) {
+        clearTimeout(SUPA.state.syncTimer);
+        SUPA.state.syncTimer = setTimeout(async () => {
+            try {
+                await syncAmeacaMestreAgora({ mesaId, ameaca });
+            } catch (err) {
+                console.error("Erro ao sincronizar ameaça:", err);
+            }
+        }, wait);
+    }
+
+    async function syncAmeacaMestreAgora({ mesaId, ameaca }) {
+        const client = ensureClient();
+        if (!SUPA.state.user) throw new Error("Usuário não autenticado.");
+
+        SUPA.state.isSaving = true;
+        try {
+            const payloadFicha = {
+                ...ameaca,
+                tipoRegistro: "ameaca_mestre",
+                origem: "mestre"
+            };
+
+            const payload = {
+                owner_user_id: SUPA.state.user.id,
+                mesa_id: mesaId,
+                nome: ameaca.nome || "Ameaça",
+                ficha_local_id: `ameaca:${String(ameaca.instanciaId)}`,
+                ficha_json: payloadFicha,
+                is_active: true
+            };
+
+            const { data, error } = await client
+                .from("characters")
+                .upsert(payload, { onConflict: "owner_user_id,ficha_local_id" })
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            SUPA.state.lastSyncedAt = new Date().toISOString();
+            return data;
+        } finally {
+            SUPA.state.isSaving = false;
+        }
+    }
+
+    async function removerAmeacaMestre({ mesaId, instanciaId }) {
+        const client = ensureClient();
+        if (!SUPA.state.user) throw new Error("Usuário não autenticado.");
+
+        const { error } = await client
+            .from("characters")
+            .delete()
+            .eq("mesa_id", mesaId)
+            .eq("owner_user_id", SUPA.state.user.id)
+            .eq("ficha_local_id", `ameaca:${String(instanciaId)}`);
+
+        if (error) throw error;
+        return true;
+    }
+
+    async function removerTodasAmeacasMestreDaMesa(mesaId) {
+        const client = ensureClient();
+        if (!SUPA.state.user) throw new Error("Usuário não autenticado.");
+
+        const { error } = await client
+            .from("characters")
+            .delete()
+            .eq("mesa_id", mesaId)
+            .eq("owner_user_id", SUPA.state.user.id)
+            .like("ficha_local_id", "ameaca:%");
+
+        if (error) throw error;
+        return true;
+    }
   async function syncFichaAtivaAgora({ mesaId, ficha }) {
     const client = ensureClient();
     if (!SUPA.state.user) throw new Error('Usuário não autenticado.');
@@ -309,6 +412,11 @@
     buscarMesaPorNome,
     excluirMesa,
     alterarSenha,
+    salvarAmeacaMestre,
+    removerAmeacaMestre,
+    removerTodasAmeacasMestreDaMesa,
+    syncAmeacaMestreAgora,
+    agendarSyncAmeacaMestre,
   };
 
   init().catch((err) => {
