@@ -6335,7 +6335,7 @@ function renderConteudoRegrasTabela(registros) {
         </div>
     `;
 }
-function renderModalRegras() {
+function renderModalRegras() {    
     if (state.modal !== "regras") return "";
 
     garantirEstadoRegrasMestre();
@@ -7262,18 +7262,33 @@ function removerFlutuantesDaFichaNoMestre(html) {
     // remove o container lateral de botões
     wrapper.querySelectorAll(".side-buttons").forEach(el => el.remove());
 
-    // remove botões flutuantes de dados e regras
-    wrapper.querySelectorAll(".btn.primary.floating").forEach(el => {
+    // remove botões ligados a dados, regras e dinheiro
+    wrapper.querySelectorAll("button").forEach(el => {
         const onclick = String(el.getAttribute("onclick") || "");
         const texto = String(el.textContent || "").trim().toLowerCase();
+        const cls = String(el.className || "").toLowerCase();
 
-        if (
+        const ehBotaoDados =
             onclick.includes("abrirModal('dados')") ||
             onclick.includes('abrirModal("dados")') ||
+            texto === "dados";
+
+        const ehBotaoRegras =
             onclick.includes("abrirModalRegras()") ||
-            texto === "dados" ||
-            texto === "regras"
-        ) {
+            texto === "regras";
+
+        const ehBotaoDinheiro =
+            onclick.includes("togglePainelDinheiro()") ||
+            texto === "t$ 0" ||
+            texto.startsWith("t$") ||
+            texto.includes("t$");
+
+        const ehFlutuante =
+            cls.includes("floating") ||
+            cls.includes("money") ||
+            cls.includes("dinheiro");
+
+        if (ehBotaoDados || ehBotaoRegras || ehBotaoDinheiro || ehFlutuante) {
             el.remove();
         }
     });
@@ -7288,11 +7303,22 @@ function removerFlutuantesDaFichaNoMestre(html) {
         .dinheiro-flutuante,
         .money-widget-floating,
         .floating-money,
-        .money-floating-btn
+        .money-floating-btn,
+        .side-buttons
     `).forEach(el => el.remove());
 
-    // fallback extra para botões/blocos que vierem sem classe padronizada
-    wrapper.querySelectorAll("button, div, section, aside").forEach(el => {
+    // remove especificamente o modal de regras da ficha do player
+    wrapper.querySelectorAll(".overlay").forEach(el => {
+        const titulo = el.querySelector(".overlay-title")?.textContent?.trim().toLowerCase() || "";
+        const botaoFechar = el.querySelector('[onclick*="fecharModalRegras()"]');
+
+        if (titulo === "regras" || botaoFechar) {
+            el.remove();
+        }
+    });
+
+    // fallback extra para blocos sem classe padronizada
+    wrapper.querySelectorAll("div, section, aside").forEach(el => {
         const texto = String(el.textContent || "").trim().toLowerCase();
         const cls = String(el.className || "").toLowerCase();
 
