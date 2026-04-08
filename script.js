@@ -6957,99 +6957,8 @@ function renderFichaMestreDetalhe(fichaRemota) {
       </div>
     `;
 }
-let mestreAutoScaleCleanup = null;
-let mestreAutoScaleRaf = 0;
-
-function pararAutoScaleMestre() {
-    if (typeof mestreAutoScaleCleanup === "function") {
-        mestreAutoScaleCleanup();
-        mestreAutoScaleCleanup = null;
-    }
-
-    cancelAnimationFrame(mestreAutoScaleRaf);
-    mestreAutoScaleRaf = 0;
-}
-
-function aplicarEscalaAutomaticaMestre() {
-    const wraps = document.querySelectorAll(".mestre-scale-wrap");
-
-    wraps.forEach((wrap) => {
-        const inner = wrap.querySelector(".mestre-scale-inner");
-        if (!inner) return;
-
-        inner.style.transform = "scale(1)";
-        inner.style.width = "max-content";
-        inner.style.height = "auto";
-        wrap.style.minHeight = "0px";
-
-        const larguraDisponivel = wrap.clientWidth;
-        const larguraConteudo = inner.scrollWidth;
-        const alturaConteudo = inner.scrollHeight;
-
-        if (!larguraDisponivel || !larguraConteudo || !alturaConteudo) return;
-
-        let escala = larguraDisponivel / larguraConteudo;
-
-        escala = Math.min(1, escala);
-        escala = Math.max(0.42, escala);
-
-        inner.style.transform = `scale(${escala})`;
-        inner.style.width = `${larguraConteudo}px`;
-        inner.style.height = `${alturaConteudo}px`;
-        wrap.style.minHeight = `${Math.ceil(alturaConteudo * escala)}px`;
-    });
-}
-
-function agendarEscalaAutomaticaMestre() {
-    cancelAnimationFrame(mestreAutoScaleRaf);
-    mestreAutoScaleRaf = requestAnimationFrame(() => {
-        aplicarEscalaAutomaticaMestre();
-    });
-}
-
-function iniciarAutoScaleMestre() {
-    pararAutoScaleMestre();
-
-    const resizeObserver = new ResizeObserver(() => {
-        agendarEscalaAutomaticaMestre();
-    });
-
-    document.querySelectorAll(".mestre-scale-wrap, .mestre-scale-inner").forEach((el) => {
-        resizeObserver.observe(el);
-    });
-
-    const onResize = () => agendarEscalaAutomaticaMestre();
-    window.addEventListener("resize", onResize);
-
-    let viewport = null;
-    let onViewportResize = null;
-
-    if (window.visualViewport) {
-        viewport = window.visualViewport;
-        onViewportResize = () => agendarEscalaAutomaticaMestre();
-        viewport.addEventListener("resize", onViewportResize);
-        viewport.addEventListener("scroll", onViewportResize);
-    }
-
-    agendarEscalaAutomaticaMestre();
-    setTimeout(agendarEscalaAutomaticaMestre, 0);
-    setTimeout(agendarEscalaAutomaticaMestre, 60);
-    setTimeout(agendarEscalaAutomaticaMestre, 180);
-    setTimeout(agendarEscalaAutomaticaMestre, 320);
-
-    mestreAutoScaleCleanup = () => {
-        resizeObserver.disconnect();
-        window.removeEventListener("resize", onResize);
-
-        if (viewport && onViewportResize) {
-            viewport.removeEventListener("resize", onViewportResize);
-            viewport.removeEventListener("scroll", onViewportResize);
-        }
-    };
-}
 function renderMestre() {
     garantirEstadoAmeacasMestre();
-    pararAutoScaleMestre();
 
     const fichaHtml = montarHtmlViewerMestre();
     const listaFichas = getListaFichasMestreComNpcs();
@@ -7057,199 +6966,229 @@ function renderMestre() {
     app.innerHTML = `
     <div class="screen" style="padding:0; min-height:100vh; position:relative; width:100%; max-width:none; overflow:visible;">
       <style>
-        .mestre-layout {
-          position: relative;
-          min-height: 100vh;
-          width: 100%;
-          background: #f5f6fa;
-        }
+  .mestre-layout {
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    background: #f5f6fa;
+  }
 
-        .mestre-ficha-viewer {
-          min-height: 100vh;
-          margin-left: 320px;
-          width: calc(100vw - 320px);
-          overflow: auto;
-          box-sizing: border-box;
-        }
+  .mestre-ficha-viewer {
+    min-height: 100vh;
+    margin-left: 320px;
+    width: calc(100vw - 320px);
+    overflow: auto;
+    box-sizing: border-box;
+  }
 
-        .mestre-ficha-viewer > .screen > .topbar {
-          display: none !important;
-        }
+  .mestre-ficha-viewer > .screen > .topbar {
+    display: none !important;
+  }
 
-        .mestre-dual-view {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 16px;
-          min-height: 100vh;
-          padding: 16px;
-          align-items: start;
-          width: 100%;
-          box-sizing: border-box;
-        }
+  .mestre-dual-view {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    min-height: 100vh;
+    padding: 16px;
+    align-items: start;
+    width: 100%;
+    box-sizing: border-box;
+  }
 
-        .mestre-view-pane {
-          min-width: 0;
-          width: 100%;
-          min-height: calc(100vh - 32px);
-          background: transparent;
-          display: flex;
-          flex-direction: column;
-        }
+  .mestre-view-pane {
+    min-width: 0;
+    width: 100%;
+    min-height: calc(100vh - 32px);
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+  }
 
-        .mestre-view-pane-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 8px 12px;
-          margin-bottom: 8px;
-          border-radius: 12px;
-          background: rgba(255,255,255,0.88);
-          border: 1px solid #ddd;
-          backdrop-filter: blur(4px);
-        }
+  .mestre-view-pane-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.88);
+    border: 1px solid #ddd;
+    backdrop-filter: blur(4px);
+  }
 
-        .mestre-view-pane-body {
-          min-width: 0;
-          width: 100%;
-          flex: 1;
-          overflow: auto;
-        }
+  .mestre-view-pane-body {
+    min-width: 0;
+    width: 100%;
+    flex: 1;
+    overflow: auto;
+  }
 
-        .mestre-scale-wrap {
-          width: 100%;
-          overflow: auto;
-          position: relative;
-        }
+  .mestre-scale-wrap {
+    width: 100%;
+    overflow: auto;
+  }
 
-        .mestre-scale-inner {
-          transform-origin: top left;
-          width: max-content;
-          min-width: 0;
-          will-change: transform;
-        }
+  .mestre-scale-inner {
+    transform-origin: top left;
+    width: 100%;
+    zoom: 0.78;
+  }
 
-        .mestre-scale-inner .screen,
-        .mestre-scale-inner .sheet-wrap,
-        .mestre-scale-inner .ameaca-sheet-wrap,
-        .mestre-scale-inner .sheet,
-        .mestre-scale-inner .ameaca-sheet {
-          max-width: none !important;
-          margin: 0 !important;
-          box-sizing: border-box !important;
-        }
+  .mestre-scale-inner .screen,
+  .mestre-scale-inner .sheet-wrap,
+  .mestre-scale-inner .ameaca-sheet-wrap,
+  .mestre-scale-inner .sheet,
+  .mestre-scale-inner .ameaca-sheet {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
 
-        .mestre-scale-inner .screen {
-          padding: 0 !important;
-          min-height: auto !important;
-          overflow: visible !important;
-        }
+  .mestre-scale-inner .screen {
+    padding: 0 !important;
+    min-height: auto !important;
+    overflow: visible !important;
+  }
 
-        .mestre-scale-inner .sheet-wrap,
-        .mestre-scale-inner .ameaca-sheet-wrap {
-          padding: 0 !important;
-        }
+  .mestre-scale-inner .sheet-wrap,
+  .mestre-scale-inner .ameaca-sheet-wrap {
+    padding: 0 !important;
+  }
 
-        .mestre-sidebar {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 320px;
-          height: 100vh;
-          background: rgba(255,255,255,0.96);
-          backdrop-filter: blur(6px);
-          border-right: 1px solid #ddd;
-          box-shadow: 0 0 24px rgba(0,0,0,.08);
-          z-index: 50;
-          display: flex;
-          flex-direction: column;
-        }
+  .mestre-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 320px;
+    height: 100vh;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(6px);
+    border-right: 1px solid #ddd;
+    box-shadow: 0 0 24px rgba(0,0,0,.08);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+  }
 
-        .mestre-sidebar-header {
-          padding: 16px;
-          border-bottom: 1px solid #eee;
-          background: rgba(250,250,250,0.96);
-        }
+  .mestre-sidebar-header {
+    padding: 16px;
+    border-bottom: 1px solid #eee;
+    background: rgba(250,250,250,0.96);
+  }
 
-        .mestre-sidebar-body {
-          flex: 1;
-          overflow: auto;
-          padding: 12px;
-        }
+  .mestre-sidebar-body {
+    flex: 1;
+    overflow: auto;
+    padding: 12px;
+  }
 
-        .mestre-sidebar-section {
-          margin-bottom: 18px;
-        }
+  .mestre-sidebar-section {
+    margin-bottom: 18px;
+  }
 
-        .mestre-player-btn {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 10px;
-          border-radius: 14px;
-          border: 1px solid #ddd;
-          background: #fff;
-          cursor: pointer;
-          text-align: left;
-          margin-bottom: 10px;
-        }
+  .mestre-player-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 14px;
+    border: 1px solid #ddd;
+    background: #fff;
+    cursor: pointer;
+    text-align: left;
+    margin-bottom: 10px;
+  }
 
-        .mestre-player-btn.ativo {
-          border: 2px solid #6d4aff;
-          background: #f7f4ff;
-        }
+  .mestre-player-btn.ativo {
+    border: 2px solid #6d4aff;
+    background: #f7f4ff;
+  }
 
-        .mestre-player-avatar {
-          width: 42px;
-          height: 42px;
-          border-radius: 999px;
-          background: #6d4aff;
-          color: #fff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 700;
-          flex: 0 0 auto;
-        }
+  .mestre-player-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    background: #6d4aff;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex: 0 0 auto;
+  }
 
-        .mestre-view-topbar {
-          position: fixed;
-          top: 16px;
-          right: 16px;
-          z-index: 60;
-          display: flex;
-          gap: 10px;
-        }
+  .mestre-view-topbar {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 60;
+    display: flex;
+    gap: 10px;
+  }
 
-        .mestre-mesa-btn {
-          width: 100%;
-          display: block;
-          padding: 10px 12px;
-          border-radius: 12px;
-          border: 1px solid #ddd;
-          background: #fff;
-          text-align: left;
-          cursor: pointer;
-          margin-bottom: 8px;
-        }
+  .mestre-mesa-btn {
+    width: 100%;
+    display: block;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    background: #fff;
+    text-align: left;
+    cursor: pointer;
+    margin-bottom: 8px;
+  }
 
-        .mestre-mesa-btn.ativa {
-          border: 2px solid #6d4aff;
-          background: #f7f4ff;
-        }
+  .mestre-mesa-btn.ativa {
+    border: 2px solid #6d4aff;
+    background: #f7f4ff;
+  }
 
-        .mestre-player-row {
-          display: flex;
-          gap: 8px;
-          align-items: center;
-          margin-bottom: 10px;
-        }
+  .mestre-player-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
 
-        .mestre-player-row .mestre-player-btn {
-          margin-bottom: 0;
-          flex: 1;
-        }
-      </style>
+  .mestre-player-row .mestre-player-btn {
+    margin-bottom: 0;
+    flex: 1;
+  }
+
+  @media (min-width: 2200px) {
+    .mestre-scale-inner {
+      zoom: 1;
+    }
+  }
+
+  @media (max-width: 2199px) and (min-width: 2000px) {
+    .mestre-scale-inner {
+      zoom: 0.92;
+    }
+  }
+
+  @media (max-width: 1999px) and (min-width: 1800px) {
+    .mestre-scale-inner {
+      zoom: 0.86;
+    }
+  }
+
+  @media (max-width: 1799px) and (min-width: 1600px) {
+    .mestre-scale-inner {
+      zoom: 0.8;
+    }
+  }
+
+  @media (max-width: 1599px) {
+    .mestre-scale-inner {
+      zoom: 0.72;
+    }
+  }
+</style>
 
       <div class="mestre-layout">
         <div class="mestre-view-topbar">
@@ -7388,7 +7327,6 @@ function renderMestre() {
   `;
 
     aplicarModoSomenteLeituraMestre();
-    iniciarAutoScaleMestre();
 
     const modalNpcHtml = renderNpcAleatorioModal();
     if (modalNpcHtml) {
@@ -17156,7 +17094,6 @@ function renderDados() {
 }
 
 function renderFicha() {
-    pararAutoScaleMestre();
     const f = getFichaAtual();
     if (!f) {
         go("personagens");
