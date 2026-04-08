@@ -6964,7 +6964,8 @@ function renderMestre() {
     const listaFichas = getListaFichasMestreComNpcs();
 
     app.innerHTML = `
-    <div class="screen" style="padding:0; min-height:100vh; position:relative; width:max-content; max-width:none; overflow:visible;">
+    <div class="screen" style="padding:0; margin:0; width:100vw; height:100vh; max-width:none; overflow:auto; position:relative;">
+  <div class="mestre-viewport">
       <style>
         html, body {
           overflow: auto;
@@ -6975,13 +6976,22 @@ function renderMestre() {
           overflow: visible;
         }
 
+         .mestre-viewport {
+          width: 1274px;
+          min-width: 1274px;
+          height: 100%;
+          position: relative;
+        }
+        
         .mestre-layout {
           position: relative;
           min-height: 100vh;
-          width: max-content;
+          width: 2548px;
           min-width: 2548px;
           background: #f5f6fa;
           overflow: visible;
+          transform: scale(0.5);
+          transform-origin: top left;
         }
 
         .mestre-sidebar {
@@ -7304,6 +7314,7 @@ function renderMestre() {
         <div class="mestre-ficha-viewer">
           ${fichaHtml}
         </div>
+          </div>
       </div>
     </div>
   `;
