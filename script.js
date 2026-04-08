@@ -6957,6 +6957,104 @@ function renderFichaMestreDetalhe(fichaRemota) {
       </div>
     `;
 }
+let mestreResponsiveCleanup = null;
+let mestreResponsiveRaf = 0;
+
+function pararResponsividadeMestre() {
+    if (typeof mestreResponsiveCleanup === "function") {
+        mestreResponsiveCleanup();
+        mestreResponsiveCleanup = null;
+    }
+
+    if (mestreResponsiveRaf) {
+        cancelAnimationFrame(mestreResponsiveRaf);
+        mestreResponsiveRaf = 0;
+    }
+}
+
+function calcularLayoutMestre() {
+    const layout = document.querySelector(".mestre-layout");
+    if (!layout) return;
+
+    const viewportWidth = window.visualViewport?.width || window.innerWidth || document.documentElement.clientWidth || 0;
+
+    let sidebarWidth;
+    if (viewportWidth >= 2100) sidebarWidth = 320;
+    else if (viewportWidth >= 1800) sidebarWidth = 300;
+    else if (viewportWidth >= 1550) sidebarWidth = 280;
+    else if (viewportWidth >= 1300) sidebarWidth = 260;
+    else if (viewportWidth >= 1100) sidebarWidth = 240;
+    else sidebarWidth = 220;
+
+    let paneGap;
+    if (viewportWidth >= 1800) paneGap = 16;
+    else if (viewportWidth >= 1300) paneGap = 12;
+    else paneGap = 10;
+
+    let panePadding;
+    if (viewportWidth >= 1800) panePadding = 16;
+    else if (viewportWidth >= 1300) panePadding = 12;
+    else panePadding = 10;
+
+    const viewerWidth = Math.max(320, viewportWidth - sidebarWidth);
+    const larguraUtil = Math.max(240, viewerWidth - (panePadding * 2) - paneGap);
+    const paneWidth = larguraUtil / 2;
+
+    // 900 é o “alvo confortável” para cada ficha.
+    // Quando a coluna fica menor que isso, o zoom começa a reduzir.
+    let escala = paneWidth / 900;
+
+    // limita para não ficar gigante nem pequeno demais
+    escala = Math.min(1, escala);
+    escala = Math.max(0.62, escala);
+
+    layout.style.setProperty("--mestre-sidebar-width", `${sidebarWidth}px`);
+    layout.style.setProperty("--mestre-pane-gap", `${paneGap}px`);
+    layout.style.setProperty("--mestre-pane-padding", `${panePadding}px`);
+    layout.style.setProperty("--mestre-scale", escala.toFixed(4));
+}
+
+function agendarLayoutMestre() {
+    if (mestreResponsiveRaf) {
+        cancelAnimationFrame(mestreResponsiveRaf);
+    }
+
+    mestreResponsiveRaf = requestAnimationFrame(() => {
+        calcularLayoutMestre();
+    });
+}
+
+function iniciarResponsividadeMestre() {
+    pararResponsividadeMestre();
+
+    const onResize = () => agendarLayoutMestre();
+    window.addEventListener("resize", onResize);
+
+    let viewport = null;
+    let onViewportResize = null;
+
+    if (window.visualViewport) {
+        viewport = window.visualViewport;
+        onViewportResize = () => agendarLayoutMestre();
+        viewport.addEventListener("resize", onViewportResize);
+        viewport.addEventListener("scroll", onViewportResize);
+    }
+
+    agendarLayoutMestre();
+    setTimeout(agendarLayoutMestre, 0);
+    setTimeout(agendarLayoutMestre, 50);
+    setTimeout(agendarLayoutMestre, 150);
+    setTimeout(agendarLayoutMestre, 300);
+
+    mestreResponsiveCleanup = () => {
+        window.removeEventListener("resize", onResize);
+
+        if (viewport && onViewportResize) {
+            viewport.removeEventListener("resize", onViewportResize);
+            viewport.removeEventListener("scroll", onViewportResize);
+        }
+    };
+}
 function renderMestre() {
     garantirEstadoAmeacasMestre();
 
@@ -6971,12 +7069,16 @@ function renderMestre() {
     min-height: 100vh;
     width: 100%;
     background: #f5f6fa;
+    --mestre-sidebar-width: 320px;
+    --mestre-pane-gap: 16px;
+    --mestre-pane-padding: 16px;
+    --mestre-scale: 0.78;
   }
 
   .mestre-ficha-viewer {
     min-height: 100vh;
-    margin-left: 320px;
-    width: calc(100vw - 320px);
+    margin-left: var(--mestre-sidebar-width);
+    width: calc(100vw - var(--mestre-sidebar-width));
     overflow: auto;
     box-sizing: border-box;
   }
@@ -6988,9 +7090,9 @@ function renderMestre() {
   .mestre-dual-view {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+    gap: var(--mestre-pane-gap);
     min-height: 100vh;
-    padding: 16px;
+    padding: var(--mestre-pane-padding);
     align-items: start;
     width: 100%;
     box-sizing: border-box;
@@ -6999,7 +7101,7 @@ function renderMestre() {
   .mestre-view-pane {
     min-width: 0;
     width: 100%;
-    min-height: calc(100vh - 32px);
+    min-height: calc(100vh - (var(--mestre-pane-padding) * 2));
     background: transparent;
     display: flex;
     flex-direction: column;
@@ -7032,7 +7134,7 @@ function renderMestre() {
   .mestre-scale-inner {
     transform-origin: top left;
     width: 100%;
-    zoom: 0.78;
+    zoom: var(--mestre-scale);
   }
 
   .mestre-scale-inner .screen,
@@ -7062,7 +7164,7 @@ function renderMestre() {
     position: fixed;
     top: 0;
     left: 0;
-    width: 320px;
+    width: var(--mestre-sidebar-width);
     height: 100vh;
     background: rgba(255,255,255,0.96);
     backdrop-filter: blur(6px);
@@ -7074,7 +7176,7 @@ function renderMestre() {
   }
 
   .mestre-sidebar-header {
-    padding: 16px;
+    padding: 14px;
     border-bottom: 1px solid #eee;
     background: rgba(250,250,250,0.96);
   }
@@ -7082,19 +7184,19 @@ function renderMestre() {
   .mestre-sidebar-body {
     flex: 1;
     overflow: auto;
-    padding: 12px;
+    padding: 10px;
   }
 
   .mestre-sidebar-section {
-    margin-bottom: 18px;
+    margin-bottom: 16px;
   }
 
   .mestre-player-btn {
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px;
+    gap: 10px;
+    padding: 9px;
     border-radius: 14px;
     border: 1px solid #ddd;
     background: #fff;
@@ -7109,8 +7211,8 @@ function renderMestre() {
   }
 
   .mestre-player-avatar {
-    width: 42px;
-    height: 42px;
+    width: 38px;
+    height: 38px;
     border-radius: 999px;
     background: #6d4aff;
     color: #fff;
@@ -7133,7 +7235,7 @@ function renderMestre() {
   .mestre-mesa-btn {
     width: 100%;
     display: block;
-    padding: 10px 12px;
+    padding: 9px 10px;
     border-radius: 12px;
     border: 1px solid #ddd;
     background: #fff;
@@ -7157,36 +7259,6 @@ function renderMestre() {
   .mestre-player-row .mestre-player-btn {
     margin-bottom: 0;
     flex: 1;
-  }
-
-  @media (min-width: 2200px) {
-    .mestre-scale-inner {
-      zoom: 1;
-    }
-  }
-
-  @media (max-width: 2199px) and (min-width: 2000px) {
-    .mestre-scale-inner {
-      zoom: 0.92;
-    }
-  }
-
-  @media (max-width: 1999px) and (min-width: 1800px) {
-    .mestre-scale-inner {
-      zoom: 0.86;
-    }
-  }
-
-  @media (max-width: 1799px) and (min-width: 1600px) {
-    .mestre-scale-inner {
-      zoom: 0.8;
-    }
-  }
-
-  @media (max-width: 1599px) {
-    .mestre-scale-inner {
-      zoom: 0.72;
-    }
   }
 </style>
 
@@ -7342,6 +7414,7 @@ function renderMestre() {
     if (modalRegrasHtml) {
         app.insertAdjacentHTML("beforeend", modalRegrasHtml);
     }
+    iniciarResponsividadeMestre();
 }
 function exportarFichasJson() {
     try {
@@ -17094,6 +17167,7 @@ function renderDados() {
 }
 
 function renderFicha() {
+     pararResponsividadeMestre();
     const f = getFichaAtual();
     if (!f) {
         go("personagens");
