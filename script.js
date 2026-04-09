@@ -8549,13 +8549,129 @@ function getAmeacaInstanciaEditavelSelecionada() {
             percepcao: Number(percepcao.valor || 0) || 0,
             fort: Number(item.fort ?? 0) || 0,
             ref: Number(item.ref ?? 0) || 0,
-            von: Number(von.valor || 0) || 0
+            von: Number(von.valor || 0) || 0,
+            poderesTexto: formatarTextoEditavelListaAmeaca(item.poderes),
+            magiasTexto: formatarTextoEditavelListaAmeaca(item.magias),
+            equipamentoTexto: String(item.equipamento || ""),
+            tesouroTexto: String(item.tesouro || ""),
+            percepcaoComplemento: String(percepcao.complemento || ""),
+            vonComplemento: String(von.complemento || ""),
         };
     }
 
     return item;
 }
+function renderSecaoTextoInlineEditavelAmeaca(titulo, campo, valor, placeholder = "Clique para editar...") {
+    const texto = String(valor || "").trim();
+    const vazio = !texto;
 
+    return `
+        <div class="ameaca-secao">
+            <div class="ameaca-secao-titulo">${escapeHtml(titulo)}</div>
+            <div
+                class="ameaca-texto-inline-editavel ${vazio ? "is-empty" : ""}"
+                contenteditable="true"
+                spellcheck="false"
+                data-placeholder="${escapeAttr(placeholder)}"
+                data-raw="${escapeAttr(texto)}"
+                onfocus="entrarEdicaoInlineAmeaca(this)"
+                onblur="salvarEdicaoInlineAmeaca(this, '${escapeAttr(campo)}')"
+            >${vazio ? "" : formatarMarkupInlineAmeaca(texto)}</div>
+        </div>
+    `;
+}
+function renderTextoInlineEditavelLateralAmeaca(campo, valor, placeholder = "Clique para editar...") {
+    const texto = String(valor || "").trim();
+    const vazio = !texto;
+
+    return `
+        <div
+            class="ameaca-side-texto-inline-editavel ${vazio ? "is-empty" : ""}"
+            contenteditable="true"
+            spellcheck="false"
+            data-placeholder="${escapeAttr(placeholder)}"
+            data-raw="${escapeAttr(texto)}"
+            onfocus="entrarEdicaoInlineAmeaca(this)"
+            onblur="salvarEdicaoInlineAmeaca(this, '${escapeAttr(campo)}')"
+        >${vazio ? "" : formatarMarkupInlineAmeaca(texto)}</div>
+    `;
+}
+function entrarEdicaoInlineAmeaca(el) {
+    if (!el) return;
+
+    el.classList.add("is-editing");
+
+    const raw = String(el.dataset.raw || "");
+
+    if (!raw.trim()) {
+        el.textContent = "";
+        el.classList.remove("is-empty");
+        return;
+    }
+
+    el.textContent = raw;
+    el.classList.remove("is-empty");
+}
+
+function salvarEdicaoInlineAmeaca(el, campo) {
+    if (!el) return;
+
+    const valor = String(el.textContent || "").trim();
+
+    el.classList.remove("is-editing");
+    el.dataset.raw = valor;
+
+    if (!valor) {
+        el.classList.add("is-empty");
+        el.innerHTML = "";
+    } else {
+        el.classList.remove("is-empty");
+        el.innerHTML = formatarMarkupInlineAmeaca(valor);
+    }
+
+    updateAmeacaSelecionadaCampo(campo, valor);
+}
+function formatarTextoEditavelListaAmeaca(lista) {
+    if (!Array.isArray(lista) || !lista.length) return "";
+
+    return lista
+        .map(item => {
+            if (!item) return "";
+
+            const nome = String(item.nome || "").trim();
+
+            const meta = [
+                item.execucao,
+                item.custo_pm,
+                item.duracao
+            ]
+                .map(v => String(v || "").trim())
+                .filter(Boolean)
+                .join(", ");
+
+            const descricao = String(item.descricao || "").trim();
+
+            return [
+                nome ? `*${nome}*` : "",
+                meta ? `#(${meta})#` : "",
+                descricao
+            ]
+                .filter(Boolean)
+                .join(" ")
+                .trim();
+        })
+        .filter(Boolean)
+        .join("\n");
+}
+function formatarMarkupInlineAmeaca(texto) {
+    const bruto = String(texto || "");
+    const escapado = escapeHtml(bruto);
+
+    return escapado
+        .replace(/\*([^*\n]+)\*/g, "<strong>$1</strong>")
+        .replace(/#([^#\n]+)#/g, '<span class="ameaca-inline-marrom">$1</span>')
+        .replace(/\n/g, "<br>");
+}
 function getValorEditavelAmeaca(ameaca, campo, fallback = "") {
     const instancia = getAmeacaAtivaMestreSelecionada();
     if (instancia && instancia.ameacaId === ameaca.id && instancia.edicao && campo in instancia.edicao) {
@@ -8700,10 +8816,30 @@ function montarHtmlFichaAmeaca(ameaca) {
                             ${renderAtributoAmeaca("CAR", "car", ameaca.car)}
                         </div>
 
-                        ${renderSecaoListaAmeaca("Poderes", ameaca.poderes)}
-                        ${renderSecaoListaAmeaca("Magias", ameaca.magias)}
-                        ${renderSecaoTextoAmeaca("Equipamento", ameaca.equipamento)}
-                        ${renderSecaoTextoAmeaca("Tesouro", ameaca.tesouro)}
+                        ${renderSecaoTextoInlineEditavelAmeaca(
+                            "Poderes",
+                            "poderesTexto",
+                            getValorEditavelAmeaca(ameaca, "poderesTexto", formatarTextoEditavelListaAmeaca(ameaca.poderes)),
+                            "Clique para editar os poderes..."
+                        )}
+${renderSecaoTextoInlineEditavelAmeaca(
+                            "Magias",
+                            "magiasTexto",
+                            getValorEditavelAmeaca(ameaca, "magiasTexto", formatarTextoEditavelListaAmeaca(ameaca.magias)),
+                            "Clique para editar as magias..."
+                        )}
+${renderSecaoTextoInlineEditavelAmeaca(
+                            "Equipamento",
+                            "equipamentoTexto",
+                            getValorEditavelAmeaca(ameaca, "equipamentoTexto", ameaca.equipamento || ""),
+                            "Clique para editar o equipamento..."
+                        )}
+${renderSecaoTextoInlineEditavelAmeaca(
+                            "Tesouro",
+                            "tesouroTexto",
+                            getValorEditavelAmeaca(ameaca, "tesouroTexto", ameaca.tesouro || ""),
+                            "Clique para editar o tesouro..."
+                        )}
                     </div>
 
                     <aside class="ameaca-side">
@@ -8727,9 +8863,13 @@ function montarHtmlFichaAmeaca(ameaca) {
                             />
                         </div>
 
-                        ${percepcao.complemento ? `
-                            <div class="ameaca-side-extra">${escapeHtml(percepcao.complemento)}</div>
-                        ` : ""}
+                        <div class="ameaca-side-extra">
+                        ${renderTextoInlineEditavelLateralAmeaca(
+                            "percepcaoComplemento",
+                            getValorEditavelAmeaca(ameaca, "percepcaoComplemento", percepcao.complemento || ""),
+                            "Clique para editar o complemento de Percepção."
+                        )}
+                    </div>
 
                         <div class="ameaca-side-linha">
                             <span class="ameaca-label">Fort</span>
@@ -8761,14 +8901,22 @@ function montarHtmlFichaAmeaca(ameaca) {
                             />
                         </div>
 
-                        ${von.complemento ? `
-                            <div class="ameaca-side-extra">${escapeHtml(von.complemento)}</div>
-                        ` : ""}
+                        <div class="ameaca-side-extra">
+                        ${renderTextoInlineEditavelLateralAmeaca(
+                            "vonComplemento",
+                            getValorEditavelAmeaca(ameaca, "vonComplemento", von.complemento || ""),
+                            "Clique para editar o complemento de Von."
+                        )}
+                    </div>
 
                       <div class="ameaca-side-bloco">
                         <div class="ameaca-label">Perícias</div>
                         <div class="ameaca-side-texto">
-                            ${formatarPericiasAmeacaTexto(getValorEditavelAmeaca(ameaca, "pericias", ameaca.pericias || "—"))}
+                            ${renderTextoInlineEditavelLateralAmeaca(
+                                "pericias",
+                                getValorEditavelAmeaca(ameaca, "pericias", ameaca.pericias || ""),
+                                "Clique para editar as perícias."
+                            )}
                         </div>
                     </div>
                     </aside>
