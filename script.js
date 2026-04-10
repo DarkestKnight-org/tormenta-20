@@ -9637,7 +9637,9 @@ async function confirmarCriacaoNpcAleatorio() {
     }
 }
 function getFichaAtual() {
-    if (state.screen === "mestre") {
+    const renderizandoRemotaNoMestre = !!state?.mestre?.renderizandoFichaRemota;
+
+    if (state.screen === "mestre" || renderizandoRemotaNoMestre) {
         const selecionada = getFichaMestreSelecionada();
         if (!selecionada) return null;
 
