@@ -14455,6 +14455,7 @@ function classeCriacaoValida() {
 function abrirEscolhaClasseCriacao(escolhaId) {
     state.criacao.escolhaClasseAbertaId = escolhaId;
     state.criacao.filtroEscolhaClasse = "";
+    state.criacao.deveFocarBuscaEscolhaClasse = true;
     render();
 }
 
@@ -15554,9 +15555,10 @@ function renderEscolhaClasseCriacaoModal() {
                 campoBusca.value = buscaAtual;
             }
 
-            if (document.activeElement !== campoBusca) {
-                campoBusca.focus();
+            if (state.criacao.deveFocarBuscaEscolhaClasse && document.activeElement !== campoBusca) {
+                campoBusca.focus({ preventScroll: true });
             }
+            state.criacao.deveFocarBuscaEscolhaClasse = false;
         }
 
         aplicarFiltroModalEscolhaClasse("criacao", buscaAtual);
@@ -15691,9 +15693,10 @@ function renderEscolhaClasseEvolucaoModal() {
                 campoBusca.value = buscaAtual;
             }
 
-            if (document.activeElement !== campoBusca) {
-                campoBusca.focus();
+            if (state.criacao.deveFocarBuscaEscolhaClasse && document.activeElement !== campoBusca) {
+                campoBusca.focus({ preventScroll: true });
             }
+            state.criacao.deveFocarBuscaEscolhaClasse = false;
         }
 
         aplicarFiltroModalEscolhaClasse("evolucao", buscaAtual);
