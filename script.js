@@ -6335,7 +6335,7 @@ function renderConteudoRegrasTabela(registros) {
         </div>
     `;
 }
-function renderModalRegras() {    
+function renderModalRegras() {
     if (state.modal !== "regras") return "";
 
     garantirEstadoRegrasMestre();
@@ -7798,7 +7798,7 @@ function renderMestre() {
     const modalRegrasHtml = renderModalRegras();
     if (modalRegrasHtml) {
         app.insertAdjacentHTML("beforeend", modalRegrasHtml);
-    }    
+    }
 }
 function exportarFichasJson() {
     try {
@@ -8817,29 +8817,29 @@ function montarHtmlFichaAmeaca(ameaca) {
                         </div>
 
                         ${renderSecaoTextoInlineEditavelAmeaca(
-                            "Poderes",
-                            "poderesTexto",
-                            getValorEditavelAmeaca(ameaca, "poderesTexto", formatarTextoEditavelListaAmeaca(ameaca.poderes)),
-                            "Clique para editar os poderes..."
-                        )}
+        "Poderes",
+        "poderesTexto",
+        getValorEditavelAmeaca(ameaca, "poderesTexto", formatarTextoEditavelListaAmeaca(ameaca.poderes)),
+        "Clique para editar os poderes..."
+    )}
 ${renderSecaoTextoInlineEditavelAmeaca(
-                            "Magias",
-                            "magiasTexto",
-                            getValorEditavelAmeaca(ameaca, "magiasTexto", formatarTextoEditavelListaAmeaca(ameaca.magias)),
-                            "Clique para editar as magias..."
-                        )}
+        "Magias",
+        "magiasTexto",
+        getValorEditavelAmeaca(ameaca, "magiasTexto", formatarTextoEditavelListaAmeaca(ameaca.magias)),
+        "Clique para editar as magias..."
+    )}
 ${renderSecaoTextoInlineEditavelAmeaca(
-                            "Equipamento",
-                            "equipamentoTexto",
-                            getValorEditavelAmeaca(ameaca, "equipamentoTexto", ameaca.equipamento || ""),
-                            "Clique para editar o equipamento..."
-                        )}
+        "Equipamento",
+        "equipamentoTexto",
+        getValorEditavelAmeaca(ameaca, "equipamentoTexto", ameaca.equipamento || ""),
+        "Clique para editar o equipamento..."
+    )}
 ${renderSecaoTextoInlineEditavelAmeaca(
-                            "Tesouro",
-                            "tesouroTexto",
-                            getValorEditavelAmeaca(ameaca, "tesouroTexto", ameaca.tesouro || ""),
-                            "Clique para editar o tesouro..."
-                        )}
+        "Tesouro",
+        "tesouroTexto",
+        getValorEditavelAmeaca(ameaca, "tesouroTexto", ameaca.tesouro || ""),
+        "Clique para editar o tesouro..."
+    )}
                     </div>
 
                     <aside class="ameaca-side">
@@ -8865,10 +8865,10 @@ ${renderSecaoTextoInlineEditavelAmeaca(
 
                         <div class="ameaca-side-extra">
                         ${renderTextoInlineEditavelLateralAmeaca(
-                            "percepcaoComplemento",
-                            getValorEditavelAmeaca(ameaca, "percepcaoComplemento", percepcao.complemento || ""),
-                            "Clique para editar o complemento de Percepção."
-                        )}
+        "percepcaoComplemento",
+        getValorEditavelAmeaca(ameaca, "percepcaoComplemento", percepcao.complemento || ""),
+        "Clique para editar o complemento de Percepção."
+    )}
                     </div>
 
                         <div class="ameaca-side-linha">
@@ -8903,20 +8903,20 @@ ${renderSecaoTextoInlineEditavelAmeaca(
 
                         <div class="ameaca-side-extra">
                         ${renderTextoInlineEditavelLateralAmeaca(
-                            "vonComplemento",
-                            getValorEditavelAmeaca(ameaca, "vonComplemento", von.complemento || ""),
-                            "Clique para editar o complemento de Von."
-                        )}
+        "vonComplemento",
+        getValorEditavelAmeaca(ameaca, "vonComplemento", von.complemento || ""),
+        "Clique para editar o complemento de Von."
+    )}
                     </div>
 
                       <div class="ameaca-side-bloco">
                         <div class="ameaca-label">Perícias</div>
                         <div class="ameaca-side-texto">
                             ${renderTextoInlineEditavelLateralAmeaca(
-                                "pericias",
-                                getValorEditavelAmeaca(ameaca, "pericias", ameaca.pericias || ""),
-                                "Clique para editar as perícias."
-                            )}
+        "pericias",
+        getValorEditavelAmeaca(ameaca, "pericias", ameaca.pericias || ""),
+        "Clique para editar as perícias."
+    )}
                         </div>
                     </div>
                     </aside>
@@ -12997,75 +12997,152 @@ function adicionarHabilidadeManualNaFicha() {
 
 function getPoderesDisponiveisParaAdicionarNaFicha() {
     const ficha = getFichaAtual();
-    const idsJaNaFicha = new Set(
-        (ficha?.habilidades || [])
+    if (!ficha) return [];
+
+    const chavesJaNaFicha = new Set(
+        (ficha.habilidades || [])
+            .map(h => String(h.chaveOrigemPoder || "").trim())
+            .filter(Boolean)
+    );
+
+    const idsGeraisJaNaFicha = new Set(
+        (ficha.habilidades || [])
             .map(h => String(h.registroId || "").trim())
             .filter(Boolean)
     );
 
-    return (PODERES_MAGIAS_DB.registros || [])
+    const poderesGerais = (PODERES_MAGIAS_DB.registros || [])
         .filter(registro => normalizarTextoRegra(registro?.tipoRegistro || "") === "poder")
-        .filter(registro => !idsJaNaFicha.has(String(registro.id)))
+        .map(registro => ({
+            ...registro,
+            origemBanco: "geral",
+            chaveOrigemPoder: `geral:${registro.id}`,
+            origemBase: registro.origemBase || "Poder geral"
+        }))
+        .filter(registro =>
+            !chavesJaNaFicha.has(registro.chaveOrigemPoder) &&
+            !idsGeraisJaNaFicha.has(String(registro.id))
+        );
+
+    const poderesClasse = (CLASSES_DB || []).flatMap(classe =>
+        (classe.poderes || [])
+            .filter(registro => normalizarTextoRegra(registro?.tipoRegistro || "poder") === "poder")
+            .map(registro => ({
+                ...registro,
+                origemBanco: "classe",
+                classeId: classe.id,
+                classeNome: classe.nome,
+                chaveOrigemPoder: `classe:${classe.id}:${registro.id}`,
+                origemBase: `Poder de classe: ${classe.nome}`
+            }))
+            .filter(registro => !chavesJaNaFicha.has(registro.chaveOrigemPoder))
+    );
+
+    return [...poderesGerais, ...poderesClasse]
         .sort((a, b) => String(a?.nome || "").localeCompare(String(b?.nome || ""), "pt-BR"));
 }
 
-function adicionarPoderDoBancoNaFicha(registroId) {
+function adicionarPoderDoBancoNaFicha(chaveOuRegistroId) {
     const ficha = getFichaAtual();
     if (!ficha) return;
 
-    const registro = getRegistroPoderMagiaPorId(registroId);
-    if (!registro) return;
+    const chave = String(chaveOuRegistroId || "").trim();
+    if (!chave) return;
 
-    const incrementos = getIncrementosPoderMagia(registro.id).map(inc => ({
-        id: uid(),
-        custoPm: Number(inc.custoPm) || 0,
-        custoVida: Number(inc.custoVida) || 0,
-        custoPmPermanente: Number(inc.custoPmPermanente) || 0,
-        custoVidaPermanente: Number(inc.custoVidaPermanente) || 0,
-        descricao: inc.descricao || "",
-        efeitoResumo: inc.efeitoResumo || "",
-        selecionado: false
-    }));
+    let registro = null;
+    let origemTipo = "Poder";
+    let origemNome = "Banco";
+    let chaveOrigemPoder = "";
+    let incrementos = [];
+    let escolhas = [];
 
-    const escolhas = (PODERES_MAGIAS_DB.escolhas || [])
-        .filter(e => String(e.registro_id) === String(registro.id))
-        .sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0))
-        .map(e => ({
-            id: String(e.id || uid()),
-            registro_id: String(e.registro_id || registro.id),
-            ordem: Number(e.ordem) || 0,
-            tipo: e.tipo || "",
-            titulo: e.titulo || "",
-            descricao: e.descricao || "",
-            quantidade: Number(e.quantidade) || 0,
-            filtro: e.filtro || "",
-            opcoesTexto: e.opcoesTexto || "",
-            regrasGrupo: e.regrasGrupo || "",
-            dependeDe: e.dependeDe || "",
+    if (chave.startsWith("classe:")) {
+        const [, classeId, poderId] = chave.split(":");
+        const classe = getClasseDoBanco(classeId);
+        if (!classe) return;
+
+        registro = getPoderClassePorId(classeId, poderId);
+        if (!registro) return;
+
+        origemTipo = "Classe";
+        origemNome = classe.nome || "Classe";
+        chaveOrigemPoder = `classe:${classeId}:${registro.id}`;
+
+        incrementos = (registro.incrementos || []).map(inc => ({
+            id: uid(),
+            custoPm: Number(inc.custoPm) || 0,
+            custoVida: Number(inc.custoVida) || 0,
+            custoPmPermanente: Number(inc.custoPmPermanente) || 0,
+            custoVidaPermanente: Number(inc.custoVidaPermanente) || 0,
+            descricao: inc.descricao || "",
+            efeitoResumo: inc.efeitoResumo || "",
+            selecionado: false
+        }));
+
+        escolhas = (registro.escolhas || []).map(e => ({
+            ...e,
+            id: uid(),
             selecionadas: []
         }));
+    } else {
+        const registroId = chave.startsWith("geral:") ? chave.split(":")[1] : chave;
+
+        registro = getRegistroPoderMagiaPorId(registroId);
+        if (!registro) return;
+
+        origemTipo = "Poder";
+        origemNome = "Banco geral";
+        chaveOrigemPoder = `geral:${registro.id}`;
+
+        incrementos = getIncrementosPoderMagia(registro.id).map(inc => ({
+            id: uid(),
+            custoPm: Number(inc.custoPm) || 0,
+            custoVida: Number(inc.custoVida) || 0,
+            custoPmPermanente: Number(inc.custoPmPermanente) || 0,
+            custoVidaPermanente: Number(inc.custoVidaPermanente) || 0,
+            descricao: inc.descricao || "",
+            efeitoResumo: inc.efeitoResumo || "",
+            selecionado: false
+        }));
+
+        escolhas = (PODERES_MAGIAS_DB.escolhas || [])
+            .filter(e => String(e.registro_id) === String(registro.id))
+            .sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0))
+            .map(e => ({
+                ...e,
+                id: uid(),
+                selecionadas: []
+            }));
+    }
 
     adicionarHabilidadeNaFicha(
         ficha,
         {
-            registroId: registro.id,
             nome: registro.nome || "",
             descricao: registro.descricao || "",
             custoPm: Number(registro.custoPm) || 0,
             custoVida: Number(registro.custoVida) || 0,
+            custoPmPermanente: Number(registro.custoPmPermanente) || 0,
+            custoVidaPermanente: Number(registro.custoVidaPermanente) || 0,
             resumoUso: registro.resumoUso || "",
-            ativavel: !!registro.ativavel,
+            registroId: String(registro.id || ""),
+            chaveOrigemPoder,
+            ativavel: Number(registro.custoPm) > 0 || Number(registro.custoVida) > 0,
+            permiteIntensificar: incrementos.length > 0,
+            incrementos,
             escolhas,
             tipoRegistro: "poder",
+            origemBase: registro.origemBase || origemNome,
             filtros: registro.filtros || "",
-            origemBase: registro.origemBase || ""
+            preRequisitos: registro.preRequisitos || ""
         },
-        "Manual",
-        "Banco de poderes"
+        origemTipo,
+        origemNome
     );
 
     saveFichas();
     fecharModal();
+    render();
 }
 
 function abrirDetalheHabilidade(id) {
@@ -18952,7 +19029,7 @@ function renderModalAdicionarHabilidade() {
         <div class="overlay-header">
           <div>
             <div class="overlay-title">Adicionar habilidade</div>
-            <div class="subtitle">Você pode cadastrar manualmente ou escolher qualquer poder do banco.</div>
+            <div class="subtitle">Você pode cadastrar manualmente ou escolher poderes gerais e de classe.</div>
           </div>
           <button class="btn ghost" onclick="fecharModal()">Fechar</button>
         </div>
@@ -19003,12 +19080,9 @@ function renderModalAdicionarHabilidade() {
                     </div>
 
                     <div class="actions">
-                      <button
-                        class="btn primary"
-                        onclick="adicionarPoderDoBancoNaFicha('${escapeAttr(String(registro.id))}')"
-                      >
-                        Adicionar
-                      </button>
+                      <button class="btn primary" onclick="adicionarPoderDoBancoNaFicha('${escapeAttr(String(registro.chaveOrigemPoder || registro.id))}')">
+                      Adicionar
+                    </button>
                     </div>
                   </div>
                 `).join("")}
