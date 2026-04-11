@@ -4226,9 +4226,10 @@ function getNiveisDeClasseNoContexto(ficha) {
     (ficha?.classesPersonagem || []).forEach(cp => {
         const id = cp.classeId || cp.id;
         if (!id) return;
-        mapa[id] = Number(cp.nivel) || 0;
+        mapa[id] = Number(cp.nivel || cp.niveis) || 0;
     });
 
+    // Contexto da criação
     const classeCriacao = getClasseSelecionadaCriacao?.();
     const ctxCriacao = state.criacao?.classeEvolucaoContexto;
 
@@ -4241,6 +4242,15 @@ function getNiveisDeClasseNoContexto(ficha) {
         } else if (!mapa[classeCriacao.id]) {
             mapa[classeCriacao.id] = 1;
         }
+    }
+
+    // Contexto da evolução da ficha aberta
+    const ctxEvolucao = state.evolucao?.classeEvolucaoContexto;
+    if (ctxEvolucao?.classeId) {
+        mapa[ctxEvolucao.classeId] = Math.max(
+            mapa[ctxEvolucao.classeId] || 0,
+            Number(ctxEvolucao.nivelAlvo) || 1
+        );
     }
 
     return mapa;
