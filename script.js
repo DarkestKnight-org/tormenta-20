@@ -6600,6 +6600,7 @@ function toggleJogadoresAtivosMestre() {
     render();
 }
 
+const LIMITE_AMEACAS_POR_CRIACAO = 10;
 function toggleAmeacasAtivasMestre() {
     garantirEstadoAmeacasMestre();
     state.mestre.ameacasAbertas = !state.mestre.ameacasAbertas;
@@ -8183,13 +8184,28 @@ function toggleSelecaoAmeaca(ameacaId, checked) {
     garantirEstadoAmeacasMestre();
 
     const id = String(ameacaId);
+    const selecionadas = state.mestre.ameacasModal.selecionadas || {};
 
     if (checked) {
-        if (!state.mestre.ameacasModal.selecionadas[id]) {
-            state.mestre.ameacasModal.selecionadas[id] = { quantidade: 1 };
+        const totalAtual = getTotalAmeacasSelecionadasModal();
+
+        if (totalAtual >= LIMITE_AMEACAS_POR_CRIACAO) {
+            alert("limite por criação, adicione primeiro");
+
+            const checkbox = document.querySelector(
+                `input[type="checkbox"][onchange*="toggleSelecaoAmeaca('${id}', this.checked)"]`
+            );
+            if (checkbox) checkbox.checked = false;
+
+            render();
+            return;
+        }
+
+        if (!selecionadas[id]) {
+            selecionadas[id] = { quantidade: 1 };
         }
     } else {
-        delete state.mestre.ameacasModal.selecionadas[id];
+        delete selecionadas[id];
     }
 
     render();
@@ -8199,13 +8215,24 @@ function alterarQuantidadeAmeacaSelecionada(ameacaId, valor) {
     garantirEstadoAmeacasMestre();
 
     const id = String(ameacaId);
-    const quantidade = Math.max(1, Number(valor) || 1);
+    const selecionadas = state.mestre.ameacasModal.selecionadas || {};
 
-    if (!state.mestre.ameacasModal.selecionadas[id]) {
-        state.mestre.ameacasModal.selecionadas[id] = { quantidade: 1 };
+    if (!selecionadas[id]) {
+        selecionadas[id] = { quantidade: 1 };
     }
 
-    state.mestre.ameacasModal.selecionadas[id].quantidade = quantidade;
+    const quantidadeAnterior = Math.max(1, Number(selecionadas[id].quantidade) || 1);
+    let novaQuantidade = Math.max(1, Number(valor) || 1);
+
+    const totalSemEssaAmeaca = getTotalAmeacasSelecionadasModal() - quantidadeAnterior;
+    const maxPermitidoParaEssaAmeaca = Math.max(1, LIMITE_AMEACAS_POR_CRIACAO - totalSemEssaAmeaca);
+
+    if (novaQuantidade > maxPermitidoParaEssaAmeaca) {
+        novaQuantidade = maxPermitidoParaEssaAmeaca;
+        alert("limite por criação, adicione primeiro");
+    }
+
+    selecionadas[id].quantidade = novaQuantidade;
     render();
 }
 
@@ -8213,7 +8240,7 @@ function getTotalAmeacasSelecionadasModal() {
     garantirEstadoAmeacasMestre();
 
     return Object.values(state.mestre.ameacasModal.selecionadas || {})
-        .reduce((acc, item) => acc + (Number(item.quantidade) || 0), 0);
+        .reduce((acc, item) => acc + Math.max(1, Number(item.quantidade) || 0), 0);
 }
 async function adicionarAmeacasSelecionadas() {
     garantirEstadoAmeacasMestre();
@@ -8435,12 +8462,12 @@ function renderModalAmeacas() {
                         <div class="field" style="width:110px; flex:0 0 110px;">
                           <label>Qtd.</label>
                           <input
-                            type="number"
-                            min="1"
-                            value="${escapeAttr(quantidade)}"
-                            ${selecionada ? "" : "disabled"}
-                            onchange="alterarQuantidadeAmeacaSelecionada('${escapeAttr(ameaca.id)}', this.value)"
-                          />
+                              type="number"
+                              min="1"
+                              value="${escapeAttr(quantidade)}"
+                              ${selecionada ? "" : "disabled"}
+                              onchange="alterarQuantidadeAmeacaSelecionada('${escapeAttr(ameaca.id)}', this.value)"
+                            />
                         </div>
                       </div>
                     `;
