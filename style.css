@@ -266,7 +266,7 @@ button {
         color: var(--red-dark);
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        word-break: break-word;
+        word-break: auto-phrase;
         hyphens: auto;
     }
 
