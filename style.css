@@ -2,7 +2,7 @@
     --bg: #f3f0ea;
 
     /* Paleta padronizada do site. Qualquer ajuste de cor deve ser
-       feito aqui — o resto do CSS consome estas variáveis. */
+       feito aqui â€” o resto do CSS consome estas variÃ¡veis. */
     --marrom-claro: #d8c69f;
     --marrom-escuro: #b89f72;
     --preto: #050505;
@@ -12,8 +12,8 @@
     --vermelho: #b62222;
     --vermelho-escuro: #7a1010;
 
-    /* Semáforo de status (perícias/magias): bloqueada, preenchida, vazia.
-       Mantido separado do --vermelho-escuro para não perder a distinção
+    /* SemÃ¡foro de status (perÃ­cias/magias): bloqueada, preenchida, vazia.
+       Mantido separado do --vermelho-escuro para nÃ£o perder a distinÃ§Ã£o
        visual entre os 3 estados. */
     --status-bloqueado: #9a6a00;
     --status-preenchido: #1d6f3a;
@@ -27,9 +27,9 @@
     --shadow: 0 10px 25px rgba(0,0,0,.12);
     --radius: 12px;
 
-    /* Borda metálica: sequência de tons de preto/branco/cinza usada
-       no efeito de bisel (avatares, molduras) e na divisória padrão.
-       Trocar estes tons no modo noite inverte a aparência. */
+    /* Borda metÃ¡lica: sequÃªncia de tons de preto/branco/cinza usada
+       no efeito de bisel (avatares, molduras) e na divisÃ³ria padrÃ£o.
+       Trocar estes tons no modo noite inverte a aparÃªncia. */
     --metal-1: #0d0d0d;
     --metal-2: #0f0f0f;
     --metal-3: #333333;
@@ -48,10 +48,10 @@
     box-sizing: border-box;
 }
 
-/* Divisória padrão do site — linha metálica usada para separar
+/* DivisÃ³ria padrÃ£o do site â€” linha metÃ¡lica usada para separar
    blocos nas telas Home, Fichas (personagens) e Ficha (mobile).
-   As cores vêm de --divider-* (definidas no :root), que se
-   invertem sozinhas quando body.t20-theme-noite está ativo. */
+   As cores vÃªm de --divider-* (definidas no :root), que se
+   invertem sozinhas quando body.t20-theme-noite estÃ¡ ativo. */
 .t20-divider {
     width: 100%;
     height: 3px;
@@ -184,7 +184,8 @@ button {
 }
 
 .home-topbar {
-    margin-top: 72px;
+    margin-top: 18px;
+    margin-bottom: 10px;
 }
 
 .btn {
@@ -220,10 +221,10 @@ button {
 
 .menu-grid {
     display: grid;
-    grid-template-columns: minmax(105px, 143px);
+    grid-template-columns: minmax(135px, 183px);
     justify-content: center;
-    gap: 26px;
-    margin-top: 30px;
+    gap: 18px;
+    margin-top: 20px;
 }
 
 .menu-card {
@@ -248,7 +249,7 @@ button {
     align-items: center;
     justify-content: center;
     text-align: center;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 16 / 11;
     width: 100%;
     padding: 18%;
     container-type: inline-size;
@@ -341,7 +342,7 @@ button {
 .logo-image {
     display: block;
     margin: 0 auto;
-    height: 90px;
+    height: 74px;
     width: auto;
     max-width: 100%;
 }
@@ -701,7 +702,7 @@ td input {
     }
 
     .logo-image {
-        height: 60px;
+        height: 48px;
     }
 
     .topbar {
@@ -997,7 +998,7 @@ input[type="checkbox"] {
     aspect-ratio: 791 / 291;
     margin: 0 auto 14px;
     border: none;
-    background: url("images/caixa-texto-3.png") center / 80% 80% no-repeat;
+    background: url("images/caixa-texto-3.webp") center / 80% 80% no-repeat;
     color: var(--branco);
     display: flex;
     align-items: center;
@@ -1188,7 +1189,7 @@ input[type="checkbox"] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: url("images/caixa-texto-3.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-3.webp") center / 100% 100% no-repeat;
     color: var(--branco);
     font-size: 22px;
     font-weight: 900;
@@ -1473,7 +1474,7 @@ input[type="checkbox"] {
 .criacao-origem-container .btn {
     min-height: 32px;
     border: none;
-    background: url("images/caixa-texto-2.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-2.webp") center / 100% 100% no-repeat;
     color: var(--preto);
     font-family: "Alegreya Sans", sans-serif;
     font-size: 12px;
@@ -1484,7 +1485,7 @@ input[type="checkbox"] {
 }
 
 .criacao-origem-container .btn.danger {
-    background-image: url("images/caixa-texto-3.png");
+    background-image: url("images/caixa-texto-3.webp");
     color: var(--branco);
     text-shadow: 0 1px 2px rgba(0, 0, 0, .55);
 }
@@ -1543,7 +1544,7 @@ input[type="checkbox"] {
     margin: 0 auto 10px;
     border: none;
     border-radius: 0;
-    background: url("images/caixa-texto-2.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-2.webp") center / 100% 100% no-repeat;
     color: var(--preto);
     display: flex;
     align-items: center;
@@ -1612,7 +1613,7 @@ input[type="checkbox"] {
 .criacao-equipamentos-container .btn {
     min-height: 34px;
     border: none;
-    background: url("images/caixa-texto-2.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-2.webp") center / 100% 100% no-repeat;
     color: var(--preto);
     font-family: "Alegreya Sans", sans-serif;
     font-size: 13px;
@@ -1624,7 +1625,7 @@ input[type="checkbox"] {
 }
 
 .criacao-equipamentos-container .btn.danger {
-    background-image: url("images/caixa-texto-3.png");
+    background-image: url("images/caixa-texto-3.webp");
     color: var(--branco);
     text-shadow: 0 1px 2px rgba(0, 0, 0, .55);
 }
@@ -1723,7 +1724,7 @@ input[type="checkbox"] {
     width: 54px;
     aspect-ratio: 1 / 1;
     border: none;
-    background: url("images/xp.png") center / contain no-repeat;
+    background: url("images/xp.webp") center / contain no-repeat;
     color: var(--branco);
     display: inline-flex;
     align-items: center;
@@ -1759,7 +1760,7 @@ input[type="checkbox"] {
     border: none;
     border-radius: 0;
     overflow: visible;
-    background: url("images/caixa-atributos.png") center / contain no-repeat;
+    background: url("images/caixa-atributos.webp") center / contain no-repeat;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2146,7 +2147,7 @@ button.criacao-raca-attr-box:disabled {
 
 .criacao-raca-escolher-btn {
     border: none;
-    background: url("images/caixa-texto-2.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-2.webp") center / 100% 100% no-repeat;
     color: var(--preto);
     width: 82px;
     aspect-ratio: 791 / 291;
@@ -2395,7 +2396,7 @@ button.criacao-raca-attr-box:disabled {
     border: none;
     border-radius: 0;
     background-color: transparent;
-    background-image: url("images/caixa-texto-2.png");
+    background-image: url("images/caixa-texto-2.webp");
     background-position: center;
     background-size: 100% 100%;
     background-repeat: no-repeat;
@@ -2615,14 +2616,14 @@ button.criacao-raca-attr-box:disabled {
 }
 
 .criacao-nav-voltar.btn {
-    background-image: url("images/caixa-texto-2.png");
+    background-image: url("images/caixa-texto-2.webp");
     color: var(--preto);
     text-shadow: 0 1px 0 rgba(255, 255, 255, .45);
 }
 
 .criacao-nav-proximo.btn,
 .criacao-nav-proximo.btn.primary {
-    background-image: url("images/caixa-texto-3.png");
+    background-image: url("images/caixa-texto-3.webp");
     color: var(--branco);
     text-shadow: 0 1px 2px rgba(0, 0, 0, .55);
 }
@@ -2760,7 +2761,7 @@ button.criacao-raca-attr-box:disabled {
     border: none;
     border-radius: 0;
     background-color: transparent;
-    background-image: url("images/xp.png");
+    background-image: url("images/xp.webp");
     background-position: center;
     background-size: 100% 100%;
     background-repeat: no-repeat;
@@ -4501,7 +4502,7 @@ button.criacao-raca-attr-box:disabled {
     align-items: center;
     justify-content: center;
     padding: 0 20px;
-    background: url("images/caixa-texto-3.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-3.webp") center / 100% 100% no-repeat;
     color: var(--branco);
     font-family: "Alegreya Sans", sans-serif;
     font-size: 17px;
@@ -4671,8 +4672,8 @@ button.criacao-raca-attr-box:disabled {
     }
 
 /* ======================================================================
-   VERSÃO MOBILE ILUSTRADA (Tormenta20) — ativada via JS (isMobileFicha())
-   Namespace: tudo dentro de .mobile-ficha, não interfere no layout desktop.
+   VERSÃƒO MOBILE ILUSTRADA (Tormenta20) â€” ativada via JS (isMobileFicha())
+   Namespace: tudo dentro de .mobile-ficha, nÃ£o interfere no layout desktop.
    ====================================================================== */
 
 .mobile-ficha {
@@ -4720,7 +4721,7 @@ button.criacao-raca-attr-box:disabled {
     width: 150px;
     height: auto;
     aspect-ratio: 1334 / 291;
-    background: url("images/tormenta.png") center / contain no-repeat;
+    background: url("images/tormenta.webp") center / contain no-repeat;
     justify-self: center;
 }
 
@@ -4729,9 +4730,9 @@ button.criacao-raca-attr-box:disabled {
     min-width: 0;
 }
 
-/* Caixa larga (pergaminho cheio) — nome do personagem */
+/* Caixa larga (pergaminho cheio) â€” nome do personagem */
 .mf-box-wide {
-    background: url("images/caixa-texto-2.png") center / 80% 70% no-repeat;
+    background: url("images/caixa-texto-2.webp") center / 80% 70% no-repeat;
     aspect-ratio: 1627 / 291;
     display: flex;
     align-items: center;
@@ -4739,9 +4740,9 @@ button.criacao-raca-attr-box:disabled {
     padding: 0 8%;
 }
 
-/* Faixa vermelha — título de seção / botão grande (ATRIBUTOS, SUBIR NÍVEL) */
+/* Faixa vermelha â€” tÃ­tulo de seÃ§Ã£o / botÃ£o grande (ATRIBUTOS, SUBIR NÃVEL) */
 .mf-banner {
-    background: url("images/caixa-texto-3.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-3.webp") center / 100% 100% no-repeat;
     aspect-ratio: 1627 / 291;
     width: 70%;        /* ajuste a porcentagem que quiser */
     margin: 0 auto;     /* centraliza a faixa */
@@ -4762,23 +4763,23 @@ button.criacao-raca-attr-box:disabled {
     cursor: pointer;
 }
 
-/* Botão Voltar da topbar com o mesmo visual da faixa vermelha
-   (Atributos / Subir Nível), porém dimensionado à largura do texto
-   em vez de ocupar 70% da tela como o banner padrão. */
+/* BotÃ£o Voltar da topbar com o mesmo visual da faixa vermelha
+   (Atributos / Subir NÃ­vel), porÃ©m dimensionado Ã  largura do texto
+   em vez de ocupar 70% da tela como o banner padrÃ£o. */
 .mf-banner-back {
     width: auto;
     min-width: 60px;
     margin: 0;
     padding: 0 16px;
     font-size: 13px;
-    background: url("images/caixa-texto-3.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-3.webp") center / 100% 100% no-repeat;
     aspect-ratio: 791 / 291;
     justify-self: end;
 }
 
-/* Caixa média (pergaminho estreito) — Raça/Origem/Classe/Divindade, PV/MM label, etc */
+/* Caixa mÃ©dia (pergaminho estreito) â€” RaÃ§a/Origem/Classe/Divindade, PV/MM label, etc */
 .mf-box-med {
-    background: url("images/caixa-texto-2.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-2.webp") center / 100% 100% no-repeat;
     aspect-ratio: 951 / 291;
     display: flex;
     align-items: center;
@@ -4836,7 +4837,7 @@ button.mf-box-med:focus-visible,
     white-space: nowrap;
 }
 
-/* Raça, Origem e Divindade: caixa clara mesmo no modo escuro, entao o texto
+/* RaÃ§a, Origem e Divindade: caixa clara mesmo no modo escuro, entao o texto
    precisa ficar com --preto (nao --preto-modo-escuro) para continuar legivel. */
 .mf-static-claro {
     color: var(--preto);
@@ -4886,7 +4887,7 @@ button.mf-box-med:focus-visible,
     text-align: center;
 }
 
-/* Linha "Personagem" — rótulo e caixa de nome lado a lado */
+/* Linha "Personagem" â€” rÃ³tulo e caixa de nome lado a lado */
 .mf-personagem-row {
     display: flex;
     align-items: center;
@@ -4910,9 +4911,9 @@ button.mf-box-med:focus-visible,
     min-width: 0;
 }
 
-/* Grade dos 4 blocos (Raça / Origem / Classe e Nível / Divindade)
-   minmax(0, 1fr) evita que o conteúdo mais longo de um bloco (ex.:
-   nome de classe + nível) force sua coluna a crescer além da fatia
+/* Grade dos 4 blocos (RaÃ§a / Origem / Classe e NÃ­vel / Divindade)
+   minmax(0, 1fr) evita que o conteÃºdo mais longo de um bloco (ex.:
+   nome de classe + nÃ­vel) force sua coluna a crescer alÃ©m da fatia
    igual que caberia a cada um dos 4, empurrando/afinando os vizinhos. */
 .mf-grid-4 {
     display: grid;
@@ -4925,7 +4926,7 @@ button.mf-box-med:focus-visible,
     height: 16px;
 }
 
-/* Abas (Status | Perícias | Ataques | Poderes | Magias | Equipamento) */
+/* Abas (Status | PerÃ­cias | Ataques | Poderes | Magias | Equipamento) */
 .mf-tabs {
     display: flex;
     flex-wrap: wrap;
@@ -4937,9 +4938,9 @@ button.mf-box-med:focus-visible,
     position: relative;
 }
 
-/* Linhas antes/depois das abas — mesmo visual (gradiente metálico +
+/* Linhas antes/depois das abas â€” mesmo visual (gradiente metÃ¡lico +
    sombras) da .t20-divider, aplicado via pseudo-elementos porque aqui
-   as linhas precisam ficar coladas nas bordas do próprio container. */
+   as linhas precisam ficar coladas nas bordas do prÃ³prio container. */
 .mf-tabs::before,
 .mf-tabs::after {
     content: "";
@@ -4969,9 +4970,9 @@ button.mf-box-med:focus-visible,
     bottom: 0;
 }
 
-/* Divisória padrão do site (linha metálica) — ver definição em
+/* DivisÃ³ria padrÃ£o do site (linha metÃ¡lica) â€” ver definiÃ§Ã£o em
    ".t20-divider" mais abaixo. Usada aqui, em Fichas (personagens)
-   e na Home para separar blocos, com uma única classe que já
+   e na Home para separar blocos, com uma Ãºnica classe que jÃ¡
    inverte a cor sozinha no modo noite. */
 
 .mf-tab {
@@ -5042,7 +5043,7 @@ button.mf-box-med:focus-visible,
     overflow: hidden;
 }
 
-/* Contorno metálico — mesmo gradiente (--divider-*) usado nas linhas
+/* Contorno metÃ¡lico â€” mesmo gradiente (--divider-*) usado nas linhas
    internas da tabela, aplicado como anel via mask para respeitar o
    border-radius. */
 .mf-pericias-tabela::after {
@@ -5252,7 +5253,7 @@ button.mf-box-med:focus-visible,
     width: 112px;
     aspect-ratio: 791 / 291;
     border: none;
-    background: url("images/caixa-texto-3.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-3.webp") center / 100% 100% no-repeat;
     color: var(--branco);
     cursor: pointer;
     font-family: "Alegreya Sans", serif;
@@ -5501,7 +5502,7 @@ button.mf-box-med:focus-visible,
 .mf-poderes-add {
     width: 118px;
     aspect-ratio: 951 / 291;
-    background: url("images/caixa-texto-2.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-2.webp") center / 100% 100% no-repeat;
     color: var(--preto);
     text-shadow: none;
 }
@@ -5509,7 +5510,7 @@ button.mf-box-med:focus-visible,
 .mf-poderes-use {
     width: 72px;
     aspect-ratio: 791 / 291;
-    background: url("images/caixa-texto-3.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-3.webp") center / 100% 100% no-repeat;
 }
 
 .mf-poderes-use:disabled {
@@ -5527,7 +5528,7 @@ button.mf-box-med:focus-visible,
     overflow: hidden;
 }
 
-/* Contorno metálico — mesmo gradiente (--divider-*) usado nas linhas
+/* Contorno metÃ¡lico â€” mesmo gradiente (--divider-*) usado nas linhas
    internas da tabela, aplicado como anel via mask para respeitar o
    border-radius. */
 .mf-poderes-tabela::after {
@@ -5753,7 +5754,7 @@ button.mf-box-med:focus-visible,
     width: clamp(78px, 21vw, 96px);
     aspect-ratio: 951 / 291;
     background-color: transparent;
-    background-image: url("images/caixa-texto-2.png");
+    background-image: url("images/caixa-texto-2.webp");
     background-position: center;
     background-size: 100% 100%;
     background-repeat: no-repeat;
@@ -5771,7 +5772,7 @@ button.mf-box-med:focus-visible,
     width: clamp(112px, 30vw, 140px);
     aspect-ratio: 791 / 291;
     background-color: transparent;
-    background-image: url("images/caixa-texto-3.png");
+    background-image: url("images/caixa-texto-3.webp");
     background-position: center;
     background-size: 100% 100%;
     background-repeat: no-repeat;
@@ -5827,7 +5828,7 @@ button.mf-box-med:focus-visible,
     display: flex;
     align-items: center;
     justify-content: center;
-    background-image: url("images/caixa-texto-3.png");
+    background-image: url("images/caixa-texto-3.webp");
     background-position: center;
     background-repeat: no-repeat;
     background-size: 100% 100%;
@@ -6225,7 +6226,7 @@ button.mf-box-med:focus-visible,
     width: clamp(64px, 18vw, 80px);
     aspect-ratio: 791 / 291;
     background-color: transparent;
-    background-image: url("images/caixa-texto-3.png");
+    background-image: url("images/caixa-texto-3.webp");
     background-position: center;
     background-size: 100% 100%;
     background-repeat: no-repeat;
@@ -6326,7 +6327,7 @@ button.mf-box-med:focus-visible,
     width: min(150px, 46vw);
     aspect-ratio: 791 / 291;
     border: none;
-    background: url("images/caixa-texto-3.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-3.webp") center / 100% 100% no-repeat;
     color: var(--branco);
     display: flex;
     align-items: center;
@@ -6679,7 +6680,7 @@ button.mf-box-med:focus-visible,
 .mf-classe-submodal-btn-add {
     width: clamp(78px, 21vw, 96px);
     aspect-ratio: 791 / 291;
-    background-image: url("images/caixa-texto-3.png");
+    background-image: url("images/caixa-texto-3.webp");
     background-position: center;
     background-size: 100% 100%;
     background-repeat: no-repeat;
@@ -6691,7 +6692,7 @@ button.mf-box-med:focus-visible,
 .mf-classe-submodal-btn-remove {
     width: clamp(78px, 21vw, 96px);
     aspect-ratio: 951 / 291;
-    background-image: url("images/caixa-texto-2.png");
+    background-image: url("images/caixa-texto-2.webp");
     background-position: center;
     background-size: 100% 100%;
     background-repeat: no-repeat;
@@ -7282,7 +7283,7 @@ button.mf-box-med:focus-visible,
 }
 
 .mf-add-item-btn-red {
-    background-image: url("images/caixa-texto-3.png");
+    background-image: url("images/caixa-texto-3.webp");
     background-position: center;
     background-size: 100% 100%;
     background-repeat: no-repeat;
@@ -7291,7 +7292,7 @@ button.mf-box-med:focus-visible,
 }
 
 .mf-add-item-btn-white {
-    background-image: url("images/caixa-texto-2.png");
+    background-image: url("images/caixa-texto-2.webp");
     background-position: center;
     background-size: 100% 100%;
     background-repeat: no-repeat;
@@ -7352,7 +7353,7 @@ button.mf-box-med:focus-visible,
     width: 56px;
     aspect-ratio: 791 / 291;
     border: none;
-    background: url("images/caixa-texto-3.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-3.webp") center / 100% 100% no-repeat;
     color: var(--branco);
     cursor: pointer;
     font-family: "Alegreya Sans", serif;
@@ -7389,7 +7390,7 @@ button.mf-box-med:focus-visible,
     width: 86px;
     aspect-ratio: 951 / 291;
     border: none;
-    background: url("images/caixa-texto-2.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-2.webp") center / 100% 100% no-repeat;
     color: var(--preto);
     cursor: pointer;
     font-family: "Alegreya Sans", serif;
@@ -7511,7 +7512,7 @@ button.mf-box-med:focus-visible,
     padding: 0;
 }
 
-/* Pontos de atributo disponíveis (abaixo do título "Atributos") */
+/* Pontos de atributo disponÃ­veis (abaixo do tÃ­tulo "Atributos") */
 .mf-attr-pontos-row {
     display: flex;
     align-items: center;
@@ -7576,7 +7577,7 @@ button.mf-box-med:focus-visible,
     flex: 0 0 auto;
     border: none;
     background-color: transparent;
-    background-image: url("images/xp.png");
+    background-image: url("images/xp.webp");
     background-position: center;
     background-size: 100% 100%;
     background-repeat: no-repeat;
@@ -7602,7 +7603,7 @@ button.mf-box-med:focus-visible,
 
 .mf-attr {
     position: relative;
-    background: url("images/caixa-atributos.png") center / contain no-repeat;
+    background: url("images/caixa-atributos.webp") center / contain no-repeat;
     aspect-ratio: 412 / 512;
     display: flex;
     flex-direction: column;
@@ -7659,7 +7660,7 @@ button.mf-box-med:focus-visible,
     border-radius: 999px;
 }
 
-/* PV / MM / CA / XP — círculos com +/- ao lado */
+/* PV / MM / CA / XP â€” cÃ­rculos com +/- ao lado */
 .mf-stat-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -7683,9 +7684,9 @@ button.mf-box-med:focus-visible,
     width: 100%;
 }
 
-/* Wrapper com o tamanho final (já rotacionado) do botão +/- ;
-   o botão interno nasce deitado (igual à arte original) e é
-   girado 90° para dentro dessa caixa vertical. */
+/* Wrapper com o tamanho final (jÃ¡ rotacionado) do botÃ£o +/- ;
+   o botÃ£o interno nasce deitado (igual Ã  arte original) e Ã©
+   girado 90Â° para dentro dessa caixa vertical. */
 .mf-pill-grey-wrap {
     flex: 0 0 auto;
     width: 22px;
@@ -7699,7 +7700,7 @@ button.mf-box-med:focus-visible,
     flex: 0 0 auto;
     width: 58px;
     height: 22px;
-    background: url("images/caixa-somar.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-somar.webp") center / 100% 100% no-repeat;
     border: none;
     color: var(--preto);
     font-weight: 800;
@@ -7732,10 +7733,10 @@ button.mf-box-med:focus-visible,
     position: relative;
 }
 
-.mf-circle-pv { aspect-ratio: 1 / 1; background: url("images/pv.png") center / contain no-repeat; }
-.mf-circle-pm { aspect-ratio: 1 / 1; background: url("images/pm.png") center / contain no-repeat; }
-.mf-circle-ca { aspect-ratio: 1 / 1; background: url("images/ca.png") center / contain no-repeat; }
-.mf-circle-xp { aspect-ratio: 1 / 1; background: url("images/xp.png") center / contain no-repeat; }
+.mf-circle-pv { aspect-ratio: 1 / 1; background: url("images/pv.webp") center / contain no-repeat; }
+.mf-circle-pm { aspect-ratio: 1 / 1; background: url("images/pm.webp") center / contain no-repeat; }
+.mf-circle-ca { aspect-ratio: 1 / 1; background: url("images/ca.webp") center / contain no-repeat; }
+.mf-circle-xp { aspect-ratio: 1 / 1; background: url("images/xp.webp") center / contain no-repeat; }
 
 /* Area de personagens no estilo ilustrado Tormenta */
 .personagens-page {
@@ -7762,7 +7763,7 @@ button.mf-box-med:focus-visible,
 .personagens-logo {
     width: clamp(210px, 46vw, 270px);
     aspect-ratio: 1334 / 291;
-    background: url("images/tormenta.png") center / contain no-repeat;
+    background: url("images/tormenta.webp") center / contain no-repeat;
     justify-self: center;
 }
 
@@ -7774,7 +7775,7 @@ button.mf-box-med:focus-visible,
     text-align: center;
 }
 
-/* Divisória padrão do site (linha metálica) — ver ".t20-divider". */
+/* DivisÃ³ria padrÃ£o do site (linha metÃ¡lica) â€” ver ".t20-divider". */
 
 .personagens-btn {
     border: none;
@@ -7791,13 +7792,13 @@ button.mf-box-med:focus-visible,
 }
 
 .personagens-btn-red {
-    background: url("images/caixa-texto-3.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-3.webp") center / 100% 100% no-repeat;
     color: var(--branco);
     text-shadow: 0 1px 2px rgba(0,0,0,.55);
 }
 
 .personagens-btn-white {
-    background: url("images/caixa-texto-2.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-2.webp") center / 100% 100% no-repeat;
     color: var(--preto);
     text-shadow: 0 1px 0 rgba(255,255,255,.45);
 }
@@ -7904,8 +7905,8 @@ button.mf-box-med:focus-visible,
         inset 0 2px 2px rgba(255, 255, 255, 0.08);
 }
 
-/* Contorno metálico — mesmo gradiente (--divider-*) usado nas tabelas,
-   porém um pouco mais grosso, aplicado como anel via mask para respeitar
+/* Contorno metÃ¡lico â€” mesmo gradiente (--divider-*) usado nas tabelas,
+   porÃ©m um pouco mais grosso, aplicado como anel via mask para respeitar
    o border-radius. */
 .personagem-card::after {
     display: none;
@@ -8034,7 +8035,7 @@ button.mf-box-med:focus-visible,
     width: min(410px, 100%);
     height: 46px;
     border: none;
-    background: url("images/caixa-texto-2.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-2.webp") center / 100% 100% no-repeat;
     color: var(--preto);
     font-size: 18px;
     font-weight: 900;
@@ -8140,7 +8141,7 @@ button.mf-box-med:focus-visible,
 
 /* Area/modal de Login e Cadastro: usa o mesmo padrao visual das telas
    de Personagens, com moldura metalica e fundo cinza. Botoes Login/Entrar em
-   "caixa-texto-3" e botão Cadastro em "caixa-texto-2", fonte Alegreya
+   "caixa-texto-3" e botÃ£o Cadastro em "caixa-texto-2", fonte Alegreya
    Sans em todo o bloco. */
 .auth-modal {
     width: min(301px, calc(100vw - 28px));
@@ -8189,7 +8190,7 @@ button.mf-box-med:focus-visible,
 .auth-logo {
     width: clamp(210px, 48vw, 285px);
     aspect-ratio: 1334 / 291;
-    background: url("images/tormenta.png") center / contain no-repeat;
+    background: url("images/tormenta.webp") center / contain no-repeat;
     margin-bottom: 20px;
 }
 
@@ -8201,8 +8202,8 @@ button.mf-box-med:focus-visible,
     text-transform: none;
 }
 
-/* Campos digitáveis 20% menores (padding, fonte e raio reduzidos
-   proporcionalmente aos valores padrão de .field input). */
+/* Campos digitÃ¡veis 20% menores (padding, fonte e raio reduzidos
+   proporcionalmente aos valores padrÃ£o de .field input). */
 .auth-field input {
     font-family: "Alegreya Sans", sans-serif;
     height: 30px;
@@ -8255,13 +8256,13 @@ button.mf-box-med:focus-visible,
 
 .auth-btn-login,
 .auth-btn-entrar {
-    background: url("images/caixa-texto-3.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-3.webp") center / 100% 100% no-repeat;
     color: var(--branco);
     text-shadow: 0 1px 2px rgba(0,0,0,.55);
 }
 
 .auth-btn-cadastro {
-    background: url("images/caixa-texto-2.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-2.webp") center / 100% 100% no-repeat;
     color: var(--preto);
     text-shadow: 0 1px 0 rgba(255,255,255,.45);
 }
@@ -8294,10 +8295,10 @@ button.mf-box-med:focus-visible,
     }
 }
 
-/* Caixa de texto (PV/PM/CA/XP) — largura reduzida para ficar do mesmo
-   tamanho visual das caixas de Raça/Origem/Classe/Divindade, que ficam
+/* Caixa de texto (PV/PM/CA/XP) â€” largura reduzida para ficar do mesmo
+   tamanho visual das caixas de RaÃ§a/Origem/Classe/Divindade, que ficam
    em colunas mais estreitas (mf-grid-4) do que o par pv+pm / ca+xp
-   (mf-stat-row, só 2 colunas). Sem isso a caixa herdava 100% da coluna
+   (mf-stat-row, sÃ³ 2 colunas). Sem isso a caixa herdava 100% da coluna
    do stat-row, ficando quase o dobro da largura das demais. */
 .mf-box-stat {
     width: 62%;
@@ -8324,9 +8325,9 @@ button.mf-box-med:focus-visible,
     margin-top: 10px;
 }
 
-/* Proficiências / CD Magias (linha 2)
+/* ProficiÃªncias / CD Magias (linha 2)
    Usa as mesmas 3 colunas do .mf-grid-3 (Penalidade/Tamanho/Deslocamento)
-   para que as caixas fiquem com o tamanho idêntico às da linha de cima;
+   para que as caixas fiquem com o tamanho idÃªntico Ã s da linha de cima;
    os dois campos ficam nas colunas 1 e 3, deixando a coluna do meio vazia. */
 .mf-grid-2 {
     display: grid;
@@ -8398,9 +8399,9 @@ button.mf-box-med:focus-visible,
 /* Area "Montagem da rolagem" da tela Dados (acessada pelo Home): o
    container usa moldura metalica com fundo cinza, com rolagem interna liberada
    para funcionar bem no mobile. Os campos Quantidade e Tipo ficam soltos
-   dentro do container, sem caixa de fundo, e menores do que o padrão
-   anterior. O botão Remover (por dado) e o botão Rolar tudo usam a textura
-   "caixa-texto-3"; o botão Adicionar dado usa a "caixa-texto-2". Fonte
+   dentro do container, sem caixa de fundo, e menores do que o padrÃ£o
+   anterior. O botÃ£o Remover (por dado) e o botÃ£o Rolar tudo usam a textura
+   "caixa-texto-3"; o botÃ£o Adicionar dado usa a "caixa-texto-2". Fonte
    Alegreya Sans em todo o bloco. */
 .dados-topo-btn {
     border: none;
@@ -8426,13 +8427,13 @@ button.mf-box-med:focus-visible,
     }
 
 .dados-topo-btn-adicionar {
-    background-image: url("images/caixa-texto-2.png");
+    background-image: url("images/caixa-texto-2.webp");
     color: var(--preto);
     text-shadow: 0 1px 0 rgba(255,255,255,.45);
 }
 
 .dados-topo-btn-rolar {
-    background-image: url("images/caixa-texto-3.png");
+    background-image: url("images/caixa-texto-3.webp");
     color: var(--branco);
     text-shadow: 0 1px 2px rgba(0,0,0,.55);
 }
@@ -8549,7 +8550,7 @@ button.mf-box-med:focus-visible,
     border: none;
     cursor: pointer;
     background-color: transparent;
-    background-image: url("images/caixa-texto-3.png");
+    background-image: url("images/caixa-texto-3.webp");
     background-position: center;
     background-size: 100% 100%;
     background-repeat: no-repeat;
@@ -8870,7 +8871,7 @@ button.mf-box-med:focus-visible,
     width: 116px;
     aspect-ratio: 791 / 291;
     background-color: transparent;
-    background-image: url("images/caixa-texto-3.png");
+    background-image: url("images/caixa-texto-3.webp");
     background-position: center;
     background-size: 100% 100%;
     background-repeat: no-repeat;
@@ -8953,7 +8954,7 @@ button.mf-box-med:focus-visible,
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: url("images/caixa-texto-3.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-3.webp") center / 100% 100% no-repeat;
     color: var(--branco);
     font-size: 21px;
     font-weight: 900;
@@ -9069,7 +9070,7 @@ button.mf-box-med:focus-visible,
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: url("images/caixa-texto-3.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-3.webp") center / 100% 100% no-repeat;
     color: var(--branco);
     font-size: 24px;
     font-weight: 900;
@@ -9174,7 +9175,7 @@ button.mf-box-med:focus-visible,
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: url("images/caixa-texto-3.png") center / 100% 100% no-repeat;
+    background: url("images/caixa-texto-3.webp") center / 100% 100% no-repeat;
     color: var(--branco);
     font-size: 16px;
     font-weight: 900;
@@ -9680,3 +9681,4 @@ button.mf-box-med:focus-visible,
         font-size: 10px;
     }
 }
+
