@@ -1,4 +1,4 @@
-﻿const STORAGE_KEY = "t20_fichas_v1";
+const STORAGE_KEY = "t20_fichas_v1";
 const DADOS_HISTORY_KEY = "t20_dados_history_v1";
 const MESTRE_INICIATIVA_STORAGE_KEY = "t20_mestre_iniciativa_v1";
 const RASCUNHO_CRIACAO_KEY = "t20_ficha_em_andamento_v1";
@@ -8840,7 +8840,7 @@ function renderMestre() {
           margin-bottom: 8px;
           border: none;
           border-radius: 0;
-          background: url("images/caixa-texto-2.png") center / 30% 110% no-repeat;
+          background: url("images/caixa-texto-2.webp") center / 30% 110% no-repeat;
           color: var(--preto);
           text-align: center;
           text-transform: uppercase;
@@ -8909,7 +8909,7 @@ function renderMestre() {
           padding: 7px 14px;
           border: none;
           border-radius: 0;
-          background: url("images/caixa-texto-2.png") center / 100% 100% no-repeat;
+          background: url("images/caixa-texto-2.webp") center / 100% 100% no-repeat;
           color: var(--preto);
           cursor: pointer;
           text-align: left;
@@ -8920,7 +8920,7 @@ function renderMestre() {
 
         .mestre-player-btn.ativo {
           border: 3px solid var(--vermelho-escuro);
-          background-image: url("images/caixa-texto-2.png");
+          background-image: url("images/caixa-texto-2.webp");
           color: var(--preto);
           text-transform: uppercase;
         }
@@ -8952,7 +8952,7 @@ function renderMestre() {
           min-height: 46px;
           border: none;
           border-radius: 0;
-          background: url("images/caixa-texto-2.png") center / 100% 100% no-repeat;
+          background: url("images/caixa-texto-2.webp") center / 100% 100% no-repeat;
           box-shadow: none;
           color: var(--preto);
           font-family: "Alegreya Sans", sans-serif;
@@ -8968,7 +8968,7 @@ function renderMestre() {
         .mestre-layout .btn.primary,
         .mestre-layout .btn.danger,
         .mestre-back-btn {
-          background-image: url("images/caixa-texto-3.png");
+          background-image: url("images/caixa-texto-3.webp");
           color: var(--branco);
           text-shadow: 0 1px 2px rgba(0,0,0,.55);
         }
@@ -8979,7 +8979,7 @@ function renderMestre() {
           aspect-ratio: 791 / 291;
           border: none;
           border-radius: 0;
-          background: url("images/caixa-texto-3.png") center / 100% 100% no-repeat !important;
+          background: url("images/caixa-texto-3.webp") center / 100% 100% no-repeat !important;
           box-shadow: none;
           color: var(--branco) !important;
           font-family: "Alegreya Sans", sans-serif;
@@ -9002,7 +9002,7 @@ function renderMestre() {
           gap: 8px;
           border: none;
           border-radius: 0;
-          background: url("images/caixa-texto-2.png") center / 100% 100% no-repeat;
+          background: url("images/caixa-texto-2.webp") center / 100% 100% no-repeat;
           color: var(--preto);
           text-align: center;
           cursor: pointer;
@@ -9012,13 +9012,13 @@ function renderMestre() {
         }
 
         .mestre-mesa-btn.ativa {
-          background-image: url("images/caixa-texto-2.png");
+          background-image: url("images/caixa-texto-2.webp");
           color: var(--preto);
           text-transform: uppercase;
         }
 
         .mestre-section-toggle {
-          background-image: url("images/caixa-texto-2.png");
+          background-image: url("images/caixa-texto-2.webp");
           color: var(--preto);
           text-transform: uppercase;
         }
@@ -9030,7 +9030,7 @@ function renderMestre() {
           align-items: center;
           justify-content: center;
           padding: 0 22px;
-          background: url("images/caixa-texto-3.png") center / 100% 100% no-repeat;
+          background: url("images/caixa-texto-3.webp") center / 100% 100% no-repeat;
           color: var(--branco);
           font-size: 20px;
           font-weight: 900;
@@ -9047,7 +9047,7 @@ function renderMestre() {
           align-items: center;
           justify-content: center;
           padding: 0 22px;
-          background: url("images/caixa-texto-3.png") center / 100% 100% no-repeat;
+          background: url("images/caixa-texto-3.webp") center / 100% 100% no-repeat;
           color: var(--branco);
           font-size: 20px !important;
           font-weight: 900 !important;
@@ -15694,7 +15694,7 @@ function renderHome() {
     <div class="screen">
       <div class="topbar home-topbar">
         <div style="width:100%; text-align:center;">
-          <img src="images/tormenta.png" alt="Tormenta" class="logo-image" />
+          <img src="images/tormenta.webp" alt="Tormenta" class="logo-image" />
           <div class="subtitle">Gerenciador de ficha e dados</div>
         </div>
       </div>
@@ -20147,7 +20147,7 @@ function renderCriacao() {
     <div class="screen criacao-screen">
       <div class="topbar criacao-topbar">
         <div class="criacao-top-spacer" aria-hidden="true"></div>
-        <img src="images/tormenta.png" alt="Tormenta" class="criacao-logo-image">
+        <img src="images/tormenta.webp" alt="Tormenta" class="criacao-logo-image">
         <button class="personagens-btn personagens-btn-red personagens-btn-back criacao-voltar-btn" onclick="cancelarCriacaoFicha()">VOLTAR</button>
       </div>
 
@@ -20206,7 +20206,7 @@ function renderEvolucaoTopoHtml() {
     return `
       <div class="topbar criacao-topbar">
         <div class="criacao-top-spacer" aria-hidden="true"></div>
-        <img src="images/tormenta.png" alt="Tormenta" class="criacao-logo-image">
+        <img src="images/tormenta.webp" alt="Tormenta" class="criacao-logo-image">
         <button class="personagens-btn personagens-btn-red personagens-btn-back criacao-voltar-btn" onclick="state.screen='ficha'; render()">VOLTAR</button>
       </div>
 
@@ -20728,7 +20728,7 @@ function renderDados() {
     <div class="screen dados-screen">
       <div class="topbar">
         <div>
-          <img src="images/tormenta.png" alt="Tormenta" class="dados-logo-image">
+          <img src="images/tormenta.webp" alt="Tormenta" class="dados-logo-image">
           <div class="subtitle">Monte rolagens compostas como d4 + 2d6 + d20.</div>
           <div class="t20-divider dados-main-divider"></div>
         </div>
@@ -24107,3 +24107,4 @@ window.addEventListener("beforeunload", () => {
 setTimeout(() => {
     carregarTodosOsBancos();
 }, 0);
+
