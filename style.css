@@ -223,7 +223,7 @@ button {
     display: grid;
     grid-template-columns: minmax(135px, 183px);
     justify-content: center;
-    gap: 18px;
+    gap: 34px;
     margin-top: 20px;
 }
 
