@@ -8,7 +8,7 @@ const MESTRE_MODAL_BASE_DPR = window.devicePixelRatio || 1;
 const PROFICIENCIAS_DISPONIVEIS = [
     "Armas simples",
     "Armas marciais",
-    "Armas exÃ³ticas",
+    "Armas exóticas",
     "Armas de fogo",
     "Armaduras leves",
     "Armaduras pesadas",
@@ -19,7 +19,7 @@ const ESPECIALIZACOES_OFICIO = [
     "Alfaiate",
     "Alquimista",
     "Armeiro",
-    "ArtesÃ£o",
+    "Artesão",
     "Cozinheiro",
     "Escriba",
     "Fazendeiro",
@@ -36,7 +36,7 @@ const GOLPE_PESSOAL_EFEITOS = [
         nome: "Amplo",
         custoPm: 3,
         repetivel: false,
-        descricao: "Seu ataque atinge todas as criaturas em alcance curto (incluindo aliados, mas nÃ£o vocÃª mesmo). FaÃ§a um Ãºnico teste de ataque e compare com a Defesa de cada criatura."
+        descricao: "Seu ataque atinge todas as criaturas em alcance curto (incluindo aliados, mas não você mesmo). Faça um único teste de ataque e compare com a Defesa de cada criatura."
     },
     {
         codigo: "atordoante",
@@ -58,14 +58,14 @@ const GOLPE_PESSOAL_EFEITOS = [
         custoPm: 0,
         repetivel: false,
         exigeMagia: true,
-        descricao: "Escolha uma magia de 1Âº ou 2Âº cÃ­rculos. Se acertar seu golpe, vocÃª lanÃ§a a magia como aÃ§Ã£o livre."
+        descricao: "Escolha uma magia de 1º ou 2º círculos. Se acertar seu golpe, você lança a magia como ação livre."
     },
     {
         codigo: "destruidor",
         nome: "Destruidor",
         custoPm: 2,
         repetivel: false,
-        descricao: "Aumenta o multiplicador de crÃ­tico em +1."
+        descricao: "Aumenta o multiplicador de crítico em +1."
     },
     {
         codigo: "distante",
@@ -80,7 +80,7 @@ const GOLPE_PESSOAL_EFEITOS = [
         custoPm: 2,
         repetivel: true,
         exigeElemento: true,
-        descricao: "Causa +2d6 pontos de dano de Ã¡cido, eletricidade, fogo ou frio."
+        descricao: "Causa +2d6 pontos de dano de ácido, eletricidade, fogo ou frio."
     },
     {
         codigo: "impactante",
@@ -95,7 +95,7 @@ const GOLPE_PESSOAL_EFEITOS = [
         custoPm: 2,
         repetivel: true,
         maxUsos: 2,
-        descricao: "Aumenta a margem de ameaÃ§a em +2. VocÃª pode escolher este efeito duas vezes para aumentar a margem de ameaÃ§a em +5."
+        descricao: "Aumenta a margem de ameaça em +2. Você pode escolher este efeito duas vezes para aumentar a margem de ameaça em +5."
     },
     {
         codigo: "penetrante",
@@ -109,21 +109,21 @@ const GOLPE_PESSOAL_EFEITOS = [
         nome: "Preciso",
         custoPm: 1,
         repetivel: false,
-        descricao: "Quando faz o teste de ataque, vocÃª rola dois dados e usa o melhor resultado."
+        descricao: "Quando faz o teste de ataque, você rola dois dados e usa o melhor resultado."
     },
     {
         codigo: "qualquer_arma",
         nome: "Qualquer Arma",
         custoPm: 1,
         repetivel: false,
-        descricao: "VocÃª pode usar seu Golpe Pessoal com qualquer tipo de arma."
+        descricao: "Você pode usar seu Golpe Pessoal com qualquer tipo de arma."
     },
     {
         codigo: "ricocheteante",
         nome: "Ricocheteante",
         custoPm: 1,
         repetivel: false,
-        descricao: "A arma volta para vocÃª apÃ³s o ataque."
+        descricao: "A arma volta para você após o ataque."
     },
     {
         codigo: "teleguiado",
@@ -137,21 +137,21 @@ const GOLPE_PESSOAL_EFEITOS = [
         nome: "Lento",
         custoPm: -2,
         repetivel: false,
-        descricao: "Seu ataque exige uma aÃ§Ã£o completa para ser usado."
+        descricao: "Seu ataque exige uma ação completa para ser usado."
     },
     {
         codigo: "perto_da_morte",
         nome: "Perto da Morte",
         custoPm: -2,
         repetivel: false,
-        descricao: "O ataque sÃ³ pode ser usado se vocÃª estiver com um quarto de seus PV ou menos."
+        descricao: "O ataque só pode ser usado se você estiver com um quarto de seus PV ou menos."
     },
     {
         codigo: "sacrificio",
-        nome: "SacrifÃ­cio",
+        nome: "Sacrifício",
         custoPm: -2,
         repetivel: false,
-        descricao: "Sempre que usa seu Golpe Pessoal, vocÃª perde 10 PV."
+        descricao: "Sempre que usa seu Golpe Pessoal, você perde 10 PV."
     }
 ];
 
@@ -172,7 +172,7 @@ async function carregarRegrasDB() {
 
     try {
         const res = await fetch("regras.json");
-        if (!res.ok) throw new Error("regras.json nÃ£o encontrado");
+        if (!res.ok) throw new Error("regras.json não encontrado");
 
         const data = await res.json();
         REGRAS_DB = data && typeof data === "object" ? data : {};
@@ -222,7 +222,7 @@ function garantirEstadoAmeacasMestre() {
     }
 }
 
-const GOLPE_PESSOAL_ELEMENTOS = ["Ã¡cido", "eletricidade", "fogo", "frio"];
+const GOLPE_PESSOAL_ELEMENTOS = ["ácido", "eletricidade", "fogo", "frio"];
 const GOLPE_PESSOAL_ATRIBUTOS_MENTAIS = ["inteligencia", "sabedoria", "carisma"];
 
 let RACAS_DB = [];
@@ -233,7 +233,7 @@ const RACAS_FALLBACK = [
         id: "humano",
         nome: "Humano",
         tipoAtributo: "distribuivel3",
-        tamanho: "MÃ©dio",
+        tamanho: "Médio",
         deslocamento: "9m",
         atributosFixos: {
             forca: 0,
@@ -245,9 +245,9 @@ const RACAS_FALLBACK = [
         },
         habilidades: [
             {
-                nome: "VersÃ¡til",
+                nome: "Versátil",
                 custoPm: 0,
-                descricao: "VocÃª recebe um poder geral Ã  sua escolha."
+                descricao: "Você recebe um poder geral à sua escolha."
             }
         ],
         periciasOutros: [],
@@ -257,7 +257,7 @@ const RACAS_FALLBACK = [
         id: "elfo",
         nome: "Elfo",
         tipoAtributo: "fixo",
-        tamanho: "MÃ©dio",
+        tamanho: "Médio",
         deslocamento: "9m",
         atributosFixos: {
             forca: 0,
@@ -269,9 +269,9 @@ const RACAS_FALLBACK = [
         },
         habilidades: [
             {
-                nome: "Sentidos Ã‰lficos",
+                nome: "Sentidos Élficos",
                 custoPm: 0,
-                descricao: "VocÃª recebe os benefÃ­cios raciais correspondentes."
+                descricao: "Você recebe os benefícios raciais correspondentes."
             }
         ],
         periciasOutros: [],
@@ -279,9 +279,9 @@ const RACAS_FALLBACK = [
     },
     {
         id: "anao",
-        nome: "AnÃ£o",
+        nome: "Anão",
         tipoAtributo: "fixo",
-        tamanho: "MÃ©dio",
+        tamanho: "Médio",
         deslocamento: "6m",
         atributosFixos: {
             forca: 0,
@@ -293,9 +293,9 @@ const RACAS_FALLBACK = [
         },
         habilidades: [
             {
-                nome: "TradiÃ§Ã£o de Heredrimm",
+                nome: "Tradição de Heredrimm",
                 custoPm: 0,
-                descricao: "VocÃª recebe os benefÃ­cios raciais correspondentes."
+                descricao: "Você recebe os benefícios raciais correspondentes."
             }
         ],
         periciasOutros: [],
@@ -319,7 +319,7 @@ const CLASSES_FALLBACK = [
         periciasBase: 2,
         usaMagia: 0,
         tipoMagia: "",
-        descricao: "Especialista em combate e resistÃªncia.",
+        descricao: "Especialista em combate e resistência.",
         habilidades: [],
         efeitos: [],
         escolhas: []
@@ -351,7 +351,7 @@ async function carregarAmeacasDB() {
 
     try {
         const res = await fetch("ameacas.json");
-        if (!res.ok) throw new Error("ameacas.json nÃ£o encontrado");
+        if (!res.ok) throw new Error("ameacas.json não encontrado");
 
         const data = await res.json();
 
@@ -381,7 +381,7 @@ async function carregarClassesDB() {
 
     try {
         const res = await fetch("classes.json");
-        if (!res.ok) throw new Error("classes.json nÃ£o encontrado");
+        if (!res.ok) throw new Error("classes.json não encontrado");
 
         const data = await res.json();
         const caminhosRaw = data.classes_caminhos || data.Classes_Caminhos || [];
@@ -398,7 +398,7 @@ async function carregarClassesDB() {
         const efeitos = data.classes_efeitos || [];
         const escolhas = data.classes_escolhas || [];
 
-        // aceita tanto minÃºsculo quanto nome vindo da aba
+        // aceita tanto minúsculo quanto nome vindo da aba
         const classesPoderes =
             data.classes_poderes ||
             data.Classes_Poderes ||
@@ -589,7 +589,7 @@ async function carregarPoderesMagiasDB() {
 
     try {
         const res = await fetch("poderes_magias.json");
-        if (!res.ok) throw new Error("poderes_magias.json nÃ£o encontrado");
+        if (!res.ok) throw new Error("poderes_magias.json não encontrado");
 
         const data = await res.json();
 
@@ -619,7 +619,7 @@ async function carregarItensEquipamentosDB() {
 
     try {
         const res = await fetch("itens_equipamentos.json");
-        if (!res.ok) throw new Error("itens_equipamentos.json nÃ£o encontrado");
+        if (!res.ok) throw new Error("itens_equipamentos.json não encontrado");
 
         const data = await res.json();
 
@@ -661,7 +661,7 @@ async function carregarOrigensDB() {
 
     try {
         const res = await fetch("origem.json");
-        if (!res.ok) throw new Error("origem.json nÃ£o encontrado");
+        if (!res.ok) throw new Error("origem.json não encontrado");
 
         const data = await res.json();
 
@@ -696,7 +696,7 @@ async function carregarDivindadesDB() {
 
     try {
         const res = await fetch("divindades.json");
-        if (!res.ok) throw new Error("divindades.json nÃ£o encontrado");
+        if (!res.ok) throw new Error("divindades.json não encontrado");
 
         const data = await res.json();
 
@@ -727,8 +727,8 @@ async function carregarDivindadesDB() {
 }
 
 async function carregarTodosOsBancos() {
-    // Carregamento em paralelo: cada funÃ§Ã£o popula sua prÃ³pria variÃ¡vel global
-    // e nenhuma depende do resultado das outras, entÃ£o nÃ£o hÃ¡ motivo para serializar.
+    // Carregamento em paralelo: cada função popula sua própria variável global
+    // e nenhuma depende do resultado das outras, então não há motivo para serializar.
     await Promise.all([
         carregarRacasDB(),
         carregarClassesDB(),
@@ -751,7 +751,7 @@ async function carregarRacasDB() {
 
     try {
         const res = await fetch("racas.json");
-        if (!res.ok) throw new Error("racas.json nÃ£o encontrado");
+        if (!res.ok) throw new Error("racas.json não encontrado");
 
         const data = await res.json();
 
@@ -771,7 +771,7 @@ async function carregarRacasDB() {
                     custoPm: Number(h.custoPm) || 0,
                     ativavel: Number(h.ativavel) === 1,
                     permiteIntensificar: Number(h.permiteIntensificar) === 1,
-                    origemTipo: h.origemTipo || "RaÃ§a",
+                    origemTipo: h.origemTipo || "Raça",
                     origemNome: h.origemNome || r.nome
                 }));
 
@@ -830,7 +830,7 @@ async function carregarRacasDB() {
             };
         });
     } catch (err) {
-        console.warn("Usando raÃ§as fallback:", err);
+        console.warn("Usando raças fallback:", err);
         RACAS_DB = RACAS_FALLBACK;
     }
 
@@ -838,7 +838,7 @@ async function carregarRacasDB() {
 }
 function iconePericiaSomenteTreinada() {
     return `
-      <span class="pericia-badge" title="SÃ³ treinada" aria-label="SÃ³ treinada">
+      <span class="pericia-badge" title="Só treinada" aria-label="Só treinada">
         <svg viewBox="0 0 24 24" class="pericia-icone pericia-icone-preenchido" aria-hidden="true">
           <path d="M12 3.5l2.6 5.27 5.82.85-4.21 4.1.99 5.78L12 16.73 6.8 19.5l.99-5.78-4.21-4.1 5.82-.85z"></path>
         </svg>
@@ -903,7 +903,7 @@ function montarOpcaoPoderUnicoOrigem(habilidade) {
     return {
         id: `origem_habilidade:${habilidade.id}`,
         tipoAplicacao: "origem_habilidade_adicionar",
-        label: `Poder Ãºnico: ${habilidade.nome}`,
+        label: `Poder único: ${habilidade.nome}`,
         valor: habilidade.nome,
         nomeCurto: habilidade.nome || "",
         descricao: habilidade.descricao || "",
@@ -1193,12 +1193,12 @@ let state = {
 const ETAPAS_CRIACAO = [
     "Identidade",
     "Atributos",
-    "RaÃ§a",
+    "Raça",
     "Classe",
     "Origem",
     "Divindade",
     "Equipamento",
-    "RevisÃ£o"
+    "Revisão"
 ];
 
 function abrirEscolhaCriacao(escolhaId) {
@@ -1410,9 +1410,9 @@ function montarDescricaoGolpePessoal(config, descricaoBase = "") {
 
     const efeitos = (config?.efeitos || []).map(efeito => {
         if (efeito.codigo === "elemental") {
-            return `â€¢ ${efeito.nome} (${efeito.elemento || "elemento"}): ${efeito.descricao}`;
+            return `⬢ ${efeito.nome} (${efeito.elemento || "elemento"}): ${efeito.descricao}`;
         }
-        return `â€¢ ${efeito.nome}: ${efeito.descricao}`;
+        return `⬢ ${efeito.nome}: ${efeito.descricao}`;
     });
 
     if (efeitos.length) {
@@ -1422,28 +1422,28 @@ function montarDescricaoGolpePessoal(config, descricaoBase = "") {
 
     if (config?.conjurador?.magiaNome) {
         linhas.push("Conjurador:");
-        linhas.push(`â€¢ Magia: ${config.conjurador.magiaNome}`);
-        linhas.push(`â€¢ CÃ­rculo: ${config.conjurador.circulo || "?"}`);
-        linhas.push(`â€¢ Custo da magia: ${Number(config.conjurador.custoPmMagia) || 0} PM`);
-        linhas.push(`â€¢ Atributo-chave: ${config.conjurador.atributoMental || "inteligencia"}`);
+        linhas.push(`⬢ Magia: ${config.conjurador.magiaNome}`);
+        linhas.push(`⬢ Círculo: ${config.conjurador.circulo || "?"}`);
+        linhas.push(`⬢ Custo da magia: ${Number(config.conjurador.custoPmMagia) || 0} PM`);
+        linhas.push(`⬢ Atributo-chave: ${config.conjurador.atributoMental || "inteligencia"}`);
 
         if (config.conjurador.execucao) {
-            linhas.push(`â€¢ ExecuÃ§Ã£o: ${config.conjurador.execucao}`);
+            linhas.push(`⬢ Execução: ${config.conjurador.execucao}`);
         }
         if (config.conjurador.alcance) {
-            linhas.push(`â€¢ Alcance: ${config.conjurador.alcance}`);
+            linhas.push(`⬢ Alcance: ${config.conjurador.alcance}`);
         }
         if (config.conjurador.area) {
-            linhas.push(`â€¢ Ãrea: ${config.conjurador.area}`);
+            linhas.push(`⬢ Área: ${config.conjurador.area}`);
         }
         if (config.conjurador.duracao) {
-            linhas.push(`â€¢ DuraÃ§Ã£o: ${config.conjurador.duracao}`);
+            linhas.push(`⬢ Duração: ${config.conjurador.duracao}`);
         }
         if (config.conjurador.resistencia) {
-            linhas.push(`â€¢ ResistÃªncia: ${config.conjurador.resistencia}`);
+            linhas.push(`⬢ Resistência: ${config.conjurador.resistencia}`);
         }
         if (config.conjurador.descricao) {
-            linhas.push(`â€¢ DescriÃ§Ã£o da magia: ${config.conjurador.descricao}`);
+            linhas.push(`⬢ Descrição da magia: ${config.conjurador.descricao}`);
         }
     }
 
@@ -1453,10 +1453,10 @@ function montarDescricaoGolpePessoal(config, descricaoBase = "") {
 function criarRegistroGolpePessoalParaFicha(opcao) {
     const config = JSON.parse(JSON.stringify(opcao?.golpePessoalConfig || criarConfigInicialGolpePessoal()));
     const custoCalculado = calcularCustoGolpePessoal(config);
-    const resumo = getResumoGolpePessoal(config) || "ConfiguraÃ§Ã£o";
+    const resumo = getResumoGolpePessoal(config) || "Configuração";
 
     const resumoUso = config?.conjurador?.magiaNome
-        ? `Custo: ${Number(custoCalculado) || 0} PM â€¢ Conjurador: ${config.conjurador.magiaNome}`
+        ? `Custo: ${Number(custoCalculado) || 0} PM ⬢ Conjurador: ${config.conjurador.magiaNome}`
         : `Custo: ${Number(custoCalculado) || 0} PM`;
 
     return {
@@ -1526,7 +1526,7 @@ function adicionarEfeitoGolpePessoal(codigo) {
 
         const magias = getMagiasElegiveisConjuradorGolpePessoal(ficha);
         if (!magias.length) {
-            alert("Nenhuma magia de 1Âº ou 2Âº cÃ­rculos disponÃ­vel para Conjurador.");
+            alert("Nenhuma magia de 1º ou 2º círculos disponível para Conjurador.");
             return;
         }
 
@@ -1738,7 +1738,7 @@ function confirmarGolpePessoalModal() {
 
     const config = JSON.parse(JSON.stringify(getGolpePessoalConfigAtual() || criarConfigInicialGolpePessoal()));
     const custoFinal = calcularCustoGolpePessoal(config);
-    const resumo = getResumoGolpePessoal(config) || "ConfiguraÃ§Ã£o";
+    const resumo = getResumoGolpePessoal(config) || "Configuração";
     const descricaoBaseBanco = opcao.descricao || "";
 
     opcao.descricaoBase = descricaoBaseBanco;
@@ -1836,7 +1836,7 @@ function renderGolpePessoalModal() {
                                   value="${escapeAttr(String(magia.registroId || magia.id))}"
                                   ${(String(config.conjurador.registroId || config.conjurador.magiaId) === String(magia.registroId || magia.id)) ? "selected" : ""}
                                 >
-                                  ${escapeHtml(`${magia.nome} (${magia.circulo}Âº cÃ­rculo, ${magia.custoPm} PM)`)}
+                                  ${escapeHtml(`${magia.nome} (${magia.circulo}º círculo, ${magia.custoPm} PM)`)}
                                 </option>
                               `).join("")}
                             </select>
@@ -2005,8 +2005,8 @@ function adicionarOuAtualizarMagiaNaFicha(ficha, referencia, origemTipo, origemN
             }
         }
 
-        const existenteEhRacial = magiaExistente.origem === "RaÃ§a";
-        const novaEhRacial = origemTipo === "RaÃ§a";
+        const existenteEhRacial = magiaExistente.origem === "Raça";
+        const novaEhRacial = origemTipo === "Raça";
 
         if ((existenteEhRacial && !novaEhRacial) || (novaEhRacial && !existenteEhRacial)) {
             aplicarDescontoMagiaRacial(magiaExistente, 1);
@@ -2014,7 +2014,7 @@ function adicionarOuAtualizarMagiaNaFicha(ficha, referencia, origemTipo, origemN
 
         if (referencia?.origemEspecial === "inventor_formula") {
             magiaExistente.tipoMagiaInventor = "formula";
-            magiaExistente.prefixoExibicao = "FÃ³rmula";
+            magiaExistente.prefixoExibicao = "Fórmula";
             magiaExistente.origem = origemTipo || magiaExistente.origem || "Classe";
             magiaExistente.origemDetalhe = origemNome || magiaExistente.origemDetalhe || "";
         }
@@ -2038,11 +2038,11 @@ function adicionarOuAtualizarMagiaNaFicha(ficha, referencia, origemTipo, origemN
         resistencia: registro?.resistencia || "",
         descricao: registro?.descricao || "",
         incrementos: registro ? montarIncrementosDaMagia(registro.id) : [],
-        origem: origemTipo || "RaÃ§a",
+        origem: origemTipo || "Raça",
         origemDetalhe: origemNome || "",
         registroId: registro?.id || "",
         tipoMagiaInventor: referencia?.tipoMagiaInventor || "",
-        prefixoExibicao: referencia?.origemEspecial === "inventor_formula" ? "FÃ³rmula" : ""
+        prefixoExibicao: referencia?.origemEspecial === "inventor_formula" ? "Fórmula" : ""
     };
 
     ficha.magias.push(magia);
@@ -2301,8 +2301,8 @@ function renderProficienciasModal() {
         <div class="overlay-card" onclick="event.stopPropagation()">
           <div class="overlay-header">
             <div>
-              <div class="overlay-title">ProficiÃªncias</div>
-              <div class="overlay-subtitle">Selecione as proficiÃªncias que o personagem possui.</div>
+              <div class="overlay-title">Proficiências</div>
+              <div class="overlay-subtitle">Selecione as proficiências que o personagem possui.</div>
             </div>
             <button class="btn ghost" onclick="fecharModal()">Fechar</button>
           </div>
@@ -2861,7 +2861,7 @@ function renderModalAdicionarItemInventario() {
         <div class="overlay-card" onclick="event.stopPropagation()">
           <div class="overlay-header">
             <div>
-              <div class="overlay-title">Adicionar item ao inventÃ¡rio</div>
+              <div class="overlay-title">Adicionar item ao inventário</div>
               <div class="overlay-subtitle">Escolha um item do banco ou crie um item manual.</div>
             </div>
             <button class="btn ghost" onclick="fecharModalAdicionarItemInventario()">Fechar</button>
@@ -2894,7 +2894,7 @@ function renderModalAdicionarItemInventario() {
                               <div class="list-item-title">${escapeHtml(item.nome || "")}</div>
                               <div class="list-item-sub">
                                 ${escapeHtml(item.categoria || "")}
-                                ${item.preco ? ` â€¢ T$ ${escapeHtml(String(item.preco))}` : ""}
+                                ${item.preco ? ` ⬢ T$ ${escapeHtml(String(item.preco))}` : ""}
                               </div>
                             </div>
                             <div class="actions" style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -2978,7 +2978,7 @@ function renderModalAdicionarItemInventario() {
                   </div>
 
                   <div class="field">
-                    <label>DescriÃ§Ã£o</label>
+                    <label>Descrição</label>
                     <input
                       value="${escapeAttr(state.ui?.novoItemManual?.descricao || "")}"
                       oninput="updateNovoItemManual('descricao', this.value)"
@@ -3091,7 +3091,7 @@ function resolverFiltroEscolhaItemOrigem(texto) {
 
     if (chave.includes("arma simples")) return { modo: "tipo_generico", valor: "arma_simples" };
     if (chave.includes("arma marcial")) return { modo: "tipo_generico", valor: "arma_marcial" };
-    if (chave.includes("arma exÃ³tica") || chave.includes("arma exotica")) return { modo: "tipo_generico", valor: "arma_exotica" };
+    if (chave.includes("arma exótica") || chave.includes("arma exotica")) return { modo: "tipo_generico", valor: "arma_exotica" };
 
     if (chave.includes("armadura leve")) return { modo: "tipo_generico", valor: "armadura_leve" };
     if (chave.includes("armadura pesada")) return { modo: "tipo_generico", valor: "armadura_pesada" };
@@ -3266,7 +3266,7 @@ function renderModalDetalhesItemInventario() {
               <div class="overlay-title">${escapeHtml(nome)}</div>
               <div class="overlay-subtitle">
                 ${escapeHtml(categoria || (item.manual ? "Item manual" : ""))}
-                ${item.quantidade > 1 ? ` â€¢ Quantidade: ${escapeHtml(String(item.quantidade))}` : ""}
+                ${item.quantidade > 1 ? ` ⬢ Quantidade: ${escapeHtml(String(item.quantidade))}` : ""}
               </div>
             </div>
             <button class="btn ghost" onclick="fecharDetalhesItemInventario()">Fechar</button>
@@ -3275,7 +3275,7 @@ function renderModalDetalhesItemInventario() {
           <div class="overlay-body">
             ${descricao ? `
               <div class="panel">
-                <div class="panel-title">DescriÃ§Ã£o</div>
+                <div class="panel-title">Descrição</div>
                 <div class="panel-body">${escapeHtml(descricao)}</div>
               </div>
               <div style="height:14px"></div>
@@ -3288,14 +3288,14 @@ function renderModalDetalhesItemInventario() {
                   <div class="list">
                     <div class="list-item">
                       <div>
-                        <div class="list-item-title">PreÃ§o total</div>
+                        <div class="list-item-title">Preço total</div>
                         <div class="list-item-sub">T$ ${escapeHtml(String(calcularPrecoTotalItem(item)))}</div>
                       </div>
                     </div>
 
                     <div class="list-item">
                       <div>
-                        <div class="list-item-title">CD de fabricaÃ§Ã£o</div>
+                        <div class="list-item-title">CD de fabricação</div>
                         <div class="list-item-sub">${escapeHtml(String(calcularCdItem(item)))}</div>
                       </div>
                     </div>
@@ -3303,7 +3303,7 @@ function renderModalDetalhesItemInventario() {
                     ${base.proficienciaNecessaria ? `
                       <div class="list-item">
                         <div>
-                          <div class="list-item-title">ProficiÃªncia necessÃ¡ria</div>
+                          <div class="list-item-title">Proficiência necessária</div>
                           <div class="list-item-sub">${escapeHtml(base.proficienciaNecessaria)}</div>
                         </div>
                       </div>
@@ -3330,7 +3330,7 @@ function renderModalDetalhesItemInventario() {
                     ${atributos.critico ? `
                       <div class="list-item">
                         <div>
-                          <div class="list-item-title">CrÃ­tico</div>
+                          <div class="list-item-title">Crítico</div>
                           <div class="list-item-sub">${escapeHtml(String(atributos.critico))}</div>
                         </div>
                       </div>
@@ -3897,7 +3897,7 @@ function getCaminhoArcanistaDaFicha(ficha) {
 
     if (encontradoNaFicha) return encontradoNaFicha;
 
-    // durante a criaÃ§Ã£o: olhar escolhas pendentes da classe
+    // durante a criação: olhar escolhas pendentes da classe
     const pendenteCriacao = Object.values(state.criacao?.classeEscolhas || {})
         .flat()
         .find(op =>
@@ -3907,7 +3907,7 @@ function getCaminhoArcanistaDaFicha(ficha) {
 
     if (pendenteCriacao?.valor) return pendenteCriacao.valor;
 
-    // durante evoluÃ§Ã£o da ficha pronta
+    // durante evolução da ficha pronta
     const pendenteEvolucao = Object.values(state.evolucao?.classeEscolhas || {})
         .flat()
         .find(op =>
@@ -4137,12 +4137,12 @@ function garantirOficiosFicha(ficha) {
 
 function montarNomePericiaOficio(especialidade) {
     const nome = String(especialidade || "").trim();
-    return nome ? `OfÃ­cio (${nome})` : "OfÃ­cio";
+    return nome ? `Ofício (${nome})` : "Ofício";
 }
 
 function extrairEspecializacaoOficio(nomePericia) {
     const texto = String(nomePericia || "").trim();
-    const match = texto.match(/^Of[iÃ­]cio\s*\(([^)]+)\)$/i);
+    const match = texto.match(/^Of[ií]cio\s*\(([^)]+)\)$/i);
     return match ? String(match[1] || "").trim() : "";
 }
 
@@ -4156,16 +4156,16 @@ function fichaTemPericiaTreinadaOuOficio(ficha, nomePericia) {
     const nomeNormalizado = normalizarTextoRegra(nomePericia);
     const especializacao = extrairEspecializacaoOficio(nomePericia);
 
-    // OfÃ­cio especializado: bloqueia sÃ³ a prÃ³pria especializaÃ§Ã£o
+    // Ofício especializado: bloqueia só a própria especialização
     if (especializacao) {
         return garantirOficiosFicha(ficha).some(of =>
             normalizarTextoRegra(of) === normalizarTextoRegra(especializacao)
         );
     }
 
-    // OfÃ­cio genÃ©rico: continua disponÃ­vel enquanto ainda existir
-    // alguma especializaÃ§Ã£o nÃ£o aprendida
-    if (nomeNormalizado === normalizarTextoRegra("OfÃ­cio")) {
+    // Ofício genérico: continua disponível enquanto ainda existir
+    // alguma especialização não aprendida
+    if (nomeNormalizado === normalizarTextoRegra("Ofício")) {
         const oficios = garantirOficiosFicha(ficha);
         const totalEspecializacoes = ESPECIALIZACOES_OFICIO.length;
         const totalAprendidas = oficios.filter(Boolean).length;
@@ -4187,7 +4187,7 @@ function getPericiasExpandidas(ficha, apenasNaoTreinadas = false) {
         const nomeBase = String(pericia?.nome || "").trim();
         if (!nomeBase) return;
 
-        if (normalizarTextoRegra(nomeBase) === normalizarTextoRegra('OfÃ­cio')) {
+        if (normalizarTextoRegra(nomeBase) === normalizarTextoRegra('Ofício')) {
             ESPECIALIZACOES_OFICIO.forEach(especialidade => {
                 const nome = montarNomePericiaOficio(especialidade);
                 const treinada = fichaTemPericiaTreinadaOuOficio(ficha, nome);
@@ -4224,7 +4224,7 @@ function aplicarTreinoPericiaNaFicha(ficha, nomePericia, origemTipo = '', origem
         }
 
         const periciaOficio = (ficha.pericias || []).find(p =>
-            normalizarTextoRegra(p.nome || '') === normalizarTextoRegra('OfÃ­cio')
+            normalizarTextoRegra(p.nome || '') === normalizarTextoRegra('Ofício')
         );
         if (periciaOficio) {
             periciaOficio.treinada = true;
@@ -4292,7 +4292,7 @@ function marcarTreinoPericiaSemRegistrar(ficha, nomePericia) {
         }
 
         const periciaOficio = (ficha.pericias || []).find(p =>
-            normalizarTextoRegra(p.nome || '') === normalizarTextoRegra('OfÃ­cio')
+            normalizarTextoRegra(p.nome || '') === normalizarTextoRegra('Ofício')
         );
         if (periciaOficio) {
             periciaOficio.treinada = true;
@@ -4340,7 +4340,7 @@ function reconstruirTreinosPericiaDaFicha(ficha) {
     });
 
     const periciaOficio = (ficha.pericias || []).find(p =>
-        normalizarTextoRegra(p.nome || '') === normalizarTextoRegra('OfÃ­cio')
+        normalizarTextoRegra(p.nome || '') === normalizarTextoRegra('Ofício')
     );
     if (periciaOficio && oficios.length > 0) {
         periciaOficio.treinada = true;
@@ -4366,7 +4366,7 @@ function opcaoGenericaOficioTemEspecializacaoSelecionada(lista, opcaoBase) {
 
 function ehOpcaoPericiaOficioGenerico(opcao) {
     return opcao?.tipoAplicacao === "pericia_treinada"
-        && normalizarTextoRegra(opcao?.valor || "") === normalizarTextoRegra("OfÃ­cio");
+        && normalizarTextoRegra(opcao?.valor || "") === normalizarTextoRegra("Ofício");
 }
 
 function criarOpcaoEspecializadaOficio(opcaoBase, especialidade) {
@@ -4375,7 +4375,7 @@ function criarOpcaoEspecializadaOficio(opcaoBase, especialidade) {
         ...opcaoBase,
         id: `${String(opcaoBase?.id || "oficio")}:oficio:${normalizarTextoRegra(especialidade).replace(/\s+/g, "_")}`,
         valor: nome,
-        label: `PerÃ­cia: ${nome}`,
+        label: `Perícia: ${nome}`,
         especializacaoOficio: especialidade
     };
 }
@@ -4485,7 +4485,7 @@ function renderModalEspecializacoesOficioEscolha() {
 
     const especializacoesDisponiveis = getEspecializacoesOficioDisponiveisParaEscolha(ficha, selecoes);
     const maximo = Number(state.modalPayload.maximo) || 1;
-    const titulo = state.modalPayload.titulo || "Escolha os ofÃ­cios";
+    const titulo = state.modalPayload.titulo || "Escolha os ofícios";
 
     return `
       <div class="overlay mf-add-habilidade-overlay" onclick="fecharModal()">
@@ -4612,7 +4612,7 @@ function getNiveisDeClasseNoContexto(ficha) {
         mapa[id] = Number(cp.nivel || cp.niveis) || 0;
     });
 
-    // Contexto da criaÃ§Ã£o
+    // Contexto da criação
     const classeCriacao = getClasseSelecionadaCriacao?.();
     const ctxCriacao = state.criacao?.classeEvolucaoContexto;
 
@@ -4627,7 +4627,7 @@ function getNiveisDeClasseNoContexto(ficha) {
         }
     }
 
-    // Contexto da evoluÃ§Ã£o da ficha aberta
+    // Contexto da evolução da ficha aberta
     const ctxEvolucao = state.evolucao?.classeEvolucaoContexto;
     if (ctxEvolucao?.classeId) {
         mapa[ctxEvolucao.classeId] = Math.max(
@@ -4722,7 +4722,7 @@ function normalizarNomeDivindadeParaFiltro(nome) {
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase()
-        .replace(/['â€™]/g, "")
+        .replace(/['’]/g, "")
         .replace(/\bde\b|\bdo\b|\bda\b|\bdos\b|\bdas\b/g, " ")
         .replace(/[^a-z0-9]+/g, "_")
         .replace(/^_+|_+$/g, "");
@@ -4839,8 +4839,8 @@ function montarEscolhaEspecialPoderTreinamentoPericia(opcaoBase, ficha) {
         registro_id: String(opcaoBase.registroId || ""),
         ordem: 1,
         tipo: "pericia_treinada",
-        titulo: "Escolha uma perÃ­cia",
-        descricao: "Escolha uma perÃ­cia para se tornar treinado nela.",
+        titulo: "Escolha uma perícia",
+        descricao: "Escolha uma perícia para se tornar treinado nela.",
         quantidade: 1,
         filtro: "lista",
         opcoesTexto: opcoes.join("|"),
@@ -4857,7 +4857,7 @@ function montarEscolhaEspecialPoderProficiencia(opcaoBase, ficha) {
     ];
 
     if (fichaTemProficiencia(ficha, "Armas marciais")) {
-        opcoes.splice(2, 0, "Armas exÃ³ticas");
+        opcoes.splice(2, 0, "Armas exóticas");
     }
 
     return [{
@@ -4865,8 +4865,8 @@ function montarEscolhaEspecialPoderProficiencia(opcaoBase, ficha) {
         registro_id: String(opcaoBase.registroId || ""),
         ordem: 1,
         tipo: "proficiencia",
-        titulo: "Escolha uma proficiÃªncia",
-        descricao: "Escolha uma proficiÃªncia para receber com este poder.",
+        titulo: "Escolha uma proficiência",
+        descricao: "Escolha uma proficiência para receber com este poder.",
         quantidade: 1,
         filtro: "lista",
         opcoesTexto: opcoes.join("|"),
@@ -4985,7 +4985,7 @@ function aplicarEscolhasDoPoderClasseNaFichaImediatamente(ficha, classe, opcaoCo
         adicionarHabilidadeNaFicha(
             ficha,
             {
-                nome: `Foco em PerÃ­cia: ${opcaoComEscolhas.escolhaEspecialValor}`,
+                nome: `Foco em Perícia: ${opcaoComEscolhas.escolhaEspecialValor}`,
                 descricao: opcaoComEscolhas.descricao || "",
                 custoPm: 0,
                 custoVida: 0,
@@ -5029,7 +5029,7 @@ function aplicarEscolhasDoPoderClasseNaFichaImediatamente(ficha, classe, opcaoCo
 
                 if (magiaAdicionada && opcao.origemEspecial === "inventor_formula") {
                     magiaAdicionada.tipoMagiaInventor = "formula";
-                    magiaAdicionada.prefixoExibicao = "FÃ³rmula";
+                    magiaAdicionada.prefixoExibicao = "Fórmula";
                 }
             }
 
@@ -5141,7 +5141,7 @@ function confirmarEscolhaPoderClasseModal() {
 function fecharEscolhaPoderClasseModal() {
     const origem = getEscolhaClasseSelecionadaQueAbriuPoder();
 
-    // PASSO 9: limpa o estado temporÃ¡rio do Golpe Pessoal
+    // PASSO 9: limpa o estado temporário do Golpe Pessoal
     const ctxGolpe = getGolpePessoalStateAtual();
     if (ctxGolpe) {
         ctxGolpe.golpePessoalModal = null;
@@ -5356,15 +5356,15 @@ function getAliasAtributoPreReq() {
 function getAliasClassePreReq() {
     return {
         "barbaro": "barbaro",
-        "bÃ¡rbaro": "barbaro",
+        "bárbaro": "barbaro",
         "arcanista": "arcanista",
         "bardo": "bardo",
         "bucaneiro": "bucaneiro",
         "cacador": "cacador",
-        "caÃ§ador": "cacador",
+        "caçador": "cacador",
         "cavaleiro": "cavaleiro",
         "clerigo": "clerigo",
-        "clÃ©rigo": "clerigo",
+        "clérigo": "clerigo",
         "druida": "druida",
         "guerreiro": "guerreiro",
         "inventor": "inventor",
@@ -5517,18 +5517,18 @@ function avaliarPartePreRequisito(parte, ctx) {
         if (atual >= minimo) return null;
 
         const nomes = {
-            forca: "ForÃ§a",
+            forca: "Força",
             destreza: "Destreza",
-            constituicao: "ConstituiÃ§Ã£o",
-            inteligencia: "InteligÃªncia",
+            constituicao: "Constituição",
+            inteligencia: "Inteligência",
             sabedoria: "Sabedoria",
             carisma: "Carisma"
         };
 
         return `${nomes[chave]} ${minimo}`;
     }
-    // nÃ­vel de classe: "7Âº nÃ­vel de inventor"
-    m = txt.match(/\b(\d+)\s*(?:o|Âº|Â°)?\s*nivel de\s+(barbaro|bÃ¡rbaro|arcanista|bardo|bucaneiro|cacador|caÃ§ador|cavaleiro|clerigo|clÃ©rigo|druida|guerreiro|inventor|ladino|lutador|nobre|paladino)\b/);
+    // nível de classe: "7º nível de inventor"
+    m = txt.match(/\b(\d+)\s*(?:o|º|°)?\s*nivel de\s+(barbaro|bárbaro|arcanista|bardo|bucaneiro|cacador|caçador|cavaleiro|clerigo|clérigo|druida|guerreiro|inventor|ladino|lutador|nobre|paladino)\b/);
     if (m) {
         const minimo = Number(m[1]) || 0;
         const classeId = aliasClasse[m[2]];
@@ -5536,8 +5536,8 @@ function avaliarPartePreRequisito(parte, ctx) {
         if (atual >= minimo) return null;
         return raw.replace(/\s+/g, " ").trim();
     }
-    // classe: "BÃ¡rbaro 3"
-    m = txt.match(/\b(barbaro|bÃ¡rbaro|arcanista|bardo|bucaneiro|cacador|caÃ§ador|cavaleiro|clerigo|clÃ©rigo|druida|guerreiro|inventor|ladino|lutador|nobre|paladino)\s+(\d+)\b/);
+    // classe: "Bárbaro 3"
+    m = txt.match(/\b(barbaro|bárbaro|arcanista|bardo|bucaneiro|cacador|caçador|cavaleiro|clerigo|clérigo|druida|guerreiro|inventor|ladino|lutador|nobre|paladino)\s+(\d+)\b/);
     if (m) {
         const classeId = aliasClasse[m[1]];
         const minimo = Number(m[2]) || 0;
@@ -5548,13 +5548,13 @@ function avaliarPartePreRequisito(parte, ctx) {
         return nomeFmt;
     }
 
-    // cÃ­rculo: "2Âº cÃ­rculo", "3 circulo"
-    m = txt.match(/\b(\d+)\s*(?:o|Âº)?\s*circulo\b/);
+    // círculo: "2º círculo", "3 circulo"
+    m = txt.match(/\b(\d+)\s*(?:o|º)?\s*circulo\b/);
     if (m) {
         const minimo = Number(m[1]) || 0;
         const atual = Number(ctx.circuloMaximo) || 0;
         if (atual >= minimo) return null;
-        return `${minimo}Âº cÃ­rculo`;
+        return `${minimo}º círculo`;
     }
 
     // poderes da tormenta: "quatro outros poderes da tormenta", "1 poder da tormenta"
@@ -5566,16 +5566,16 @@ function avaliarPartePreRequisito(parte, ctx) {
         return raw;
     }
 
-    // OfÃ­cio especializado: "Treinado em OfÃ­cio (alquimista)"
-    m = raw.match(/(?:treinado\s+em\s+)?of[iÃ­]cio\s*\(([^)]+)\)/i);
+    // Ofício especializado: "Treinado em Ofício (alquimista)"
+    m = raw.match(/(?:treinado\s+em\s+)?of[ií]cio\s*\(([^)]+)\)/i);
     if (m) {
         const oficioReq = normalizarTextoRegra(m[1]);
         if (ctx.oficios?.has(oficioReq)) return null;
         return raw;
     }
 
-    // perÃ­cia: "treinado em Fortitude", "Fortitude"
-    m = txt.match(/(?:treinado em|treinado na|pericia|perÃ­cia)\s+(.+)/);
+    // perícia: "treinado em Fortitude", "Fortitude"
+    m = txt.match(/(?:treinado em|treinado na|pericia|perícia)\s+(.+)/);
     if (m) {
         const nomeReq = normalizarTextoRegra(m[1]);
 
@@ -5588,16 +5588,16 @@ function avaliarPartePreRequisito(parte, ctx) {
         return raw;
     }
 
-    // nÃ­vel de personagem: "6Âº nÃ­vel de personagem"
-    m = txt.match(/\b(\d+)\s*(?:o|Âº)?\s*nivel de personagem\b/);
+    // nível de personagem: "6º nível de personagem"
+    m = txt.match(/\b(\d+)\s*(?:o|º)?\s*nivel de personagem\b/);
     if (m) {
         const minimo = Number(m[1]) || 0;
         const atual = Number(ctx.nivelPersonagem) || 0;
         if (atual >= minimo) return null;
-        return `${minimo}Âº nÃ­vel de personagem`;
+        return `${minimo}º nível de personagem`;
     }
 
-    // proficiÃªncia
+    // proficiência
     const aliasProf = getAliasProficienciaPreReq();
     const profNormalizada = normalizarTextoRegra(raw);
     if (aliasProf[profNormalizada]) {
@@ -5613,13 +5613,13 @@ function avaliarPartePreRequisito(parte, ctx) {
         return raw;
     }
 
-    // lanÃ§ar magias / habilidade magias
-    if (txt === "lancar magias" || txt === "lanÃ§ar magias" || txt === "habilidade magias" || txt === "magias") {
+    // lançar magias / habilidade magias
+    if (txt === "lancar magias" || txt === "lançar magias" || txt === "habilidade magias" || txt === "magias") {
         if (ctx.podeLancarMagias) return null;
-        return "lanÃ§ar magias";
+        return "lançar magias";
     }
 
-    // poder/habilidade especÃ­fica: "Dentes Afiados", "Anatomia Insana", etc.
+    // poder/habilidade específica: "Dentes Afiados", "Anatomia Insana", etc.
     const nomeLivre = normalizarNomePreRequisitoLivre(raw);
 
     const temHabilidade = [...ctx.habilidades].some(h => h === nomeLivre);
@@ -5638,7 +5638,7 @@ function getPendenciasPreRequisito(opcao, ficha) {
     const pendencias = [];
 
     if ((Number(opcao?.circulo) || 0) > 0 && ctx.circuloMaximo < Number(opcao.circulo)) {
-        pendencias.push(`${Number(opcao.circulo)}Âº cÃ­rculo`);
+        pendencias.push(`${Number(opcao.circulo)}º círculo`);
     }
 
     const texto = String(opcao?.preRequisitos || "").trim();
@@ -5794,8 +5794,8 @@ function podeSelecionarOpcaoRacial(escolha, opcao) {
         return false;
     }
 
-    // Magias concedidas por raÃ§a ignoram prÃ©-requisitos do prÃ³prio registro
-    // (como "1Âº cÃ­rculo" ou "Habilidade Magias").
+    // Magias concedidas por raça ignoram pré-requisitos do próprio registro
+    // (como "1º círculo" ou "Habilidade Magias").
     if (escolha.tipo === "magia" && opcao?.tipoAplicacao === "magia_adicionar") {
         return true;
     }
@@ -5935,9 +5935,9 @@ function limparEfeitosRaciaisFicha(ficha) {
         carisma: 0
     };
 
-    ficha.habilidades = (ficha.habilidades || []).filter(h => h.origem !== "RaÃ§a");
-    ficha.magias = (ficha.magias || []).filter(m => m.origem !== "RaÃ§a");
-    ficha.efeitosAplicados = (ficha.efeitosAplicados || []).filter(e => e.origemTipo !== "RaÃ§a");
+    ficha.habilidades = (ficha.habilidades || []).filter(h => h.origem !== "Raça");
+    ficha.magias = (ficha.magias || []).filter(m => m.origem !== "Raça");
+    ficha.efeitosAplicados = (ficha.efeitosAplicados || []).filter(e => e.origemTipo !== "Raça");
 
     ficha.pericias.forEach(p => {
         p.outrosRacial = 0;
@@ -5994,12 +5994,12 @@ function aplicarRacaNaFichaCriacao() {
     }
 
     (raca.habilidades || []).forEach(h => {
-        adicionarHabilidadeNaFicha(ficha, h, "RaÃ§a", raca.nome);
+        adicionarHabilidadeNaFicha(ficha, h, "Raça", raca.nome);
     });
 
     (raca.efeitos || []).forEach(efeito => {
         if (efeito.tipo === "atributo_racial") return;
-        aplicarEfeitoNaFicha(ficha, efeito, "RaÃ§a", raca.nome);
+        aplicarEfeitoNaFicha(ficha, efeito, "Raça", raca.nome);
     });
 
     const escolhasOk = aplicarEscolhasRaciaisNaFicha(ficha, raca);
@@ -6037,32 +6037,32 @@ function getBonusRacialPorNivel(ficha, tipo) {
     if (!ficha?.efeitosAplicados) return 0;
 
     return ficha.efeitosAplicados
-        .filter(e => e.origemTipo === "RaÃ§a" && e.tipo === tipo)
+        .filter(e => e.origemTipo === "Raça" && e.tipo === tipo)
         .reduce((soma, e) => soma + (Number(e.valor) || 0), 0);
 }
 
 function traduzirTipoEfeito(tipo) {
     const mapa = {
         atributo_racial: "Atributo racial",
-        pericia_bonus: "BÃ´nus em perÃ­cia",
+        pericia_bonus: "Bônus em perícia",
         pericia_treinada: "Treinado em",
         habilidade_adicionar: "Concede habilidade",
         magia_adicionar: "Concede magia",
         magia_escolher: "Escolha de magia",
-        proficiencia_adicionar: "Concede proficiÃªncia",
-        deslocamento_bonus: "BÃ´nus de deslocamento",
+        proficiencia_adicionar: "Concede proficiência",
+        deslocamento_bonus: "Bônus de deslocamento",
         deslocamento_definir: "Deslocamento",
-        pv_bonus_nivel1: "PV no nÃ­vel 1",
-        pv_bonus_por_nivel: "PV por nÃ­vel",
-        pm_bonus_nivel1: "PM no nÃ­vel 1",
-        pm_bonus_por_nivel: "PM por nÃ­vel",
-        ataque_bonus: "BÃ´nus de ataque",
-        dano_bonus: "BÃ´nus de dano",
+        pv_bonus_nivel1: "PV no nível 1",
+        pv_bonus_por_nivel: "PV por nível",
+        pm_bonus_nivel1: "PM no nível 1",
+        pm_bonus_por_nivel: "PM por nível",
+        ataque_bonus: "Bônus de ataque",
+        dano_bonus: "Bônus de dano",
         ataque_adicionar: "Concede ataque",
-        defesa_bonus: "BÃ´nus de Defesa",
+        defesa_bonus: "Bônus de Defesa",
         tamanho_definir: "Tamanho",
         poder_tormenta_adicionar: "Poder da Tormenta",
-        descricao_apenas: "DescriÃ§Ã£o"
+        descricao_apenas: "Descrição"
     };
 
     return mapa[tipo] || tipo;
@@ -6071,12 +6071,12 @@ function traduzirTipoEfeito(tipo) {
 function efeitoDeveAparecerNaPrevia(tipoOrigem, efeito) {
     if (!efeito?.tipo) return false;
 
-    // RaÃ§a: atributos jÃ¡ aparecem em "Atributos raciais"
+    // Raça: atributos já aparecem em "Atributos raciais"
     if (tipoOrigem === "raca") {
         if (efeito.tipo === "atributo_racial") return false;
     }
 
-    // Classe: PV/PM jÃ¡ aparecem na prÃ©via da classe
+    // Classe: PV/PM já aparecem na prévia da classe
     if (tipoOrigem === "classe") {
         if (efeito.tipo === "pv_bonus_nivel1") return false;
         if (efeito.tipo === "pv_bonus_por_nivel") return false;
@@ -6132,7 +6132,7 @@ function descreverEfeitoParaJogador(e) {
             return `${tipoTraduzido}: ${e.valorTexto || ""}`;
 
         case "descricao_apenas":
-            return e.descricao || "DescriÃ§Ã£o adicional";
+            return e.descricao || "Descrição adicional";
 
         default:
             return `${tipoTraduzido}`;
@@ -6169,11 +6169,11 @@ function descreverEfeitoParaCardEscolhaClasse(e) {
     }
 }
 
-// --- Rascunho local da criaÃ§Ã£o de personagem (ficha em andamento) ---
-// Guarda o estado completo do assistente de criaÃ§Ã£o (etapa atual e todas as
-// escolhas jÃ¡ feitas) no localStorage, para o usuÃ¡rio nÃ£o perder o progresso
+// --- Rascunho local da criação de personagem (ficha em andamento) ---
+// Guarda o estado completo do assistente de criação (etapa atual e todas as
+// escolhas já feitas) no localStorage, para o usuário não perder o progresso
 // se a internet cair ou a aba/tela for fechada antes de concluir a ficha.
-// SÃ³ a ficha CONCLUÃDA Ã© enviada ao Supabase; o rascunho nunca Ã© sincronizado.
+// Só a ficha CONCLUÍDA é enviada ao Supabase; o rascunho nunca é sincronizado.
 let _rascunhoCriacaoTimer = null;
 
 function salvarRascunhoCriacao() {
@@ -6225,7 +6225,7 @@ function limparRascunhoCriacao() {
 function continuarRascunhoCriacao() {
     const rascunho = carregarRascunhoCriacaoSalvo();
     if (!rascunho) {
-        alert("NÃ£o foi possÃ­vel carregar a ficha em andamento salva.");
+        alert("Não foi possível carregar a ficha em andamento salva.");
         render();
         return;
     }
@@ -6238,7 +6238,7 @@ function continuarRascunhoCriacao() {
 }
 
 async function descartarRascunhoCriacao() {
-    const ok = confirm("Descartar a ficha em andamento salva? Essa aÃ§Ã£o nÃ£o pode ser desfeita.");
+    const ok = confirm("Descartar a ficha em andamento salva? Essa ação não pode ser desfeita.");
     if (!ok) return;
 
     const rascunho = carregarRascunhoCriacaoSalvo();
@@ -6256,7 +6256,7 @@ async function iniciarCriacaoFicha() {
     const rascunhoExistente = carregarRascunhoCriacaoSalvo();
     if (rascunhoExistente) {
         const ok = confirm(
-            "VocÃª jÃ¡ tem uma ficha em andamento salva. Iniciar uma ficha nova vai descartar esse progresso. Deseja continuar mesmo assim?"
+            "Você já tem uma ficha em andamento salva. Iniciar uma ficha nova vai descartar esse progresso. Deseja continuar mesmo assim?"
         );
         if (!ok) return;
         await excluirImagensPersonagemDaFicha(rascunhoExistente?.criacao?.ficha);
@@ -6902,7 +6902,7 @@ function limparPericiasInteligenciaDaFicha(ficha) {
         }
     });
 
-    ficha.efeitosAplicados = (ficha.efeitosAplicados || []).filter(e => e.origemTipo !== "InteligÃªncia");
+    ficha.efeitosAplicados = (ficha.efeitosAplicados || []).filter(e => e.origemTipo !== "Inteligência");
 
     controle.selecionadas = [];
     controle.totalConcedido = 0;
@@ -6980,7 +6980,7 @@ function togglePericiaInteligenciaCriacao(nomePericia) {
 }
 
 function finalizarConclusaoNivelClasseCriacao() {
-    const continuar = confirm("Subir mais nÃ­veis?");
+    const continuar = confirm("Subir mais níveis?");
     if (continuar) {
         abrirSelecaoProximoNivelClasse();
         return;
@@ -7015,8 +7015,8 @@ function confirmarPericiasInteligenciaCriacao() {
         const aplicou = aplicarTreinoPericiaNaFicha(
             ficha,
             nomePericia,
-            "InteligÃªncia",
-            "InteligÃªncia"
+            "Inteligência",
+            "Inteligência"
         );
 
         if (!aplicou) return;
@@ -7072,9 +7072,9 @@ function renderModalPericiasInteligenciaCriacao() {
         <div class="overlay-card mf-add-habilidade-modal mf-magia-detail-modal mf-classe-submodal" onclick="event.stopPropagation()">
           <div class="overlay-header mf-add-habilidade-header">
             <div>
-              <div class="overlay-title">PerÃ­cias por InteligÃªncia</div>
+              <div class="overlay-title">Perícias por Inteligência</div>
               <div class="subtitle">
-                Escolha ${quantidade} ${quantidade === 1 ? "perÃ­cia treinada" : "perÃ­cias treinadas"} pela sua InteligÃªncia.
+                Escolha ${quantidade} ${quantidade === 1 ? "perícia treinada" : "perícias treinadas"} pela sua Inteligência.
                 &bull; Selecionados: ${selecionadas.length} / ${quantidade}
               </div>
             </div>
@@ -7259,9 +7259,9 @@ async function carregarFichasDoUsuario() {
             .map(r => r.ficha_json)
             .filter(f => f && f.tipoRegistro !== "ameaca_mestre");
 
-        // Restaura a conexÃ£o com a mesa online, se havia uma ficha ativa
-        // salva no banco. Isso corrige o bug em que, apÃ³s um F5, o app
-        // "esquecia" a mesa conectada e parava de sincronizar em silÃªncio.
+        // Restaura a conexão com a mesa online, se havia uma ficha ativa
+        // salva no banco. Isso corrige o bug em que, após um F5, o app
+        // "esquecia" a mesa conectada e parava de sincronizar em silêncio.
         const registroAtivoEmMesa = (registros || []).find(r => r.mesa_id && r.is_active);
         if (registroAtivoEmMesa) {
             state.mesaOnlineId = registroAtivoEmMesa.mesa_id;
@@ -7269,7 +7269,7 @@ async function carregarFichasDoUsuario() {
                 const mesa = await window.T20Supabase.buscarMesaPorId(registroAtivoEmMesa.mesa_id);
                 state.mesaOnlineNome = mesa?.nome || "";
             } catch (err) {
-                console.error("NÃ£o foi possÃ­vel recuperar o nome da mesa:", err);
+                console.error("Não foi possível recuperar o nome da mesa:", err);
             }
         } else {
             state.mesaOnlineId = "";
@@ -7279,7 +7279,7 @@ async function carregarFichasDoUsuario() {
         state.fichasCarregadas = true;
     } catch (err) {
         console.error("Erro ao carregar fichas do Supabase:", err);
-        alert("NÃ£o foi possÃ­vel carregar suas fichas. Verifique sua conexÃ£o e tente novamente.");
+        alert("Não foi possível carregar suas fichas. Verifique sua conexão e tente novamente.");
     } finally {
         state.fichasCarregando = false;
         render();
@@ -7333,8 +7333,8 @@ function flushFichaAtualAgora() {
 
     // Mesma trava usada em saveFichas(): impede que, ao trocar de tela a
     // partir do painel do mestre com a ficha de UM JOGADOR selecionada
-    // (nÃ£o uma NPC local), essa ficha seja enviada ao Supabase vinculada
-    // Ã  conta do mestre em vez da conta original do dono.
+    // (não uma NPC local), essa ficha seja enviada ao Supabase vinculada
+    // à conta do mestre em vez da conta original do dono.
     const selecionadaMestre = state.screen === "mestre" ? getFichaMestreSelecionada() : null;
     const bloqueadaNoMestre = state.screen === "mestre" && selecionadaMestre?.tipo !== "npc_local";
 
@@ -7356,12 +7356,12 @@ async function alterarSenhaAuth() {
     const confirmar = String(state.auth.confirmarNovaSenha || "");
 
     if (!novaSenha || !confirmar) {
-        alert("Preencha a nova senha e a confirmaÃ§Ã£o.");
+        alert("Preencha a nova senha e a confirmação.");
         return;
     }
 
     if (novaSenha !== confirmar) {
-        alert("As senhas nÃ£o conferem.");
+        alert("As senhas não conferem.");
         return;
     }
 
@@ -7373,7 +7373,7 @@ async function alterarSenhaAuth() {
         render();
     } catch (err) {
         console.error(err);
-        alert(err?.message || "NÃ£o foi possÃ­vel alterar a senha.");
+        alert(err?.message || "Não foi possível alterar a senha.");
     }
 }
 function garantirEstadoRegrasMestre() {
@@ -7635,7 +7635,7 @@ function renderModalRegras() {
             <div>
               <div class="overlay-title">Regras</div>
               <div class="subtitle">
-                Consulta rÃ¡pida das regras cadastradas.
+                Consulta rápida das regras cadastradas.
               </div>
             </div>
 
@@ -7734,13 +7734,13 @@ function aplicarModoSomenteLeituraMestre() {
         el.style.pointerEvents = "none";
     });
 
-    // remove bloco lateral dos botÃµes flutuantes de Dados/Regras
+    // remove bloco lateral dos botões flutuantes de Dados/Regras
     viewer.querySelectorAll(".side-buttons").forEach(el => {
         if (el.closest(".mestre-sidebar")) return;
         el.remove();
     });
 
-    // remove botÃµes flutuantes soltos de Dados/Regras
+    // remove botões flutuantes soltos de Dados/Regras
     viewer.querySelectorAll(".btn.primary.floating").forEach(el => {
         if (el.closest(".mestre-sidebar")) return;
 
@@ -7810,7 +7810,7 @@ async function conectarMesaPorNome() {
     try {
         const mesa = await window.T20Supabase.buscarMesaPorNome(nome);
         if (!mesa) {
-            alert("Mesa nÃ£o encontrada.");
+            alert("Mesa não encontrada.");
             return;
         }
 
@@ -7818,10 +7818,10 @@ async function conectarMesaPorNome() {
         state.mesaOnlineNome = mesa.nome;
         saveFichas();
         render();
-        alert(`Conectado Ã  mesa: ${mesa.nome}`);
+        alert(`Conectado à mesa: ${mesa.nome}`);
     } catch (err) {
         console.error(err);
-        alert(err?.message || "NÃ£o foi possÃ­vel localizar a mesa.");
+        alert(err?.message || "Não foi possível localizar a mesa.");
     }
 }
 
@@ -7834,7 +7834,7 @@ async function toggleFichaAtivaOnline(fichaId, checked) {
     }
 
     if (!window.T20Supabase?.SUPA?.state?.user) {
-        alert("FaÃ§a login online antes de ativar uma ficha.");
+        alert("Faça login online antes de ativar uma ficha.");
         render();
         return;
     }
@@ -7868,7 +7868,7 @@ async function toggleFichaAtivaOnline(fichaId, checked) {
         render();
     } catch (err) {
         console.error(err);
-        alert("NÃ£o foi possÃ­vel alterar a ficha ativa online.");
+        alert("Não foi possível alterar a ficha ativa online.");
     }
 }
 function toggleJogadoresAtivosMestre() {
@@ -7912,7 +7912,7 @@ async function excluirTodasAmeacasMestre() {
     const lista = state.mestre.ameacasEmCena || [];
     if (!lista.length) return;
 
-    const ok = confirm("Excluir todas as ameaÃ§as ativas da mesa?");
+    const ok = confirm("Excluir todas as ameaças ativas da mesa?");
     if (!ok) return;
 
     try {
@@ -7926,7 +7926,7 @@ async function excluirTodasAmeacasMestre() {
         render();
     } catch (err) {
         console.error(err);
-        alert(err?.message || "NÃ£o foi possÃ­vel excluir as ameaÃ§as.");
+        alert(err?.message || "Não foi possível excluir as ameaças.");
     }
 }
 async function removerAmeacaMestre(instanciaId) {
@@ -7939,8 +7939,8 @@ async function removerAmeacaMestre(instanciaId) {
 
     const nomeAtualItem = (item.edicao && typeof item.edicao.nome === "string" && item.edicao.nome.trim() !== "")
         ? item.edicao.nome
-        : (item.nome || "AmeaÃ§a");
-    const ok = confirm(`Remover a ameaÃ§a "${nomeAtualItem}" da mesa?`);
+        : (item.nome || "Ameaça");
+    const ok = confirm(`Remover a ameaça "${nomeAtualItem}" da mesa?`);
     if (!ok) return;
 
     const removidoId = String(instanciaId || "");
@@ -7964,7 +7964,7 @@ async function removerAmeacaMestre(instanciaId) {
         render();
     } catch (err) {
         console.error(err);
-        alert(err?.message || "NÃ£o foi possÃ­vel remover a ameaÃ§a.");
+        alert(err?.message || "Não foi possível remover a ameaça.");
     }
 }
 
@@ -7973,7 +7973,7 @@ function renderListaAmeacasAtivasMestre() {
 
     const lista = state.mestre.ameacasEmCena || [];
     if (!lista.length) {
-        return `<div class="empty">Nenhuma ameaÃ§a ativa.</div>`;
+        return `<div class="empty">Nenhuma ameaça ativa.</div>`;
     }
 
     const contadores = {};
@@ -7989,7 +7989,7 @@ function renderListaAmeacasAtivasMestre() {
         contadores[chave] = (contadores[chave] || 0) + 1;
         const indice = contadores[chave];
 
-        const nomeExibido = nomeAtual || "AmeaÃ§a";
+        const nomeExibido = nomeAtual || "Ameaça";
 
         return `
           <div class="mestre-player-row">
@@ -8002,7 +8002,7 @@ function renderListaAmeacasAtivasMestre() {
               <div style="min-width:0;">
                 <div class="list-item-title">${escapeHtml(nomeExibido)}</div>
                 <div class="list-item-sub">
-                   #${escapeHtml(indice)} â€¢ ND ${escapeHtml(item.nd || "-")}
+                   #${escapeHtml(indice)} ⬢ ND ${escapeHtml(item.nd || "-")}
                 </div>
               </div>
             </button>
@@ -8011,9 +8011,9 @@ function renderListaAmeacasAtivasMestre() {
               class="btn danger"
               type="button"
               onclick="removerAmeacaMestre('${escapeAttr(item.instanciaId)}')"
-              title="Remover ameaÃ§a"
+              title="Remover ameaça"
             >
-              âœ•
+              ×
             </button>
           </div>
         `;
@@ -8028,7 +8028,7 @@ async function carregarAreaDoMestre() {
     }
 
     if (!window.T20Supabase?.SUPA?.state?.user) {
-        alert("FaÃ§a login online antes de abrir a Ãrea do Mestre.");
+        alert("Faça login online antes de abrir a Área do Mestre.");
         return;
     }
 
@@ -8089,7 +8089,7 @@ async function carregarAreaDoMestre() {
         });
     } catch (err) {
         console.error(err);
-        alert("NÃ£o foi possÃ­vel carregar a Ãrea do Mestre.");
+        alert("Não foi possível carregar a Área do Mestre.");
     } finally {
         state.mestre.carregando = false;
         render();
@@ -8149,7 +8149,7 @@ async function criarMesaMestre() {
         await carregarAreaDoMestre();
     } catch (err) {
         console.error(err);
-        alert(err?.message || "NÃ£o foi possÃ­vel criar a mesa.");
+        alert(err?.message || "Não foi possível criar a mesa.");
     }
 }
 
@@ -8160,7 +8160,7 @@ async function excluirMesaMestre() {
         return;
     }
 
-    const ok = confirm("Excluir esta mesa? Essa aÃ§Ã£o nÃ£o pode ser desfeita.");
+    const ok = confirm("Excluir esta mesa? Essa ação não pode ser desfeita.");
     if (!ok) return;
 
     try {
@@ -8173,7 +8173,7 @@ async function excluirMesaMestre() {
         render();
     } catch (err) {
         console.error(err);
-        alert(err?.message || "NÃ£o foi possÃ­vel excluir a mesa.");
+        alert(err?.message || "Não foi possível excluir a mesa.");
     }
 }
 function atualizarMesaMestre(valor) {
@@ -8190,7 +8190,7 @@ function renderListaPills(lista) {
       <div style="display:flex; flex-wrap:wrap; gap:8px;">
         ${lista.map(item => `
           <span style="padding:6px 10px; border-radius:999px; background:#f2f2f2; font-size:13px;">
-            ${escapeHtml(item?.nome || item || "â€”")}
+            ${escapeHtml(item?.nome || item || "—")}
           </span>
         `).join("")}
       </div>
@@ -8201,7 +8201,7 @@ function renderFichaMestreDetalhe(fichaRemota) {
     const f = fichaRemota?.ficha_json || null;
 
     if (!f) {
-        return `<div class="empty">Selecione um jogador Ã  esquerda.</div>`;
+        return `<div class="empty">Selecione um jogador à esquerda.</div>`;
     }
 
     const atributos = [
@@ -8221,9 +8221,9 @@ function renderFichaMestreDetalhe(fichaRemota) {
             <div>
               <h2 style="margin:0 0 6px 0;">${escapeHtml(f.nome || fichaRemota.nome || "Sem nome")}</h2>
               <div class="subtitle">
-                ${escapeHtml(f.raca || "â€”")} â€¢
-                ${escapeHtml(f.classe || "â€”")} â€¢
-                NÃ­vel ${escapeHtml(f.nivelTotal || f.nivel || 1)}
+                ${escapeHtml(f.raca || "—")} •
+                ${escapeHtml(f.classe || "—")} •
+                Nível ${escapeHtml(f.nivelTotal || f.nivel || 1)}
               </div>
             </div>
             <div class="notice">
@@ -8261,34 +8261,34 @@ function renderFichaMestreDetalhe(fichaRemota) {
             </div>
             <div class="panel" style="margin:0;">
               <div class="panel-title">Deslocamento</div>
-              <div class="panel-body">${escapeHtml(f.deslocamento || "â€”")}</div>
+              <div class="panel-body">${escapeHtml(f.deslocamento || "—")}</div>
             </div>
           </div>
 
           <div style="height:12px;"></div>
 
           <div class="panel" style="margin:0 0 12px 0;">
-            <div class="panel-title">PerÃ­cias</div>
+            <div class="panel-title">Perícias</div>
             <div class="panel-body">
               ${(f.pericias || []).length
             ? `
                   <div style="display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:8px;">
                     ${(f.pericias || []).map(p => `
                       <div class="list-item" style="margin:0;">
-                        <div class="list-item-title">${escapeHtml(p.nome || "PerÃ­cia")}</div>
+                        <div class="list-item-title">${escapeHtml(p.nome || "Perícia")}</div>
                         <div class="list-item-sub">
                           Total: ${escapeHtml(
                 p.total ??
                 p.bonusTotal ??
                 ((Number(p.atributo) || 0) + (Number(p.treino) || 0) + (Number(p.outros) || 0))
             )}
-                          ${p.treinada ? " â€¢ Treinada" : ""}
+                          ${p.treinada ? " ⬢ Treinada" : ""}
                         </div>
                       </div>
                     `).join("")}
                   </div>
                 `
-            : `<div class="empty">Nenhuma perÃ­cia.</div>`
+            : `<div class="empty">Nenhuma perícia.</div>`
         }
             </div>
           </div>
@@ -8308,7 +8308,7 @@ function renderFichaMestreDetalhe(fichaRemota) {
           </div>
 
           <div class="panel" style="margin:0;">
-            <div class="panel-title">InventÃ¡rio / Equipamentos</div>
+            <div class="panel-title">Inventário / Equipamentos</div>
             <div class="panel-body">
               ${(f.equipamentos || f.inventario || []).length
             ? `
@@ -8318,7 +8318,7 @@ function renderFichaMestreDetalhe(fichaRemota) {
                         <div class="list-item-title">${escapeHtml(item.nome || "Item")}</div>
                         <div class="list-item-sub">
                           Qtd: ${escapeHtml(item.quantidade || 1)}
-                          ${item.descricao ? ` â€¢ ${escapeHtml(item.descricao)}` : ""}
+                          ${item.descricao ? ` ⬢ ${escapeHtml(item.descricao)}` : ""}
                         </div>
                       </div>
                     `).join("")}
@@ -8356,7 +8356,7 @@ function atualizarEscalaModalIniciativaMestre() {
     const dprAtual = window.devicePixelRatio || 1;
     const fatorZoom = dprAtual / MESTRE_MODAL_BASE_DPR;
 
-    // quanto maior o zoom, maior o fatorZoom, entÃ£o menor fica a escala final
+    // quanto maior o zoom, maior o fatorZoom, então menor fica a escala final
     const scaleCompensadaZoom = (scaleBase + BONUS_SCALE) / fatorZoom;
 
     const scale = Math.max(
@@ -8411,7 +8411,7 @@ function carregarIniciativaMestreDoStorage() {
         const raw = localStorage.getItem(getIniciativaStorageKey());
         state.mestre.iniciativaOrdem = raw ? JSON.parse(raw) : [];
     } catch (err) {
-        console.warn("NÃ£o foi possÃ­vel carregar a iniciativa do navegador:", err);
+        console.warn("Não foi possível carregar a iniciativa do navegador:", err);
         state.mestre.iniciativaOrdem = [];
     }
 }
@@ -8425,7 +8425,7 @@ function salvarIniciativaMestreNoStorage() {
             JSON.stringify(state.mestre.iniciativaOrdem || [])
         );
     } catch (err) {
-        console.warn("NÃ£o foi possÃ­vel salvar a iniciativa no navegador:", err);
+        console.warn("Não foi possível salvar a iniciativa no navegador:", err);
     }
 }
 
@@ -8443,7 +8443,7 @@ function getItensAtivosIniciativaMestre() {
             origem: "jogador",
             idOriginal: String(item.id),
             nome,
-            subtitulo: `${classe} â€¢ NÃ­vel ${nivel}`,
+            subtitulo: `${classe} ⬢ Nível ${nivel}`,
             inicial: (nome || "?").charAt(0).toUpperCase()
         };
     });
@@ -8454,7 +8454,7 @@ function getItensAtivosIniciativaMestre() {
         contadoresAmeacas[chave] = (contadoresAmeacas[chave] || 0) + 1;
         const indice = contadoresAmeacas[chave];
 
-        const nomeBase = item.nome || "AmeaÃ§a";
+        const nomeBase = item.nome || "Ameaça";
         const nome = indice > 1 ? `${nomeBase} ${indice}` : nomeBase;
 
         return {
@@ -8462,7 +8462,7 @@ function getItensAtivosIniciativaMestre() {
             origem: "ameaca",
             idOriginal: String(item.instanciaId),
             nome,
-            subtitulo: "AmeaÃ§a ativa",
+            subtitulo: "Ameaça ativa",
             inicial: (nomeBase || "?").charAt(0).toUpperCase()
         };
     });
@@ -8553,10 +8553,10 @@ function removerFlutuantesDaFichaNoMestre(html) {
     const wrapper = document.createElement("div");
     wrapper.innerHTML = String(html || "");
 
-    // remove o container lateral de botÃµes
+    // remove o container lateral de botões
     wrapper.querySelectorAll(".side-buttons").forEach(el => el.remove());
 
-    // remove botÃµes ligados a dados, regras e dinheiro
+    // remove botões ligados a dados, regras e dinheiro
     wrapper.querySelectorAll("button").forEach(el => {
         const onclick = String(el.getAttribute("onclick") || "");
         const texto = String(el.textContent || "").trim().toLowerCase();
@@ -8658,7 +8658,7 @@ function renderModalIniciativaMestre() {
               onclick="toggleIniciativaMinimizadaMestre()"
               title="${minimizada ? "Expandir iniciativa" : "Minimizar iniciativa"}"
             >
-              ${minimizada ? "â–¢" : "â€”"}
+              ${minimizada ? "▢" : "—"}
             </button>
 
             <button
@@ -8667,7 +8667,7 @@ function renderModalIniciativaMestre() {
               onclick="fecharIniciativaMestre()"
               title="Fechar iniciativa"
             >
-              âœ•
+              ×
             </button>
           </div>
         </div>
@@ -8685,7 +8685,7 @@ function renderModalIniciativaMestre() {
                     ondrop="soltarItemIniciativaMestre(${index})"
                     ondragend="finalizarDragIniciativaMestre()"
                   >
-                    <div class="mestre-iniciativa-handle">â˜°</div>
+                    <div class="mestre-iniciativa-handle">☰</div>
                     <div class="mestre-iniciativa-avatar">${escapeHtml(item.inicial)}</div>
                     <div class="mestre-iniciativa-info">
                       <div class="mestre-iniciativa-nome">${escapeHtml(item.nome)}</div>
@@ -9102,7 +9102,7 @@ function renderMestre() {
       <div class="mestre-layout">
         <aside class="mestre-sidebar">
           <div class="mestre-sidebar-header">
-            <div style="font-size:20px; font-weight:700;">Ãrea do Mestre</div>
+            <div style="font-size:20px; font-weight:700;">Área do Mestre</div>
             <div class="subtitle" style="margin-top:4px;">
               ${state.mestre.mesaNome
             ? `Mesa: ${escapeHtml(state.mestre.mesaNome)}`
@@ -9117,15 +9117,15 @@ function renderMestre() {
               <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; justify-content:center;">
                 <button class="btn primary" type="button" onclick="criarMesaMestre()">Criar mesa</button>
                 <button class="btn danger" type="button" onclick="excluirMesaMestre()">Excluir mesa</button>
-                <button class="btn" type="button" onclick="abrirModalNpcAleatorio()">Criar NPC aleatÃ³rio</button>
+                <button class="btn" type="button" onclick="abrirModalNpcAleatorio()">Criar NPC aleatório</button>
                 <button class="btn" type="button" onclick="abrirIniciativaMestre()">Iniciativa</button>
-                <button class="btn" type="button" onclick="abrirModalAmeacas()">AmeaÃ§as</button>
+                <button class="btn" type="button" onclick="abrirModalAmeacas()">Ameaças</button>
                 <button class="btn" type="button" onclick="abrirModalRegras()">Regras</button>
                 <button class="btn" type="button" onclick="abrirModal('dados')">Dados</button>
               </div>
 
               ${!(state.mestre.mesasCriadas || []).length
-            ? `<div class="empty">VocÃª ainda nÃ£o criou mesas.</div>`
+            ? `<div class="empty">Você ainda não criou mesas.</div>`
             : `
                   <div>
                     ${(state.mestre.mesasCriadas || []).map(mesa => `
@@ -9152,7 +9152,7 @@ function renderMestre() {
                 style="display:flex; justify-content:center; align-items:center; margin-bottom:8px;"
               >
                 <span class="list-item-title" style="font-size:18px;">Jogadores ativos</span>
-                <span>${state.mestre.jogadoresAbertos ? "â–¾" : "â–¸"}</span>
+                <span>${state.mestre.jogadoresAbertos ? "▾" : "▸"}</span>
               </button>
 
               ${state.mestre.jogadoresAbertos ? (
@@ -9177,9 +9177,9 @@ function renderMestre() {
                             <div style="min-width:0;">
                               <div class="list-item-title">
                                 ${escapeHtml(nome)}
-                                ${item.tipo === "npc_local" ? `<span class="subtitle"> â€¢ NPC</span>` : ``}
+                                ${item.tipo === "npc_local" ? `<span class="subtitle"> ⬢ NPC</span>` : ``}
                               </div>
-                              <div class="list-item-sub">${escapeHtml(classe)} â€¢ NÃ­vel ${escapeHtml(nivel)}</div>
+                              <div class="list-item-sub">${escapeHtml(classe)} ⬢ Nível ${escapeHtml(nivel)}</div>
                             </div>
                           </button>
 
@@ -9190,7 +9190,7 @@ function renderMestre() {
                               onclick="excluirNpcLocalMestre('${item.ficha.id}')"
                               title="Excluir NPC"
                             >
-                              âœ•
+                              ×
                             </button>
                           ` : ""}
                         </div>
@@ -9207,15 +9207,15 @@ function renderMestre() {
                   onclick="toggleAmeacasAtivasMestre()"
                   style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0; flex:1;"
                 >
-                  <span class="list-item-title" style="font-size:18px;">AmeaÃ§as ativas</span>
-                  <span>${state.mestre.ameacasAbertas ? "â–¾" : "â–¸"}</span>
+                  <span class="list-item-title" style="font-size:18px;">Ameaças ativas</span>
+                  <span>${state.mestre.ameacasAbertas ? "▾" : "▸"}</span>
                 </button>
 
                 <button
                   class="btn danger"
                   type="button"
                   onclick="excluirTodasAmeacasMestre()"
-                  title="Excluir todas as ameaÃ§as"
+                  title="Excluir todas as ameaças"
                 >
                   Limpar
                 </button>
@@ -9280,7 +9280,7 @@ function exportarFichasJson() {
         URL.revokeObjectURL(url);
     } catch (err) {
         console.error(err);
-        alert("NÃ£o foi possÃ­vel exportar as fichas.");
+        alert("Não foi possível exportar as fichas.");
     }
 }
 
@@ -9307,7 +9307,7 @@ function importarFichasJson(arquivo) {
                     : null;
 
             if (!Array.isArray(fichasImportadas)) {
-                alert("Arquivo invÃ¡lido. Selecione um JSON de fichas exportado pelo sistema.");
+                alert("Arquivo inválido. Selecione um JSON de fichas exportado pelo sistema.");
                 return;
             }
 
@@ -9345,7 +9345,7 @@ function importarFichasJson(arquivo) {
             });
         } catch (err) {
             console.error(err);
-            alert("NÃ£o foi possÃ­vel ler o arquivo JSON.");
+            alert("Não foi possível ler o arquivo JSON.");
         }
     };
 
@@ -9459,31 +9459,31 @@ function fichaVazia() {
             { nome: "Acrobacia", outros: 0, treinada: false, atributo: "DES", somenteTreinada: false, penalidadeArmadura: true },
             { nome: "Adestramento", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: true, penalidadeArmadura: false },
             { nome: "Atletismo", outros: 0, treinada: false, atributo: "FOR", somenteTreinada: false, penalidadeArmadura: false },
-            { nome: "AtuaÃ§Ã£o", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: true, penalidadeArmadura: false },
+            { nome: "Atuação", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: true, penalidadeArmadura: false },
             { nome: "Cavalgar", outros: 0, treinada: false, atributo: "DES", somenteTreinada: false, penalidadeArmadura: false },
             { nome: "Conhecimento", outros: 0, treinada: false, atributo: "INT", somenteTreinada: true, penalidadeArmadura: false },
             { nome: "Cura", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: false, penalidadeArmadura: false },
             { nome: "Diplomacia", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: false, penalidadeArmadura: false },
-            { nome: "EnganaÃ§Ã£o", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Enganação", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: false, penalidadeArmadura: false },
             { nome: "Fortitude", outros: 0, treinada: false, atributo: "CON", somenteTreinada: false, penalidadeArmadura: false },
             { nome: "Furtividade", outros: 0, treinada: false, atributo: "DES", somenteTreinada: false, penalidadeArmadura: true },
             { nome: "Guerra", outros: 0, treinada: false, atributo: "INT", somenteTreinada: true, penalidadeArmadura: false },
             { nome: "Iniciativa", outros: 0, treinada: false, atributo: "DES", somenteTreinada: false, penalidadeArmadura: false },
-            { nome: "IntimidaÃ§Ã£o", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: false, penalidadeArmadura: false },
-            { nome: "IntuiÃ§Ã£o", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: false, penalidadeArmadura: false },
-            { nome: "InvestigaÃ§Ã£o", outros: 0, treinada: false, atributo: "INT", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Intimidação", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Intuição", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Investigação", outros: 0, treinada: false, atributo: "INT", somenteTreinada: false, penalidadeArmadura: false },
             { nome: "Jogatina", outros: 0, treinada: false, atributo: "CAR", somenteTreinada: true, penalidadeArmadura: false },
             { nome: "Ladinagem", outros: 0, treinada: false, atributo: "DES", somenteTreinada: true, penalidadeArmadura: true },
             { nome: "Luta", outros: 0, treinada: false, atributo: "FOR", somenteTreinada: false, penalidadeArmadura: false },
             { nome: "Misticismo", outros: 0, treinada: false, atributo: "INT", somenteTreinada: true, penalidadeArmadura: false },
             { nome: "Nobreza", outros: 0, treinada: false, atributo: "INT", somenteTreinada: true, penalidadeArmadura: false },
-            { nome: "OfÃ­cio", outros: 0, treinada: false, atributo: "INT", somenteTreinada: true, penalidadeArmadura: false },
-            { nome: "PercepÃ§Ã£o", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Ofício", outros: 0, treinada: false, atributo: "INT", somenteTreinada: true, penalidadeArmadura: false },
+            { nome: "Percepção", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: false, penalidadeArmadura: false },
             { nome: "Pilotagem", outros: 0, treinada: false, atributo: "DES", somenteTreinada: true, penalidadeArmadura: false },
             { nome: "Pontaria", outros: 0, treinada: false, atributo: "DES", somenteTreinada: false, penalidadeArmadura: false },
             { nome: "Reflexos", outros: 0, treinada: false, atributo: "DES", somenteTreinada: false, penalidadeArmadura: false },
-            { nome: "ReligiÃ£o", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: true, penalidadeArmadura: false },
-            { nome: "SobrevivÃªncia", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: false, penalidadeArmadura: false },
+            { nome: "Religião", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: true, penalidadeArmadura: false },
+            { nome: "Sobrevivência", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: false, penalidadeArmadura: false },
             { nome: "Vontade", outros: 0, treinada: false, atributo: "SAB", somenteTreinada: false, penalidadeArmadura: false }
         ],
         equipamentos: [],
@@ -9510,7 +9510,7 @@ function embaralharLista(lista) {
 }
 function abrirModalAmeacas() {
     if (!state.mestre?.mesaId) {
-        alert("Selecione uma mesa antes de adicionar ameaÃ§as.");
+        alert("Selecione uma mesa antes de adicionar ameaças.");
         return;
     }
 
@@ -9584,8 +9584,8 @@ function aplicarFiltroModalAmeacas(valor = "") {
     if (mensagem) {
         mensagem.style.display = totalVisivel === 0 ? "block" : "none";
         mensagem.textContent = termo
-            ? "Nenhuma ameaÃ§a encontrada para essa busca."
-            : "Nenhuma ameaÃ§a encontrada.";
+            ? "Nenhuma ameaça encontrada para essa busca."
+            : "Nenhuma ameaça encontrada.";
     }
 }
 
@@ -9638,7 +9638,7 @@ function toggleSelecaoAmeaca(ameacaId, checked) {
         const totalAtual = getTotalAmeacasSelecionadasModal();
 
         if (totalAtual >= LIMITE_AMEACAS_POR_CRIACAO) {
-            alert("limite por criaÃ§Ã£o, adicione primeiro");
+            alert("limite por criação, adicione primeiro");
 
             const checkbox = document.querySelector(
                 `input[type="checkbox"][onchange*="toggleSelecaoAmeaca('${id}', this.checked)"]`
@@ -9677,7 +9677,7 @@ function alterarQuantidadeAmeacaSelecionada(ameacaId, valor) {
 
     if (novaQuantidade > maxPermitidoParaEssaAmeaca) {
         novaQuantidade = maxPermitidoParaEssaAmeaca;
-        alert("limite por criaÃ§Ã£o, adicione primeiro");
+        alert("limite por criação, adicione primeiro");
     }
 
     selecionadas[id].quantidade = novaQuantidade;
@@ -9697,12 +9697,12 @@ async function adicionarAmeacasSelecionadas() {
     const ids = Object.keys(selecionadas);
 
     if (!ids.length) {
-        alert("Selecione pelo menos uma ameaÃ§a.");
+        alert("Selecione pelo menos uma ameaça.");
         return;
     }
 
     if (!state.mestre.mesaId) {
-        alert("Selecione uma mesa antes de adicionar ameaÃ§as.");
+        alert("Selecione uma mesa antes de adicionar ameaças.");
         return;
     }
 
@@ -9734,7 +9734,7 @@ async function adicionarAmeacasSelecionadas() {
                     resumo: base.resumo || "",
                     percepcaoBase: base.percepcao || "",
                     vonBase: base.von || "",
-                    pericias: base.pericias || "â€”",
+                    pericias: base.pericias || "—",
                     pv: Number(base.pv ?? 0) || 0,
                     pm: base.pm === "" || base.pm == null ? "" : Number(base.pm) || 0,
                     defesa: Number(base.defesa ?? 0) || 0,
@@ -9760,7 +9760,7 @@ async function adicionarAmeacasSelecionadas() {
                         von: Number(extrairValorEComplementoAmeaca(base.von).valor || 0) || 0,
                         tamanho: base.tamanho || "",
                         deslocamento: base.deslocamento || "",
-                        pericias: base.pericias || "â€”",
+                        pericias: base.pericias || "—",
                         for: Number(base.for ?? 0) || 0,
                         des: Number(base.des ?? 0) || 0,
                         con: Number(base.con ?? 0) || 0,
@@ -9787,7 +9787,7 @@ async function adicionarAmeacasSelecionadas() {
         fecharModalAmeacas();
     } catch (err) {
         console.error(err);
-        alert(err?.message || "NÃ£o foi possÃ­vel salvar as ameaÃ§as.");
+        alert(err?.message || "Não foi possível salvar as ameaças.");
     }
 }
 function renderModalAmeacas() {
@@ -9820,7 +9820,7 @@ function renderModalAmeacas() {
         <div class="overlay-card mf-add-habilidade-modal mf-mestre-ameacas-modal" onclick="event.stopPropagation()">
           <div class="overlay-header mf-add-habilidade-header">
             <div>
-              <div class="overlay-title">Adicionar ameaÃ§as</div>
+              <div class="overlay-title">Adicionar ameaças</div>
               <div class="subtitle">
                 Filtre por ND, busque por nome e defina a quantidade de cada inimigo.
               </div>
@@ -9856,7 +9856,7 @@ function renderModalAmeacas() {
                     id="busca-ameacas-modal"
                     type="search"
                     value="${escapeAttr(state.mestre.ameacasModal.busca || "")}"
-                    placeholder="Ex.: Goblin, Lobo, DragÃ£o..."
+                    placeholder="Ex.: Goblin, Lobo, Dragão..."
                     oninput="agendarFiltroModalAmeacas(this.value)"
                     onkeydown="if (event.key === 'Enter') { event.preventDefault(); aplicarFiltroModalAmeacas(this.value); }"
                     />
@@ -9872,12 +9872,12 @@ function renderModalAmeacas() {
             <div class="t20-divider"></div>
 
             <div id="mensagem-sem-ameacas-modal" class="empty" style="display:none; margin-bottom:12px;">
-  Nenhuma ameaÃ§a encontrada para essa busca.
+  Nenhuma ameaça encontrada para essa busca.
 </div>
 
 <div class="mf-add-habilidade-lista mf-mestre-ameacas-lista" id="lista-ameacas-modal">
   ${!lista.length ? `
-    <div class="empty">Nenhuma ameaÃ§a encontrada.</div>
+    <div class="empty">Nenhuma ameaça encontrada.</div>
   ` : lista.map(ameaca => {
         const selecionada = state.mestre.ameacasModal.selecionadas[String(ameaca.id)];
         const quantidade = Math.max(1, Number(selecionada?.quantidade) || 1);
@@ -9893,8 +9893,8 @@ function renderModalAmeacas() {
                             <div class="mf-add-habilidade-nome">${escapeHtml(ameaca.nome)}</div>
                             <div class="mf-add-habilidade-origem">
                               ND ${escapeHtml(ameaca.nd || "-")}
-                              ${ameaca.tipo ? ` â€¢ ${escapeHtml(ameaca.tipo)}` : ""}
-                              ${ameaca.tamanho ? ` â€¢ ${escapeHtml(ameaca.tamanho)}` : ""}
+                              ${ameaca.tipo ? ` ⬢ ${escapeHtml(ameaca.tipo)}` : ""}
+                              ${ameaca.tamanho ? ` ⬢ ${escapeHtml(ameaca.tamanho)}` : ""}
                             </div>
                             ${ameaca.resumo ? `
                               <div class="mf-raca-escolha-descricao">
@@ -9935,7 +9935,7 @@ function renderResumoAmeacasEmCena() {
     garantirEstadoAmeacasMestre();
 
     if (!state.mestre.ameacasEmCena.length) {
-        return `<div class="empty">Nenhuma ameaÃ§a adicionada.</div>`;
+        return `<div class="empty">Nenhuma ameaça adicionada.</div>`;
     }
 
     return `
@@ -9943,7 +9943,7 @@ function renderResumoAmeacasEmCena() {
         ${state.mestre.ameacasEmCena.map(item => `
           <div class="list-item">
             <div>
-              <div class="list-item-title">${escapeHtml(item.nome)} Ã— ${escapeHtml(item.quantidade)}</div>
+              <div class="list-item-title">${escapeHtml(item.nome)} × ${escapeHtml(item.quantidade)}</div>
               <div class="list-item-sub">ND ${escapeHtml(item.nd || "-")}</div>
             </div>
           </div>
@@ -10002,7 +10002,7 @@ function extrairValorEComplementoAmeaca(texto) {
 }
 function formatarBonusAmeaca(valor) {
     const texto = String(valor ?? "").trim();
-    if (!texto) return "â€”";
+    if (!texto) return "—";
     if (texto.startsWith("+") || texto.startsWith("-")) return texto;
     return `+${texto}`;
 }
@@ -10220,11 +10220,11 @@ function alterarAtributoAmeaca(campo, delta) {
     agendarSyncInstanciaAmeacaSelecionada();
 }
 function formatarPericiasAmeacaTexto(texto) {
-    return escapeHtml(String(texto || "â€”")).replace(/,\s*/g, ",<br>");
+    return escapeHtml(String(texto || "—")).replace(/,\s*/g, ",<br>");
 }
 function montarHtmlFichaAmeaca(ameaca) {
     if (!ameaca) {
-        return `<div class="empty">AmeaÃ§a nÃ£o encontrada.</div>`;
+        return `<div class="empty">Ameaça não encontrada.</div>`;
     }
 
     const percepcao = extrairValorEComplementoAmeaca(ameaca.percepcao);
@@ -10246,7 +10246,7 @@ function montarHtmlFichaAmeaca(ameaca) {
                     <div class="ameaca-nd-badge">ND ${escapeHtml(ameaca.nd || "-")}</div>
                 </div>
 
-                <div class="ameaca-subtipo">${escapeHtml(ameaca.tipo || "â€”")}</div>
+                <div class="ameaca-subtipo">${escapeHtml(ameaca.tipo || "—")}</div>
 
                 <div class="ameaca-layout">
                     <div class="ameaca-main">
@@ -10351,7 +10351,7 @@ ${renderSecaoTextoInlineEditavelAmeaca(
                         </div>
 
                         <div class="ameaca-side-linha">
-                            <span class="ameaca-label">PercepÃ§Ã£o</span>
+                            <span class="ameaca-label">Percepção</span>
                             <input
                                 class="ameaca-box-input ameaca-box-input-side"
                                 type="number"
@@ -10364,7 +10364,7 @@ ${renderSecaoTextoInlineEditavelAmeaca(
                         ${renderTextoInlineEditavelLateralAmeaca(
         "percepcaoComplemento",
         getValorEditavelAmeaca(ameaca, "percepcaoComplemento", percepcao.complemento || ""),
-        "Clique para editar o complemento de PercepÃ§Ã£o."
+        "Clique para editar o complemento de Percepção."
     )}
                     </div>
 
@@ -10407,12 +10407,12 @@ ${renderSecaoTextoInlineEditavelAmeaca(
                     </div>
 
                       <div class="ameaca-side-bloco">
-                        <div class="ameaca-label">PerÃ­cias</div>
+                        <div class="ameaca-label">Perícias</div>
                         <div class="ameaca-side-texto">
                             ${renderTextoInlineEditavelLateralAmeaca(
         "pericias",
         getValorEditavelAmeaca(ameaca, "pericias", ameaca.pericias || ""),
-        "Clique para editar as perÃ­cias."
+        "Clique para editar as perícias."
     )}
                         </div>
                     </div>
@@ -10483,7 +10483,7 @@ function montarHtmlViewerMestre() {
 
     const htmlFichaAmeaca = ameacaSelecionada
         ? montarHtmlFichaAmeaca(getAmeacaCompletaPorId(ameacaSelecionada.ameacaId))
-        : `<div class="empty">Nenhuma ameaÃ§a ativa selecionada.</div>`;
+        : `<div class="empty">Nenhuma ameaça ativa selecionada.</div>`;
 
     return `
       <div class="mestre-dual-view">
@@ -10502,7 +10502,7 @@ function montarHtmlViewerMestre() {
 
         <section class="mestre-view-pane">
           <div class="mestre-view-pane-header">
-            <div class="list-item-title">AmeaÃ§a ativa</div>
+            <div class="list-item-title">Ameaça ativa</div>
           </div>
           <div class="mestre-view-pane-body">
             <div class="mestre-scale-wrap">
@@ -10562,8 +10562,8 @@ function renderNpcAleatorioModal() {
         <div class="overlay-card mf-add-habilidade-modal mf-mestre-npc-modal" onclick="event.stopPropagation()">
           <div class="overlay-header mf-add-habilidade-header">
             <div>
-              <div class="overlay-title">Criar NPC aleatÃ³rio</div>
-              <div class="overlay-subtitle">Escolha raÃ§a, classe e nÃ­vel.</div>
+              <div class="overlay-title">Criar NPC aleatório</div>
+              <div class="overlay-subtitle">Escolha raça, classe e nível.</div>
             </div>
 
             <div class="mf-mestre-modal-actions">
@@ -10577,9 +10577,9 @@ function renderNpcAleatorioModal() {
 
             <div class="mf-mestre-npc-fields">
             <div class="field mf-add-habilidade-field">
-              <label>RaÃ§a</label>
+              <label>Raça</label>
               <select onchange="state.modalPayload.racaId=this.value">
-                <option value="">AleatÃ³ria</option>
+                <option value="">Aleatória</option>
                 ${racas.map(r => `
                   <option value="${escapeAttr(r.id)}" ${payload.racaId === r.id ? "selected" : ""}>
                     ${escapeHtml(r.nome)}
@@ -10591,7 +10591,7 @@ function renderNpcAleatorioModal() {
             <div class="field mf-add-habilidade-field">
               <label>Classe</label>
               <select onchange="state.modalPayload.classeId=this.value">
-                <option value="">AleatÃ³ria</option>
+                <option value="">Aleatória</option>
                 ${classes.map(c => `
                   <option value="${escapeAttr(c.id)}" ${payload.classeId === c.id ? "selected" : ""}>
                     ${escapeHtml(c.nome)}
@@ -10601,7 +10601,7 @@ function renderNpcAleatorioModal() {
             </div>
 
             <div class="field mf-add-habilidade-field">
-              <label>NÃ­vel</label>
+              <label>Nível</label>
               <input
                 type="number"
                 min="1"
@@ -10705,7 +10705,7 @@ function aplicarRacaNpcNaFicha(ficha, raca) {
                 incrementos: habilidade.incrementos || [],
                 escolhas: habilidade.escolhas || []
             },
-            "RaÃ§a",
+            "Raça",
             raca.nome || ""
         );
     });
@@ -10902,7 +10902,7 @@ function adicionarPoderAleatorioNaFicha(ficha, opcao) {
             escolhas: []
         },
         "Poder",
-        "NPC AleatÃ³rio"
+        "NPC Aleatório"
     );
 
     ficha.poderes.push({
@@ -11031,7 +11031,7 @@ function adicionarItemBancoNaFicha(ficha, itemBase, quantidade = 1) {
 function gerarItensAleatoriosNpc(ficha, classe, nivel) {
     const armas = filtrarItensPorCategoria(["arma"]);
     const armaduras = filtrarItensPorCategoria(["armadura", "escudo"]);
-    const utilitarios = filtrarItensPorCategoria(["poÃ§Ã£o", "kit", "ferramenta", "item"]);
+    const utilitarios = filtrarItensPorCategoria(["poção", "kit", "ferramenta", "item"]);
 
     const armaValida = embaralharLista(armas).find(item =>
         !item.proficienciaNecessaria || fichaTemProficiencia(ficha, item.proficienciaNecessaria)
@@ -11074,7 +11074,7 @@ async function confirmarCriacaoNpcAleatorio() {
             : escolherAleatorio((CLASSES_DB || []).filter(c => c?.id));
 
         if (!raca || !classe) {
-            alert("NÃ£o foi possÃ­vel determinar a raÃ§a e a classe do NPC.");
+            alert("Não foi possível determinar a raça e a classe do NPC.");
             return;
         }
 
@@ -11134,7 +11134,7 @@ async function confirmarCriacaoNpcAleatorio() {
         render();
     } catch (err) {
         console.error(err);
-        alert(err?.message || "NÃ£o foi possÃ­vel criar o NPC aleatÃ³rio.");
+        alert(err?.message || "Não foi possível criar o NPC aleatório.");
     }
 }
 function getFichaAtual() {
@@ -11186,7 +11186,7 @@ async function excluirNpcLocalMestre(fichaId) {
         await window.T20Supabase?.excluirFichaPorLocalId(idRemovido);
     } catch (err) {
         console.error("Erro ao excluir NPC no Supabase:", err);
-        alert("O NPC foi removido da tela, mas houve um erro ao excluÃ­-lo do servidor. Tente novamente.");
+        alert("O NPC foi removido da tela, mas houve um erro ao excluí-lo do servidor. Tente novamente.");
     }
 }
 function getNivelTotalPersonagem(ficha) {
@@ -11373,7 +11373,7 @@ function getResumoClasseCurtoFicha(ficha) {
     return "Multiclasse";
 }
 function formatarClassesPersonagem(ficha) {
-    if (!ficha?.classesPersonagem?.length) return "â€”";
+    if (!ficha?.classesPersonagem?.length) return "—";
 
     return ficha.classesPersonagem
         .map(c => `${c.nome} ${c.niveis}`)
@@ -11519,7 +11519,7 @@ function getOpcoesFormulasInventorAteOCirculo(circuloMaximo, ficha) {
                 ...opcao,
                 id: `formula_inventor:${registro.id}`,
                 tipoAplicacao: "magia_adicionar",
-                label: `FÃ³rmula: ${registro.nome}`,
+                label: `Fórmula: ${registro.nome}`,
                 valor: registro.nome,
                 registroId: registro.id,
                 origemEspecial: "inventor_formula",
@@ -11543,8 +11543,8 @@ function criarEscolhaFormulasInventor(classe, nivelClasse, ficha) {
         id: `inventor_formulas_nivel_${nivelClasse}`,
         habilidade_id: "",
         tipo: "magia",
-        titulo: "FÃ³rmulas do Inventor",
-        descricao: `Escolha ${quantidade} fÃ³rmula(s) de atÃ© ${circuloMaximo}Âº cÃ­rculo.`,
+        titulo: "Fórmulas do Inventor",
+        descricao: `Escolha ${quantidade} fórmula(s) de até ${circuloMaximo}º círculo.`,
         quantidade,
         filtro: `inventor_formulas_${circuloMaximo}`,
         opcoesTexto: "",
@@ -11610,7 +11610,7 @@ function getEscolhasInternasDeHabilidadesClasseNoNivel(classe, nivelClasse) {
     const escolhasInternas = [];
 
     habilidadesDoNivel.forEach(h => {
-        // se a prÃ³pria habilidade jÃ¡ trouxer escolhas internas
+        // se a própria habilidade já trouxer escolhas internas
         if (Array.isArray(h.escolhas) && h.escolhas.length) {
             h.escolhas.forEach(e => {
                 escolhasInternas.push({
@@ -11621,7 +11621,7 @@ function getEscolhasInternasDeHabilidadesClasseNoNivel(classe, nivelClasse) {
             });
         }
 
-        // se o registro da habilidade existir no banco geral, reaproveita escolhas de lÃ¡
+        // se o registro da habilidade existir no banco geral, reaproveita escolhas de lá
         if (h.registroId) {
             const registro = getRegistroPoderMagiaPorId(h.registroId);
             if (registro && Array.isArray(registro.escolhas)) {
@@ -11651,7 +11651,7 @@ function getEscolhasMagiasPorHabilidadeClasse(classe, nivelClasse, ficha) {
         let habilidadeGeraMagias = false;
 
         if (nomeClasse === "arcanista") {
-            // Para Arcanista, sÃ³ a habilidade "Magias" gera a escolha.
+            // Para Arcanista, só a habilidade "Magias" gera a escolha.
             habilidadeGeraMagias = nome === "magias";
         } else {
             habilidadeGeraMagias =
@@ -11721,7 +11721,7 @@ function getEscolhasMagiasPorHabilidadeClasse(classe, nivelClasse, ficha) {
                 id: `magias-${classe.id}-${nivelClasse}`,
                 tipo: "magia",
                 titulo: "Escolha suas magias",
-                descricao: `Selecione ${quantidade} magia(s) disponÃ­veis para este nÃ­vel.`,
+                descricao: `Selecione ${quantidade} magia(s) disponíveis para este nível.`,
                 quantidade,
                 filtro: filtroMagia,
                 usarMagiasAteCirculo: true,
@@ -11799,7 +11799,7 @@ function aplicarEscolhasClasseResolvidasNaFicha(ficha) {
 
                 if (magiaAdicionada && opcao.origemEspecial === "inventor_formula") {
                     magiaAdicionada.tipoMagiaInventor = "formula";
-                    magiaAdicionada.prefixoExibicao = "FÃ³rmula";
+                    magiaAdicionada.prefixoExibicao = "Fórmula";
                 }
 
                 ficha.efeitosAplicados.push({
@@ -11980,7 +11980,7 @@ function aplicarEscolhasClasseResolvidasNaFicha(ficha) {
                     "";
 
                 const ehEmpatiaSelvagem = normalizarNomeHabilidade(nomeHabilidade) === "empatia selvagem";
-                const temEmpatiaRacial = fichaTemHabilidadeComOrigem(ficha, "Empatia Selvagem", "RaÃ§a");
+                const temEmpatiaRacial = fichaTemHabilidadeComOrigem(ficha, "Empatia Selvagem", "Raça");
 
                 if (ehEmpatiaSelvagem && temEmpatiaRacial) {
                     aplicarBonusEmpatiaSelvagemDahllan(ficha, "Classe", classe.nome);
@@ -11989,7 +11989,7 @@ function aplicarEscolhasClasseResolvidasNaFicha(ficha) {
                         ficha,
                         {
                             nome: nomeHabilidade,
-                            descricao: registroHabilidade?.descricao || `Escolhido na evoluÃ§Ã£o da classe ${classe.nome}.`,
+                            descricao: registroHabilidade?.descricao || `Escolhido na evolução da classe ${classe.nome}.`,
                             custoPm: Number(registroHabilidade?.custoPm) || 0,
                             custoVida: Number(registroHabilidade?.custoVida) || 0,
                             custoPmPermanente: Number(registroHabilidade?.custoPmPermanente) || 0,
@@ -12023,7 +12023,7 @@ function aplicarEscolhasClasseResolvidasNaFicha(ficha) {
                                 adicionarHabilidadeNaFicha(
                                     ficha,
                                     {
-                                        nome: `Foco em PerÃ­cia: ${opcao.escolhaEspecialValor}`,
+                                        nome: `Foco em Perícia: ${opcao.escolhaEspecialValor}`,
                                         descricao: opcao.descricao || "",
                                         custoPm: 0,
                                         custoVida: 0,
@@ -12045,7 +12045,7 @@ function aplicarEscolhasClasseResolvidasNaFicha(ficha) {
                                     origemTipo: "Classe",
                                     origemNome: classe.nome,
                                     tipo: "habilidade_adicionar",
-                                    alvo: `Foco em PerÃ­cia: ${opcao.escolhaEspecialValor}`
+                                    alvo: `Foco em Perícia: ${opcao.escolhaEspecialValor}`
                                 });
                             }
 
@@ -12069,7 +12069,7 @@ function aplicarEscolhasClasseResolvidasNaFicha(ficha) {
 
                                 if (magiaAdicionada && subopcao.origemEspecial === "inventor_formula") {
                                     magiaAdicionada.tipoMagiaInventor = "formula";
-                                    magiaAdicionada.prefixoExibicao = "FÃ³rmula";
+                                    magiaAdicionada.prefixoExibicao = "Fórmula";
                                 }
 
                                 ficha.efeitosAplicados.push({
@@ -12506,7 +12506,7 @@ function toggleEscolhaClasseValorEvolucao(escolhaId, opcao, quantidadeMaxima) {
                 escolhaId,
                 opcaoBase: opcao,
                 maximo: restante,
-                titulo: "Escolha as especializaÃ§Ãµes de OfÃ­cio"
+                titulo: "Escolha as especializações de Ofício"
             });
             return;
         }
@@ -12611,7 +12611,7 @@ function concluirNivelClasseEvolucao() {
     recalcularEquipamentosEFicha(ficha);
     saveFichas();
 
-    const continuar = confirm("Subir mais nÃ­veis?");
+    const continuar = confirm("Subir mais níveis?");
     if (continuar) {
         abrirSelecaoProximoNivelEvolucao();
         return;
@@ -12713,7 +12713,7 @@ async function excluirFicha(id) {
         await window.T20Supabase?.excluirFichaPorLocalId(id);
     } catch (err) {
         console.error("Erro ao excluir ficha no Supabase:", err);
-        alert("A ficha foi removida da tela, mas houve um erro ao excluÃ­-la do servidor. Tente novamente.");
+        alert("A ficha foi removida da tela, mas houve um erro ao excluí-la do servidor. Tente novamente.");
     }
 }
 
@@ -12880,7 +12880,7 @@ function adicionarHabilidadeNaFicha(ficha, habilidade, origemTipo, origemNome) {
     const descricao = String(habilidade?.descricao || "").trim();
     const nomeNormalizado = normalizarTextoRegra(nome);
     const descricaoNormalizada = normalizarTextoRegra(descricao);
-    const origemTipoNormalizada = normalizarTextoRegra(origemTipo || "RaÃ§a");
+    const origemTipoNormalizada = normalizarTextoRegra(origemTipo || "Raça");
 
     const ehHabilidadeDeCirculoMagico =
         /^magias\s*\(?\d+/.test(nomeNormalizado) ||
@@ -12914,7 +12914,7 @@ function adicionarHabilidadeNaFicha(ficha, habilidade, origemTipo, origemNome) {
         descricao,
         resumoUso: habilidade.resumoUso || "",
         selecionada: false,
-        origem: origemTipo || "RaÃ§a",
+        origem: origemTipo || "Raça",
         origemDetalhe: origemNome || "",
         registroId: habilidade.registroId || "",
         tipoRegistro: habilidade.tipoRegistro || "",
@@ -12999,9 +12999,9 @@ function montarOpcoesEspecializacaoEmArma(opcaoBase, ficha) {
     return getArmasElegiveisParaEspecializacao(ficha).map(item => ({
         ...opcaoBase,
         id: `habilidade:${opcaoBase.registroId}:especializacao_arma:${item.id}`,
-        label: `EspecializaÃ§Ã£o em Arma: ${item.nome}`,
-        valor: `EspecializaÃ§Ã£o em Arma: ${item.nome}`,
-        nomeCurto: `EspecializaÃ§Ã£o em Arma: ${item.nome}`,
+        label: `Especialização em Arma: ${item.nome}`,
+        valor: `Especialização em Arma: ${item.nome}`,
+        nomeCurto: `Especialização em Arma: ${item.nome}`,
         escolhaEspecial: "especializacao_em_arma",
         escolhaEspecialValor: item.nome,
         itemBaseId: item.id,
@@ -13065,8 +13065,8 @@ function montarEscolhaEspecialPoderFocoEmPericia(opcaoBase) {
         registro_id: String(opcaoBase.registroId || ""),
         ordem: 1,
         tipo: "foco_em_pericia",
-        titulo: "Escolha uma perÃ­cia",
-        descricao: "Escolha a perÃ­cia para o poder Foco em PerÃ­cia.",
+        titulo: "Escolha uma perícia",
+        descricao: "Escolha a perícia para o poder Foco em Perícia.",
         quantidade: 1,
         filtro: "especial",
         opcoesTexto: "",
@@ -13135,10 +13135,10 @@ function expandirOpcoesEspeciaisDePoder(opcoesBase, ficha) {
 
             if (escolhaAtributo) {
                 [
-                    "ForÃ§a",
+                    "Força",
                     "Destreza",
-                    "ConstituiÃ§Ã£o",
-                    "InteligÃªncia",
+                    "Constituição",
+                    "Inteligência",
                     "Sabedoria",
                     "Carisma"
                 ].forEach(nomeAtributo => {
@@ -13324,7 +13324,7 @@ function montarOpcaoPericiaBonus(nomePericia, valor = 2) {
     return {
         id: `pericia:${nomePericia}:bonus`,
         tipoAplicacao: "pericia_bonus",
-        label: `BÃ´nus em perÃ­cia: ${nomePericia} (+${valor})`,
+        label: `Bônus em perícia: ${nomePericia} (+${valor})`,
         valor: nomePericia,
         bonus: Number(valor) || 2
     };
@@ -13341,7 +13341,7 @@ function ordenarOpcoesParaExibicao(opcoes, podeSelecionarFn) {
             if (a.habilitada !== b.habilitada) {
                 return a.habilitada ? -1 : 1; // habilitadas primeiro
             }
-            return a.indexOriginal - b.indexOriginal; // mantÃ©m ordem original dentro do grupo
+            return a.indexOriginal - b.indexOriginal; // mantém ordem original dentro do grupo
         })
         .map(item => item.opcao);
 }
@@ -13427,7 +13427,7 @@ function getOpcoesEscolhaOrigem(escolha, ficha) {
                     return getPericiasExpandidas(ficha, false).map(p => ({
                         id: `pericia:${p.nome}`,
                         tipoAplicacao: "pericia_treinada",
-                        label: `PerÃ­cia: ${p.nome}`,
+                        label: `Perícia: ${p.nome}`,
                         valor: p.nome
                     }));
                 }
@@ -13435,7 +13435,7 @@ function getOpcoesEscolhaOrigem(escolha, ficha) {
                 return [{
                     id: `pericia:${nome}`,
                     tipoAplicacao: "pericia_treinada",
-                    label: `PerÃ­cia: ${nome}`,
+                    label: `Perícia: ${nome}`,
                     valor: nome
                 }];
             });
@@ -13456,12 +13456,12 @@ function getOpcoesEscolhaOrigem(escolha, ficha) {
             return [...pericias, ...poderes, ...poderesUnicos];
         }
 
-        // EXCEÃ‡ÃƒO: AmnÃ©sico
+        // EXCEÇÃO: Amnésico
         if (escolha.filtro === "origem_amnesico_mestre") {
             const pericias = getPericiasExpandidas(ficha, false).map(pericia => ({
                 id: `pericia:${pericia.nome}`,
                 tipoAplicacao: "pericia_treinada",
-                label: `PerÃ­cia: ${pericia.nome}`,
+                label: `Perícia: ${pericia.nome}`,
                 valor: pericia.nome
             }));
 
@@ -13487,10 +13487,10 @@ function getOpcoesEscolhaOrigem(escolha, ficha) {
             const criarNovo = {
                 id: "origem_habilidade:custom_manual",
                 tipoAplicacao: "origem_habilidade_custom_manual",
-                label: "Poder Ãºnico: Criar novo",
-                valor: "Poder Ãºnico personalizado",
+                label: "Poder único: Criar novo",
+                valor: "Poder único personalizado",
                 nomeCurto: "Criar novo",
-                descricao: "NÃ£o aplica efeitos na ficha, use-os na hora de jogar."
+                descricao: "Não aplica efeitos na ficha, use-os na hora de jogar."
             };
 
             return [...pericias, ...finalizarOpcoesPoderesOrigem(poderes, ficha), ...poderesUnicos, criarNovo];
@@ -13501,7 +13501,7 @@ function getOpcoesEscolhaOrigem(escolha, ficha) {
             const pericias = getPericiasExpandidas(ficha, false).map(pericia => ({
                 id: `pericia:${pericia.nome}`,
                 tipoAplicacao: "pericia_treinada",
-                label: `PerÃ­cia: ${pericia.nome}`,
+                label: `Perícia: ${pericia.nome}`,
                 valor: pericia.nome
             }));
 
@@ -13525,10 +13525,10 @@ function getOpcoesEscolhaOrigem(escolha, ficha) {
                     return [{
                         id: "origem_habilidade:custom_manual",
                         tipoAplicacao: "origem_habilidade_custom_manual",
-                        label: "Poder Ãºnico: Criar novo",
-                        valor: "Poder Ãºnico personalizado",
+                        label: "Poder único: Criar novo",
+                        valor: "Poder único personalizado",
                         nomeCurto: "Criar novo",
-                        descricao: "NÃ£o aplica efeitos na ficha, use-os na hora de jogar."
+                        descricao: "Não aplica efeitos na ficha, use-os na hora de jogar."
                     }];
                 }
 
@@ -13570,7 +13570,7 @@ function getOpcoesEscolha(escolha, ficha) {
             const opcao = {
                 id: `pericia:${nome}`,
                 tipoAplicacao: "pericia_treinada",
-                label: `PerÃ­cia: ${nome}`,
+                label: `Perícia: ${nome}`,
                 valor: nome
             };
 
@@ -13578,7 +13578,7 @@ function getOpcoesEscolha(escolha, ficha) {
 
             return {
                 ...opcao,
-                preRequisitos: bloqueada ? "PerÃ­cia jÃ¡ treinada" : "",
+                preRequisitos: bloqueada ? "Perícia já treinada" : "",
                 escolhaBloqueada: bloqueada
             };
         });
@@ -13596,9 +13596,9 @@ function getOpcoesEscolha(escolha, ficha) {
             return {
                 id: `proficiencia:${nome}`,
                 tipoAplicacao: "proficiencia_adicionar",
-                label: `ProficiÃªncia: ${nome}`,
+                label: `Proficiência: ${nome}`,
                 valor: nome,
-                preRequisitos: jaPossui ? "ProficiÃªncia jÃ¡ conhecida" : "",
+                preRequisitos: jaPossui ? "Proficiência já conhecida" : "",
                 escolhaBloqueada: jaPossui
             };
         });
@@ -13634,9 +13634,9 @@ function getOpcoesEscolha(escolha, ficha) {
         return getPericiasElegiveisParaFoco(ficha).map(pericia => ({
             id: `foco_pericia:${normalizarTextoRegra(pericia.nome)}`,
             tipoAplicacao: "foco_em_pericia_definir",
-            label: `Foco em PerÃ­cia: ${pericia.nome}`,
-            valor: `Foco em PerÃ­cia: ${pericia.nome}`,
-            nomeCurto: `Foco em PerÃ­cia: ${pericia.nome}`,
+            label: `Foco em Perícia: ${pericia.nome}`,
+            valor: `Foco em Perícia: ${pericia.nome}`,
+            nomeCurto: `Foco em Perícia: ${pericia.nome}`,
             escolhaEspecial: "foco_em_pericia",
             escolhaEspecialValor: pericia.nome,
             periciaNome: pericia.nome,
@@ -13840,7 +13840,7 @@ function getOpcoesEscolha(escolha, ficha) {
             const pericias = getPericiasExpandidas(ficha, false).map(pericia => ({
                 id: `pericia:${pericia.nome}`,
                 tipoAplicacao: "pericia_treinada",
-                label: `PerÃ­cia: ${pericia.nome}`,
+                label: `Perícia: ${pericia.nome}`,
                 valor: pericia.nome
             }));
 
@@ -13861,7 +13861,7 @@ function getOpcoesEscolha(escolha, ficha) {
             const pericias = getPericiasExpandidas(ficha, false).map(pericia => ({
                 id: `pericia:${pericia.nome}`,
                 tipoAplicacao: "pericia_treinada",
-                label: `PerÃ­cia: ${pericia.nome}`,
+                label: `Perícia: ${pericia.nome}`,
                 valor: pericia.nome
             }));
 
@@ -13908,10 +13908,10 @@ function getOpcoesEscolha(escolha, ficha) {
             const limite = getLimiteAumentoPorAtributo(nivelTotal);
 
             return [
-                "ForÃ§a",
+                "Força",
                 "Destreza",
-                "ConstituiÃ§Ã£o",
-                "InteligÃªncia",
+                "Constituição",
+                "Inteligência",
                 "Sabedoria",
                 "Carisma"
             ].map(nome => {
@@ -14055,7 +14055,7 @@ function toggleEscolhaRacialValor(escolhaId, opcao, quantidadeMaxima) {
                 escolhaId,
                 opcaoBase: opcao,
                 maximo: restante,
-                titulo: "Escolha as especializaÃ§Ãµes de OfÃ­cio"
+                titulo: "Escolha as especializações de Ofício"
             });
             return;
         }
@@ -14106,7 +14106,7 @@ function toggleEscolhaOrigemValor(escolhaId, opcao, quantidadeMaxima) {
                 escolhaId,
                 opcaoBase: opcao,
                 maximo: restante,
-                titulo: "Escolha as especializaÃ§Ãµes de OfÃ­cio"
+                titulo: "Escolha as especializações de Ofício"
             });
             return;
         }
@@ -14247,7 +14247,7 @@ function toggleExpansaoOpcaoEscolha(tipo, escolhaId, opcaoId) {
 function getTituloOpcaoEscolha(opcao) {
     if (!opcao) return "";
     return String(opcao.nomeCurto || opcao.valor || opcao.label || "")
-        .replace(/^(PerÃ­cia|Magia|Poder de classe|Poder da Tormenta|Poder|Habilidade|ProficiÃªncia|Substituir por|BÃ´nus em perÃ­cia):\s*/i, "")
+        .replace(/^(Perícia|Magia|Poder de classe|Poder da Tormenta|Poder|Habilidade|Proficiência|Substituir por|Bônus em perícia):\s*/i, "")
         .trim();
 }
 
@@ -14323,7 +14323,7 @@ function aplicarEscolhasRaciaisNaFicha(ficha, raca) {
 
                 ficha.efeitosAplicados.push({
                     id: uid(),
-                    origemTipo: "RaÃ§a",
+                    origemTipo: "Raça",
                     origemNome: raca.nome,
                     tipo: "pericia_bonus",
                     alvo: opcao.valor,
@@ -14332,7 +14332,7 @@ function aplicarEscolhasRaciaisNaFicha(ficha, raca) {
             }
 
             if (opcao.tipoAplicacao === "pericia_treinada") {
-                aplicarTreinoPericiaNaFicha(ficha, opcao.valor, "RaÃ§a", raca.nome);
+                aplicarTreinoPericiaNaFicha(ficha, opcao.valor, "Raça", raca.nome);
             }
 
             if (opcao.tipoAplicacao === "proficiencia_adicionar") {
@@ -14340,7 +14340,7 @@ function aplicarEscolhasRaciaisNaFicha(ficha, raca) {
 
                 ficha.efeitosAplicados.push({
                     id: uid(),
-                    origemTipo: "RaÃ§a",
+                    origemTipo: "Raça",
                     origemNome: raca.nome,
                     tipo: "proficiencia_adicionar",
                     alvo: opcao.valor
@@ -14355,13 +14355,13 @@ function aplicarEscolhasRaciaisNaFicha(ficha, raca) {
                         nome: opcao.valor || "",
                         nomeAdicionado: opcao.nomeAdicionado || ""
                     },
-                    "RaÃ§a",
+                    "Raça",
                     raca.nome
                 );
 
                 ficha.efeitosAplicados.push({
                     id: uid(),
-                    origemTipo: "RaÃ§a",
+                    origemTipo: "Raça",
                     origemNome: raca.nome,
                     tipo: "magia_adicionar",
                     alvo: opcao.valor
@@ -14385,13 +14385,13 @@ function aplicarEscolhasRaciaisNaFicha(ficha, raca) {
                         incrementos: Array.isArray(opcao.incrementos) ? opcao.incrementos : [],
                         escolhas: Array.isArray(opcao.escolhas) ? opcao.escolhas : []
                     },
-                    "RaÃ§a",
+                    "Raça",
                     raca.nome
                 );
 
                 ficha.efeitosAplicados.push({
                     id: uid(),
-                    origemTipo: "RaÃ§a",
+                    origemTipo: "Raça",
                     origemNome: raca.nome,
                     tipo: "habilidade_adicionar",
                     alvo: opcao.nomeCurto || opcao.valor || ""
@@ -14402,7 +14402,7 @@ function aplicarEscolhasRaciaisNaFicha(ficha, raca) {
                 opcao.escolhasResolvidas.forEach(bloco => {
                     (bloco?.selecionadas || []).forEach(subopcao => {
                         if (subopcao.tipoAplicacao === "pericia_treinada") {
-                            aplicarTreinoPericiaNaFicha(ficha, subopcao.valor, "RaÃ§a", raca.nome);
+                            aplicarTreinoPericiaNaFicha(ficha, subopcao.valor, "Raça", raca.nome);
                         }
 
                         if (subopcao.tipoAplicacao === "magia_adicionar") {
@@ -14413,13 +14413,13 @@ function aplicarEscolhasRaciaisNaFicha(ficha, raca) {
                                     nome: subopcao.valor || "",
                                     nomeAdicionado: subopcao.nomeAdicionado || ""
                                 },
-                                "RaÃ§a",
+                                "Raça",
                                 raca.nome
                             );
 
                             ficha.efeitosAplicados.push({
                                 id: uid(),
-                                origemTipo: "RaÃ§a",
+                                origemTipo: "Raça",
                                 origemNome: raca.nome,
                                 tipo: "magia_adicionar",
                                 alvo: subopcao.valor
@@ -14431,7 +14431,7 @@ function aplicarEscolhasRaciaisNaFicha(ficha, raca) {
 
                             ficha.efeitosAplicados.push({
                                 id: uid(),
-                                origemTipo: "RaÃ§a",
+                                origemTipo: "Raça",
                                 origemNome: raca.nome,
                                 tipo: "proficiencia_adicionar",
                                 alvo: subopcao.valor
@@ -14464,8 +14464,8 @@ function aplicarHabilidadeRacialCopiadaNaFicha(ficha, opcao) {
                 ...habilidade,
                 registroId: habilidade.id
             },
-            "RaÃ§a",
-            `MemÃ³ria PÃ³stuma (${racaOrigem.nome})`
+            "Raça",
+            `Memória Póstuma (${racaOrigem.nome})`
         );
     }
 
@@ -14476,8 +14476,8 @@ function aplicarHabilidadeRacialCopiadaNaFicha(ficha, opcao) {
         aplicarEfeitoNaFicha(
             ficha,
             efeito,
-            "RaÃ§a",
-            `MemÃ³ria PÃ³stuma (${racaOrigem.nome})`
+            "Raça",
+            `Memória Póstuma (${racaOrigem.nome})`
         );
     });
 
@@ -14490,7 +14490,7 @@ function aplicarEfeitoNaFicha(ficha, efeito, origemTipo, origemNome) {
 
     ficha.efeitosAplicados.push({
         id: uid(),
-        origemTipo: origemTipo || "RaÃ§a",
+        origemTipo: origemTipo || "Raça",
         origemNome: origemNome || "",
         tipo: efeito.tipo,
         alvo: efeito.alvo || "",
@@ -14555,7 +14555,7 @@ function aplicarEfeitoNaFicha(ficha, efeito, origemTipo, origemNome) {
                             descricao: registro.descricao || "",
                             custoPm: 0
                         },
-                        origemTipo || "RaÃ§a",
+                        origemTipo || "Raça",
                         origemNome || ""
                     );
 
@@ -14852,7 +14852,7 @@ function getHabilidadesRaciaisVisiveis(ficha) {
         .filter(habilidadeDeveAparecerNaFicha)
         .filter(h => {
             const origem = normalizarTextoRegra(h.origem || "");
-            return (origem === "raca" || origem === "raÃ§a") && !habilidadeFichaEhPoder(h);
+            return (origem === "raca" || origem === "raça") && !habilidadeFichaEhPoder(h);
         });
 }
 
@@ -14875,7 +14875,7 @@ function habilidadeDeveAparecerNaFicha(habilidade) {
         return false;
     }
 
-    // ClÃ©rigo
+    // Clérigo
     if (registroId === "hab_clerigo_2") return false;
     if (nome === "magias" && origem === "classe" && origemDetalhe === "clerigo") {
         return false;
@@ -14905,7 +14905,7 @@ function updateHabilidade(id, field, value) {
 
     saveFichas();
 
-    // SÃ³ rerenderiza quando precisa atualizar a lista/resumo da ficha
+    // Só rerenderiza quando precisa atualizar a lista/resumo da ficha
     if (field === "selecionada") {
         render();
     }
@@ -15418,7 +15418,7 @@ function fichaTemHabilidadeNaoRacial(ficha, nome) {
     const alvo = normalizarNomeHabilidade(nome);
     return (ficha?.habilidades || []).some(h =>
         normalizarNomeHabilidade(h.nome) === alvo &&
-        h.origem !== "RaÃ§a"
+        h.origem !== "Raça"
     );
 }
 
@@ -15553,7 +15553,7 @@ function confirmarModalEspecializacoesOficioFicha() {
     ficha.oficios = [...selecoes];
 
     const periciaOficio = (ficha.pericias || []).find(p =>
-        normalizarTextoRegra(p.nome || "") === normalizarTextoRegra("OfÃ­cio")
+        normalizarTextoRegra(p.nome || "") === normalizarTextoRegra("Ofício")
     );
 
     if (periciaOficio) {
@@ -15630,8 +15630,8 @@ function renderModalEspecializacoesOficioFicha() {
         <div class="overlay-card" onclick="event.stopPropagation()">
           <div class="overlay-header">
             <div>
-              <div class="overlay-title">EspecializaÃ§Ãµes de OfÃ­cio</div>
-              <div class="overlay-subtitle">Escolha um ou mais ofÃ­cios para esta perÃ­cia.</div>
+              <div class="overlay-title">Especializações de Ofício</div>
+              <div class="overlay-subtitle">Escolha um ou mais ofícios para esta perícia.</div>
             </div>
             <div class="actions" style="justify-content:flex-end; align-items:center;">
               <button class="btn ghost" onclick="fecharModal()">Cancelar</button>
@@ -15670,7 +15670,7 @@ function updatePericia(index, field, value) {
     if (!ficha || !ficha.pericias?.[index]) return;
 
     const pericia = ficha.pericias[index];
-    const ehOficio = normalizarTextoRegra(pericia.nome || "") === normalizarTextoRegra("OfÃ­cio");
+    const ehOficio = normalizarTextoRegra(pericia.nome || "") === normalizarTextoRegra("Ofício");
 
     if (ehOficio && field === "treinada") {
         abrirModalEspecializacoesOficioFicha(index);
@@ -15755,7 +15755,7 @@ async function enviarAuth() {
         render();
     } catch (err) {
         console.error(err);
-        alert(err?.message || "NÃ£o foi possÃ­vel autenticar.");
+        alert(err?.message || "Não foi possível autenticar.");
     }
 }
 
@@ -15781,7 +15781,7 @@ async function sairAuth() {
         render();
     } catch (err) {
         console.error(err);
-        alert("NÃ£o foi possÃ­vel sair.");
+        alert("Não foi possível sair.");
     }
 }
 
@@ -15796,7 +15796,7 @@ function renderAuth() {
         <div class="panel-body">
           ${usuario ? `
             <div class="notice" style="margin-bottom:16px;">
-              Logado como: ${escapeHtml(usuario.email || "UsuÃ¡rio")}
+              Logado como: ${escapeHtml(usuario.email || "Usuário")}
             </div>
 
             <button class="btn danger" onclick="sairAuth()">Sair</button>
@@ -15808,7 +15808,7 @@ function renderAuth() {
 
             ${modoCadastro ? `
               <div class="field auth-field">
-                <label>Nome de exibiÃ§Ã£o</label>
+                <label>Nome de exibição</label>
                 <input
                   type="text"
                   value="${escapeAttr(state.auth.nomeExibicao || "")}"
@@ -16612,7 +16612,7 @@ function toggleEscolhaClasseValor(escolhaId, opcao, quantidadeMaxima) {
                 escolhaId,
                 opcaoBase: opcao,
                 maximo: restante,
-                titulo: "Escolha as especializaÃ§Ãµes de OfÃ­cio"
+                titulo: "Escolha as especializações de Ofício"
             });
             return;
         }
@@ -17229,21 +17229,21 @@ function renderDivindadeModal() {
                 <div class="list-item">
                   <div>
                     <div class="list-item-title">Energia</div>
-                    <div class="list-item-sub">${escapeHtml(d.energia || "â€”")}</div>
+                    <div class="list-item-sub">${escapeHtml(d.energia || "—")}</div>
                   </div>
                 </div>
 
                 <div class="list-item">
                   <div>
                     <div class="list-item-title">Arma preferida</div>
-                    <div class="list-item-sub">${escapeHtml(d.arma_preferida || "â€”")}</div>
+                    <div class="list-item-sub">${escapeHtml(d.arma_preferida || "—")}</div>
                   </div>
                 </div>
 
                 <div class="list-item">
                   <div>
-                    <div class="list-item-title">ObrigaÃ§Ãµes e restriÃ§Ãµes</div>
-                    <div class="list-item-sub" style="white-space:pre-wrap;">${escapeHtml(d.obrigacoes_restricoes || "â€”")}</div>
+                    <div class="list-item-title">Obrigações e restrições</div>
+                    <div class="list-item-sub" style="white-space:pre-wrap;">${escapeHtml(d.obrigacoes_restricoes || "—")}</div>
                   </div>
                 </div>
               </div>
@@ -17505,8 +17505,8 @@ function getEscolhasOrigemDisponiveis(origem) {
 
     const escolhasBase = Array.isArray(origem.escolhas) ? [...origem.escolhas] : [];
 
-    // Custom e AmnÃ©sico usam o modal de inventÃ¡rio para itens definidos pelo mestre.
-    // NÃ£o geram escolhas automÃ¡ticas de item para nÃ£o travar a etapa.
+    // Custom e Amnésico usam o modal de inventário para itens definidos pelo mestre.
+    // Não geram escolhas automáticas de item para não travar a etapa.
     if (origem.id === "custom" || origem.id === "amnesico") {
         return escolhasBase;
     }
@@ -17552,11 +17552,11 @@ function aplicarOrigemNaFichaCriacao() {
     ficha.origem = origem.nome || "";
     ficha.origemId = origem.id || "";
 
-    // AmnÃ©sico sempre recebe o poder Ãºnico automaticamente
+    // Amnésico sempre recebe o poder único automaticamente
     if (origem.id === "amnesico") {
         (origem.habilidades || [])
             .filter(h =>
-                normalizarTextoRegra(h.nome || "") === normalizarTextoRegra("LembranÃ§as Graduais"))
+                normalizarTextoRegra(h.nome || "") === normalizarTextoRegra("Lembranças Graduais"))
             .forEach(habilidade => {
                 adicionarHabilidadeOrigemNaFicha(ficha, habilidade, origem.nome);
 
@@ -17649,8 +17649,8 @@ function aplicarOrigemNaFichaCriacao() {
                 adicionarHabilidadeNaFicha(
                     ficha,
                     {
-                        nome: "Poder Ãºnico personalizado",
-                        descricao: "NÃ£o aplica efeitos na ficha, use-os na hora de jogar.",
+                        nome: "Poder único personalizado",
+                        descricao: "Não aplica efeitos na ficha, use-os na hora de jogar.",
                         custoPm: 0
                     },
                     "Origem",
@@ -17876,8 +17876,8 @@ function aplicarFiltroModalEscolhaClasse(modo, valor = "") {
     if (mensagem) {
         mensagem.style.display = totalVisivel === 0 ? "block" : "none";
         mensagem.textContent = termo
-            ? "Nenhuma opÃ§Ã£o encontrada para essa busca."
-            : "Nenhuma opÃ§Ã£o disponÃ­vel para esta escolha.";
+            ? "Nenhuma opção encontrada para essa busca."
+            : "Nenhuma opção disponível para esta escolha.";
     }
 }
 
@@ -18396,7 +18396,7 @@ function aplicarEscolhasClasseNaFicha(ficha, classe) {
                     "";
 
                 const ehEmpatiaSelvagem = normalizarNomeHabilidade(nomeHabilidade) === "empatia selvagem";
-                const temEmpatiaRacial = fichaTemHabilidadeComOrigem(ficha, "Empatia Selvagem", "RaÃ§a");
+                const temEmpatiaRacial = fichaTemHabilidadeComOrigem(ficha, "Empatia Selvagem", "Raça");
 
                 if (ehEmpatiaSelvagem && temEmpatiaRacial) {
                     aplicarBonusEmpatiaSelvagemDahllan(ficha, "Classe", classe.nome);
@@ -18405,7 +18405,7 @@ function aplicarEscolhasClasseNaFicha(ficha, classe) {
                         ficha,
                         {
                             nome: nomeHabilidade,
-                            descricao: registroHabilidade?.descricao || `Escolhido na evoluÃ§Ã£o da classe ${classe.nome}.`,
+                            descricao: registroHabilidade?.descricao || `Escolhido na evolução da classe ${classe.nome}.`,
                             custoPm: Number(registroHabilidade?.custoPm) || 0,
                             custoVida: Number(registroHabilidade?.custoVida) || 0,
                             custoPmPermanente: Number(registroHabilidade?.custoPmPermanente) || 0,
@@ -18439,7 +18439,7 @@ function aplicarEscolhasClasseNaFicha(ficha, classe) {
                                 adicionarHabilidadeNaFicha(
                                     ficha,
                                     {
-                                        nome: `Foco em PerÃ­cia: ${opcao.escolhaEspecialValor}`,
+                                        nome: `Foco em Perícia: ${opcao.escolhaEspecialValor}`,
                                         descricao: opcao.descricao || "",
                                         custoPm: 0,
                                         custoVida: 0,
@@ -18461,7 +18461,7 @@ function aplicarEscolhasClasseNaFicha(ficha, classe) {
                                     origemTipo: "Classe",
                                     origemNome: classe.nome,
                                     tipo: "habilidade_adicionar",
-                                    alvo: `Foco em PerÃ­cia: ${opcao.escolhaEspecialValor}`
+                                    alvo: `Foco em Perícia: ${opcao.escolhaEspecialValor}`
                                 });
                             }
 
@@ -18485,7 +18485,7 @@ function aplicarEscolhasClasseNaFicha(ficha, classe) {
 
                                 if (magiaAdicionada && subopcao.origemEspecial === "inventor_formula") {
                                     magiaAdicionada.tipoMagiaInventor = "formula";
-                                    magiaAdicionada.prefixoExibicao = "FÃ³rmula";
+                                    magiaAdicionada.prefixoExibicao = "Fórmula";
                                 }
 
                                 ficha.efeitosAplicados.push({
@@ -19022,7 +19022,7 @@ function renderConteudoEtapaCriacao() {
         <div class="panel-body criacao-atributos-body">
           <div class="criacao-identidade-container criacao-atributos-container">
           <div class="criacao-atributos-pontos">
-            Pontos disponÃ­veis: <strong>${f.pontosAtributoAtuais}</strong>
+            Pontos disponíveis: <strong>${f.pontosAtributoAtuais}</strong>
             <button class="criacao-add-ponto-btn" type="button" onclick="adicionarPontoAtributoCriacao()" aria-label="Adicionar 1 ponto">+1</button>
           </div>
 
@@ -19109,10 +19109,10 @@ function renderConteudoEtapaCriacao() {
 
         return `
     <div class="panel">
-      <div class="panel-title">RaÃ§a</div>
+      <div class="panel-title">Raça</div>
       <div class="panel-body">
         <div class="field">
-          <label>Escolha a raÃ§a</label>
+          <label>Escolha a raça</label>
           <select onchange="selecionarRacaCriacao(this.value)">
             <option value="">Selecione...</option>
             ${RACAS_DB.map(r => `
@@ -19129,16 +19129,16 @@ function renderConteudoEtapaCriacao() {
     </div>
 
     ${!raca
-                ? `<div style="margin-top:14px;" class="panel"><div class="panel-body"><div class="empty">Nenhuma raÃ§a selecionada.</div></div></div>`
+                ? `<div style="margin-top:14px;" class="panel"><div class="panel-body"><div class="empty">Nenhuma raça selecionada.</div></div></div>`
                 : `
           <div style="height:14px"></div>
 
           <div class="panel">
-            <div class="panel-title">PrÃ©via da raÃ§a</div>
+            <div class="panel-title">Prévia da raça</div>
             <div class="panel-body">
               <div class="row-3">
                 <div class="field">
-                  <label>RaÃ§a</label>
+                  <label>Raça</label>
                   <input value="${escapeAttr(raca.nome || "")}" disabled>
                 </div>
 
@@ -19170,10 +19170,10 @@ function renderConteudoEtapaCriacao() {
                     ? `
                     <div class="list">
                       ${[
-                        ["forca", "ForÃ§a"],
+                        ["forca", "Força"],
                         ["destreza", "Destreza"],
-                        ["constituicao", "ConstituiÃ§Ã£o"],
-                        ["inteligencia", "InteligÃªncia"],
+                        ["constituicao", "Constituição"],
+                        ["inteligencia", "Inteligência"],
                         ["sabedoria", "Sabedoria"],
                         ["carisma", "Carisma"]
                     ].map(([attr, nome]) => `
@@ -19191,10 +19191,10 @@ function renderConteudoEtapaCriacao() {
         ${getAtributosBloqueadosDistribuicaoRacial(raca).length
                             ? `<br>Atributos bloqueados: <strong>${getAtributosBloqueadosDistribuicaoRacial(raca)
                                 .map(attr => ({
-                                    forca: "ForÃ§a",
+                                    forca: "Força",
                                     destreza: "Destreza",
-                                    constituicao: "ConstituiÃ§Ã£o",
-                                    inteligencia: "InteligÃªncia",
+                                    constituicao: "Constituição",
+                                    inteligencia: "Inteligência",
                                     sabedoria: "Sabedoria",
                                     carisma: "Carisma"
                                 }[attr] || attr))
@@ -19209,10 +19209,10 @@ function renderConteudoEtapaCriacao() {
 
       <div class="list">
         ${[
-                            ["forca", "ForÃ§a"],
+                            ["forca", "Força"],
                             ["destreza", "Destreza"],
-                            ["constituicao", "ConstituiÃ§Ã£o"],
-                            ["inteligencia", "InteligÃªncia"],
+                            ["constituicao", "Constituição"],
+                            ["inteligencia", "Inteligência"],
                             ["sabedoria", "Sabedoria"],
                             ["carisma", "Carisma"]
                         ].map(([attr, nome]) => {
@@ -19224,7 +19224,7 @@ function renderConteudoEtapaCriacao() {
               <label class="list-item" style="cursor:${bloqueado ? "not-allowed" : "pointer"}; opacity:${bloqueado ? "0.55" : "1"};">
                 <div>
                   <div class="list-item-title">${nome}</div>
-                  ${bloqueado ? `<div class="muted" style="font-size:12px;">IndisponÃ­vel para esta raÃ§a</div>` : ``}
+                  ${bloqueado ? `<div class="muted" style="font-size:12px;">Indisponível para esta raça</div>` : ``}
                 </div>
                 <input
   class="choice-checkbox"
@@ -19241,10 +19241,10 @@ function renderConteudoEtapaCriacao() {
                         : `
                       <div class="row-3">
                         ${[
-                            ["forca", "ForÃ§a"],
+                            ["forca", "Força"],
                             ["destreza", "Destreza"],
-                            ["constituicao", "ConstituiÃ§Ã£o"],
-                            ["inteligencia", "InteligÃªncia"],
+                            ["constituicao", "Constituição"],
+                            ["inteligencia", "Inteligência"],
                             ["sabedoria", "Sabedoria"],
                             ["carisma", "Carisma"]
                         ].map(([attr, nome]) => `
@@ -19374,7 +19374,7 @@ function renderConteudoEtapaCriacao() {
                 <div style="height:14px"></div>
 
                 <div class="panel">
-                  <div class="panel-title">PrÃ©via da classe</div>
+                  <div class="panel-title">Prévia da classe</div>
                   <div class="panel-body">
                     <div class="row-3">
                       <div class="field">
@@ -19382,11 +19382,11 @@ function renderConteudoEtapaCriacao() {
                         <input value="${escapeAttr(classeSelecionada.nome || "")}" disabled>
                       </div>
                       <div class="field">
-                        <label>PV no nÃ­vel 1</label>
+                        <label>PV no nível 1</label>
                         <input value="${escapeAttr(classeSelecionada.pvNivel1 || 0)}" disabled>
                       </div>
                       <div class="field">
-                        <label>PM por nÃ­vel</label>
+                        <label>PM por nível</label>
                         <input value="${escapeAttr(classeSelecionada.pmPorNivel || 0)}" disabled>
                       </div>
                     </div>
@@ -19394,9 +19394,9 @@ function renderConteudoEtapaCriacao() {
                     <div style="height:14px"></div>
 
                     <div class="panel">
-                      <div class="panel-title">DescriÃ§Ã£o</div>
+                      <div class="panel-title">Descrição</div>
                       <div class="panel-body">
-                        ${classeSelecionada.descricao ? escapeHtml(classeSelecionada.descricao) : `<span class="empty">Sem descriÃ§Ã£o.</span>`}
+                        ${classeSelecionada.descricao ? escapeHtml(classeSelecionada.descricao) : `<span class="empty">Sem descrição.</span>`}
                       </div>
                     </div>
                   </div>
@@ -19405,7 +19405,7 @@ function renderConteudoEtapaCriacao() {
                 <div style="height:14px"></div>
 
                 <div class="actions">
-                  <button class="btn primary" onclick="iniciarFluxoClasseCriacao()">Prosseguir para evoluÃ§Ã£o</button>
+                  <button class="btn primary" onclick="iniciarFluxoClasseCriacao()">Prosseguir para evolução</button>
                 </div>
               `
                 }
@@ -19417,17 +19417,17 @@ function renderConteudoEtapaCriacao() {
         if (!ctx || !classeEmResolucao) {
             return `
       <div class="panel">
-        <div class="panel-title">EvoluÃ§Ã£o de classes</div>
+        <div class="panel-title">Evolução de classes</div>
         <div class="panel-body">
           <div class="notice">
             Classes atuais: <strong>${escapeHtml(formatarClassesPersonagem(ficha))}</strong><br>
-            NÃ­vel total: <strong>${getNivelTotalPersonagem(ficha)}</strong>
+            Nível total: <strong>${getNivelTotalPersonagem(ficha)}</strong>
           </div>
 
           <div style="height:14px"></div>
 
           <div class="field">
-            <label>Escolha a classe para o prÃ³ximo nÃ­vel</label>
+            <label>Escolha a classe para o próximo nível</label>
             <select onchange="state.criacao.classeSelecaoEvolucaoId = this.value">
               <option value="">Selecione...</option>
               ${CLASSES_DB.map(c => `
@@ -19442,7 +19442,7 @@ function renderConteudoEtapaCriacao() {
 
           <div class="actions">
             <button class="btn primary" onclick="prepararNivelClasseCriacao(state.criacao.classeSelecaoEvolucaoId)" ${!state.criacao.classeSelecaoEvolucaoId ? "disabled" : ""}>
-              Abrir prÃ³ximo nÃ­vel
+              Abrir próximo nível
             </button>
           </div>
         </div>
@@ -19465,11 +19465,11 @@ function renderConteudoEtapaCriacao() {
 
         return `
     <div class="panel">
-      <div class="panel-title">EvoluÃ§Ã£o de classe</div>
+      <div class="panel-title">Evolução de classe</div>
       <div class="panel-body">
         <div class="notice">
           Resumo atual: <strong>${escapeHtml(formatarClassesPersonagem(ficha))}</strong><br>
-          NÃ­vel total atual: <strong>${getNivelTotalPersonagem(ficha)}</strong>
+          Nível total atual: <strong>${getNivelTotalPersonagem(ficha)}</strong>
         </div>
 
         <div style="height:14px"></div>
@@ -19480,12 +19480,12 @@ function renderConteudoEtapaCriacao() {
             <input value="${escapeAttr(classeEmResolucao.nome)}" disabled>
           </div>
           <div class="field">
-            <label>NÃ­vel da classe que serÃ¡ alcanÃ§ado</label>
+            <label>Nível da classe que será alcançado</label>
             <input value="${escapeAttr(ctx.nivelAlvo)}" disabled>
           </div>
           <div class="field">
             <label>Primeira classe?</label>
-            <input value="${ctx.primeiraClasse ? "Sim" : "NÃ£o"}" disabled>
+            <input value="${ctx.primeiraClasse ? "Sim" : "Não"}" disabled>
           </div>
         </div>
       </div>
@@ -19494,15 +19494,15 @@ function renderConteudoEtapaCriacao() {
     <div style="height:14px"></div>
 
     <div class="panel">
-      <div class="panel-title">Ganho automÃ¡tico deste nÃ­vel</div>
+      <div class="panel-title">Ganho automático deste nível</div>
       <div class="panel-body">
         <div class="list">
           ${ctx.nivelAlvo === 1 && ctx.primeiraClasse
-                ? `<div class="list-item"><div class="list-item-title">PV no nÃ­vel 1</div><div>${classeEmResolucao.pvNivel1 || 0}</div></div>`
+                ? `<div class="list-item"><div class="list-item-title">PV no nível 1</div><div>${classeEmResolucao.pvNivel1 || 0}</div></div>`
                 : ""
             }
-          <div class="list-item"><div class="list-item-title">PV por nÃ­vel</div><div>${classeEmResolucao.pvPorNivel || 0}</div></div>
-          <div class="list-item"><div class="list-item-title">PM por nÃ­vel</div><div>${classeEmResolucao.pmPorNivel || 0}</div></div>
+          <div class="list-item"><div class="list-item-title">PV por nível</div><div>${classeEmResolucao.pvPorNivel || 0}</div></div>
+          <div class="list-item"><div class="list-item-title">PM por nível</div><div>${classeEmResolucao.pmPorNivel || 0}</div></div>
         </div>
       </div>
     </div>
@@ -19510,10 +19510,10 @@ function renderConteudoEtapaCriacao() {
     <div style="height:14px"></div>
 
     <div class="panel">
-      <div class="panel-title">Habilidades deste nÃ­vel</div>
+      <div class="panel-title">Habilidades deste nível</div>
       <div class="panel-body">
         ${!habilidadesDoNivel.length
-                ? `<div class="empty">Sem habilidades novas neste nÃ­vel.</div>`
+                ? `<div class="empty">Sem habilidades novas neste nível.</div>`
                 : `
               <div class="list">
                 ${habilidadesDoNivel.map(h => `
@@ -19533,10 +19533,10 @@ function renderConteudoEtapaCriacao() {
     <div style="height:14px"></div>
 
     <div class="panel">
-      <div class="panel-title">Efeitos automÃ¡ticos deste nÃ­vel</div>
+      <div class="panel-title">Efeitos automáticos deste nível</div>
       <div class="panel-body">
         ${!efeitosDoNivel.filter(e => efeitoDeveAparecerNaPrevia("classe", e)).length
-                ? `<div class="empty">Sem efeitos automÃ¡ticos visÃ­veis neste nÃ­vel.</div>`
+                ? `<div class="empty">Sem efeitos automáticos visíveis neste nível.</div>`
                 : `
               <div class="list">
                 ${efeitosDoNivel
@@ -19558,10 +19558,10 @@ function renderConteudoEtapaCriacao() {
     <div style="height:14px"></div>
 
     <div class="panel">
-      <div class="panel-title">Escolhas deste nÃ­vel</div>
+      <div class="panel-title">Escolhas deste nível</div>
       <div class="panel-body">
         ${!escolhasDoNivel.length
-                ? `<div class="empty">Sem escolhas obrigatÃ³rias neste nÃ­vel.</div>`
+                ? `<div class="empty">Sem escolhas obrigatórias neste nível.</div>`
                 : `
               <div class="list">
                 ${escolhasDoNivel.map(escolha => {
@@ -19602,7 +19602,7 @@ function renderConteudoEtapaCriacao() {
     <div style="height:14px"></div>
 
     <div class="actions" style="justify-content:flex-end;">
-      <button class="btn" onclick="abrirSelecaoProximoNivelClasse()">Voltar para seleÃ§Ã£o de classe</button>
+      <button class="btn" onclick="abrirSelecaoProximoNivelClasse()">Voltar para seleção de classe</button>
       <button class="btn primary" onclick="concluirNivelClasseCriacao()" ${!classeNivelAtualValido() ? "disabled" : ""}>
         Prosseguir
       </button>
@@ -19615,7 +19615,7 @@ function renderConteudoEtapaCriacao() {
         const escolhasOrigemDisponiveis = getEscolhasOrigemDisponiveis(origem);
         const habilidadesFixasOrigem = origem?.id === "amnesico"
             ? (origem.habilidades || []).filter(h =>
-                normalizarTextoRegra(h.nome || "") === normalizarTextoRegra("LembranÃ§as Graduais")
+                normalizarTextoRegra(h.nome || "") === normalizarTextoRegra("Lembranças Graduais")
             )
             : [];
         const origemUsaItensLivres = origem?.id === "custom" || origem?.id === "amnesico";
@@ -19672,10 +19672,10 @@ ${origemUsaItensLivres ? `
     <div class="panel-title">Itens definidos pelo mestre</div>
     <div class="panel-body">
       <div class="notice">
-        Use o botÃ£o abaixo para adicionar os itens da origem ao inventÃ¡rio sem limite de preÃ§o.
+        Use o botão abaixo para adicionar os itens da origem ao inventário sem limite de preço.
         ${origem.id === "amnesico"
-                        ? " O limite de T$ e a escolha dos itens ficam a critÃ©rio do mestre."
-                        : " Os itens da origem custom sÃ£o definidos com o mestre."
+                        ? " O limite de T$ e a escolha dos itens ficam a critério do mestre."
+                        : " Os itens da origem custom são definidos com o mestre."
                     }
       </div>
 
@@ -19690,7 +19690,7 @@ ${origemUsaItensLivres ? `
   <div style="height:12px"></div>
 
   <div class="panel">
-    <div class="panel-title">Itens jÃ¡ adicionados</div>
+    <div class="panel-title">Itens já adicionados</div>
     <div class="panel-body">
       ${!(f.inventario || []).length
                         ? `<div class="empty">Nenhum item adicionado ainda.</div>`
@@ -19732,7 +19732,7 @@ ${habilidadesFixasOrigem.length ? `
                           <div class="list-item-sub">${escapeHtml(h.descricao || "")}</div>
                         </div>
                         <div class="actions">
-                          <span style="font-weight:bold; color:var(--status-preenchido);">AutomÃ¡tico</span>
+                          <span style="font-weight:bold; color:var(--status-preenchido);">Automático</span>
                         </div>
                       </div>
                     `).join("")}
@@ -19974,10 +19974,10 @@ ${habilidadesFixasOrigem.length ? `
 
     return `
     <div class="panel">
-      <div class="panel-title">RevisÃ£o</div>
+      <div class="panel-title">Revisão</div>
       <div class="panel-body">
         <div class="notice">
-          Revise os dados do personagem. Ao concluir, a ficha serÃ¡ salva e aberta na tela de jogo.
+          Revise os dados do personagem. Ao concluir, a ficha será salva e aberta na tela de jogo.
         </div>
       </div>
     </div>
@@ -20465,7 +20465,7 @@ function renderEvolucao() {
       <div class="screen">
         <div class="topbar">        
           <div>
-            <h2>EvoluÃ§Ã£o</h2>
+            <h2>Evolução</h2>
             <div class="subtitle">Classes atuais: ${escapeHtml(formatarClassesPersonagem(ficha))}</div>
           </div>
 
@@ -20475,7 +20475,7 @@ function renderEvolucao() {
         </div>
 
         <div class="panel">
-          <div class="panel-title">Escolha a classe para o prÃ³ximo nÃ­vel</div>
+          <div class="panel-title">Escolha a classe para o próximo nível</div>
           <div class="panel-body">
             <div class="field">
               <label>Classe</label>
@@ -20497,7 +20497,7 @@ function renderEvolucao() {
                 onclick="prepararNivelClasseEvolucao(state.evolucao.classeSelecaoEvolucaoId)"
                 ${!state.evolucao.classeSelecaoEvolucaoId ? "disabled" : ""}
               >
-                Abrir prÃ³ximo nÃ­vel
+                Abrir próximo nível
               </button>
             </div>
           </div>
@@ -20510,7 +20510,7 @@ function renderEvolucao() {
             <div class="panel-title">Divindade</div>
             <div class="panel-body">
               <div class="subtitle">
-                Este personagem nÃ£o possui divindade. VocÃª pode escolher uma agora antes de continuar a evoluÃ§Ã£o.
+                Este personagem não possui divindade. Você pode escolher uma agora antes de continuar a evolução.
               </div>
 
               <div style="height:12px"></div>
@@ -20560,8 +20560,8 @@ function renderEvolucao() {
     <div class="screen">
       <div class="topbar">
         <div>
-          <h2>EvoluÃ§Ã£o</h2>
-          <div class="subtitle">${escapeHtml(formatarClassesPersonagem(ficha))} â€¢ NÃ­vel total ${getNivelTotalPersonagem(ficha)}</div>
+          <h2>Evolução</h2>
+          <div class="subtitle">${escapeHtml(formatarClassesPersonagem(ficha))} ⬢ Nível total ${getNivelTotalPersonagem(ficha)}</div>
         </div>
 
         <div class="actions">
@@ -20574,7 +20574,7 @@ function renderEvolucao() {
           <div class="panel-title">Divindade</div>
           <div class="panel-body">
             <div class="subtitle">
-              Este personagem nÃ£o possui divindade. VocÃª pode escolher uma agora antes de continuar a evoluÃ§Ã£o.
+              Este personagem não possui divindade. Você pode escolher uma agora antes de continuar a evolução.
             </div>
 
             <div style="height:12px"></div>
@@ -20589,7 +20589,7 @@ function renderEvolucao() {
       ` : ``}
 
       <div class="panel">
-        <div class="panel-title">PrÃ³ximo nÃ­vel</div>
+        <div class="panel-title">Próximo nível</div>
         <div class="panel-body">
           <div class="row-3">
             <div class="field">
@@ -20597,12 +20597,12 @@ function renderEvolucao() {
               <input value="${escapeAttr(classe.nome)}" disabled>
             </div>
             <div class="field">
-              <label>NÃ­vel alvo</label>
+              <label>Nível alvo</label>
               <input value="${escapeAttr(ctx.nivelAlvo)}" disabled>
             </div>
             <div class="field">
               <label>Primeira classe?</label>
-              <input value="${ctx.primeiraClasse ? "Sim" : "NÃ£o"}" disabled>
+              <input value="${ctx.primeiraClasse ? "Sim" : "Não"}" disabled>
             </div>
           </div>
         </div>
@@ -20611,10 +20611,10 @@ function renderEvolucao() {
       <div style="height:14px"></div>
 
       <div class="panel">
-        <div class="panel-title">Habilidades deste nÃ­vel</div>
+        <div class="panel-title">Habilidades deste nível</div>
         <div class="panel-body">
           ${!habilidadesDoNivel.length
-            ? `<div class="empty">Sem habilidades novas neste nÃ­vel.</div>`
+            ? `<div class="empty">Sem habilidades novas neste nível.</div>`
             : `
                 <div class="list">
                   ${habilidadesDoNivel.map(h => `
@@ -20634,10 +20634,10 @@ function renderEvolucao() {
       <div style="height:14px"></div>
 
       <div class="panel">
-        <div class="panel-title">Efeitos automÃ¡ticos deste nÃ­vel</div>
+        <div class="panel-title">Efeitos automáticos deste nível</div>
         <div class="panel-body">
           ${!efeitosDoNivel.filter(e => efeitoDeveAparecerNaPrevia("classe", e)).length
-            ? `<div class="empty">Sem efeitos automÃ¡ticos visÃ­veis neste nÃ­vel.</div>`
+            ? `<div class="empty">Sem efeitos automáticos visíveis neste nível.</div>`
             : `
                 <div class="list">
                   ${efeitosDoNivel
@@ -20659,10 +20659,10 @@ function renderEvolucao() {
       <div style="height:14px"></div>
 
       <div class="panel">
-        <div class="panel-title">Escolhas deste nÃ­vel</div>
+        <div class="panel-title">Escolhas deste nível</div>
         <div class="panel-body">
           ${!escolhasDoNivel.length
-            ? `<div class="empty">Sem escolhas obrigatÃ³rias neste nÃ­vel.</div>`
+            ? `<div class="empty">Sem escolhas obrigatórias neste nível.</div>`
             : `
                 <div class="list">
                   ${escolhasDoNivel.map(escolha => {
@@ -20710,7 +20710,7 @@ function renderEvolucao() {
       <div class="actions" style="justify-content:flex-end;">
         <button class="btn" onclick="abrirSelecaoProximoNivelEvolucao()">Voltar</button>
         <button class="btn primary" onclick="concluirNivelClasseEvolucao()" ${!classeNivelAtualValidoEvolucao() ? "disabled" : ""}>
-          Concluir nÃ­vel
+          Concluir nível
         </button>
       </div>
 
@@ -20774,19 +20774,19 @@ function renderDados() {
               </div>
 
               <div class="dados-rolagem-footer">
-              FÃ³rmula atual: <strong>${state.dados.grupos.map(g => `${g.quantidade}${g.tipo}`).join(" + ")}</strong><br>
+              Fórmula atual: <strong>${state.dados.grupos.map(g => `${g.quantidade}${g.tipo}`).join(" + ")}</strong><br>
               Total de dados: <strong>${getTotalDadosSelecionados()}/50</strong>
             </div>
             </div>
           </div>
 
           <div class="dados-historico-actions">
-            <button class="btn danger dados-limpar-historico-btn" onclick="limparHistoricoDados()">Limpar histÃ³rico</button>
+            <button class="btn danger dados-limpar-historico-btn" onclick="limparHistoricoDados()">Limpar histórico</button>
           </div>
 
           <div class="dados-results-grid">
             <div class="dados-card dados-resultado-panel">
-              <div class="panel-title">Ãšltimo resultado</div>
+              <div class="panel-title">Último resultado</div>
               <div class="panel-body">
                 ${!state.dados.ultimoResultado
             ? `<div class="empty">Nenhuma rolagem ainda.</div>`
@@ -20816,14 +20816,14 @@ function renderDados() {
             </div>
 
             <div class="dados-card dados-historico-panel">
-              <div class="panel-title">HistÃ³rico</div>
+              <div class="panel-title">Histórico</div>
               <div class="panel-body">
                 <div class="actions" style="margin-bottom:12px;">
-                  <button class="btn danger" onclick="limparHistoricoDados()">Limpar histÃ³rico</button>
+                  <button class="btn danger" onclick="limparHistoricoDados()">Limpar histórico</button>
                 </div>
 
                 ${state.dados.historico.length === 0
-            ? `<div class="empty">Sem histÃ³rico.</div>`
+            ? `<div class="empty">Sem histórico.</div>`
             : `
                       <div class="list">
                         ${state.dados.historico.map(item => `
@@ -20831,7 +20831,7 @@ function renderDados() {
                             <div>
                               <div class="list-item-title">${escapeHtml(item.formula)}</div>
                               <div class="list-item-sub">
-                                ${item.grupos.map(g => `${g.quantidade}${g.tipo}: ${g.resultados.join(" + ")}`).join(" â€¢ ")}
+                                ${item.grupos.map(g => `${g.quantidade}${g.tipo}: ${g.resultados.join(" + ")}`).join(" ⬢ ")}
                               </div>
                             </div>
                             <div style="font-weight:bold; font-size:20px;">${item.total}</div>
@@ -20888,11 +20888,11 @@ function tamanhoFonteValorCirculo(valor) {
     return 12;
 }
 
-const MF_TABS_EM_BREVE = ["PerÃ­cias", "Ataques", "Poderes", "Magias", "Equipamento"];
+const MF_TABS_EM_BREVE = ["Perícias", "Ataques", "Poderes", "Magias", "Equipamento"];
 
 const MF_TABS = [
     { id: "status", nome: "Status", ativo: true },
-    { id: "pericias", nome: "PerÃ­cias", ativo: true },
+    { id: "pericias", nome: "Perícias", ativo: true },
     { id: "ataques", nome: "Ataques", ativo: true },
     { id: "poderes", nome: "Poderes", ativo: true },
     { id: "magias", nome: "Magias", ativo: true },
@@ -21182,7 +21182,7 @@ function renderFichaMobilePoderesTabela(titulo, chave, itens, textoVazio) {
       <div class="mf-poderes-tabela">
         <button class="mf-poderes-section-head" type="button" onclick="toggleSecaoFicha('${escapeAttr(chave)}')">
           <span>${escapeHtml(titulo)}</span>
-          <span>${aberta ? "â–²" : "â–¼"}</span>
+          <span>${aberta ? "▲" : "▼"}</span>
         </button>
 
         ${aberta ? `
@@ -21302,7 +21302,7 @@ function renderFichaMobileMagias(f) {
                           ${escapeHtml(nome)}
                         </button>
                       </div>
-                      <div>${escapeHtml(m.circulo || "â€”")}</div>
+                      <div>${escapeHtml(m.circulo || "—")}</div>
                       <div>${escapeHtml(custoBase)} PM</div>
                       <div>
                         <button
@@ -21428,7 +21428,7 @@ function renderFichaMobile(f) {
 
       <div class="mf-grid-4">
         <div class="mf-field">
-          <div class="mf-label">RaÃ§a</div>
+          <div class="mf-label">Raça</div>
           <div class="mf-box-med"><div class="mf-static mf-static-claro">${escapeHtml(f.raca || "")}</div></div>
         </div>
         <div class="mf-field">
@@ -21436,14 +21436,14 @@ function renderFichaMobile(f) {
           <div class="mf-box-med"><div class="mf-static mf-static-claro">${escapeHtml(f.origem || "")}</div></div>
         </div>
         <div class="mf-field">
-          <div class="mf-label">Classe e NÃ­vel</div>
+          <div class="mf-label">Classe e Nível</div>
           <button class="mf-box-med mf-box-button mf-class-summary" type="button" onclick="abrirModalClassesFichaMobile()">
-            <span class="mf-static">${escapeHtml(formatarClassesPersonagem(f))} Â· Nv ${escapeHtml(getNivelTotalPersonagem(f))}</span>
+            <span class="mf-static">${escapeHtml(formatarClassesPersonagem(f))} · Nv ${escapeHtml(getNivelTotalPersonagem(f))}</span>
           </button>
         </div>
         <div class="mf-field">
           <div class="mf-label">Divindade</div>
-          <div class="mf-box-med"><div class="mf-static mf-static-claro">${escapeHtml(f.divindade || "â€”")}</div></div>
+          <div class="mf-box-med"><div class="mf-static mf-static-claro">${escapeHtml(f.divindade || "—")}</div></div>
         </div>
       </div>
 
@@ -21455,7 +21455,7 @@ function renderFichaMobile(f) {
         ${renderControleImagemPersonagemFicha(f)}
       </div>
       <div class="mf-attr-pontos-row">
-        <span class="mf-attr-pontos-label">Pontos disponÃ­veis:</span>
+        <span class="mf-attr-pontos-label">Pontos disponíveis:</span>
         <span class="mf-attr-pontos-badge">
           <span class="mf-attr-pontos-badge-text">${escapeHtml(String(Number(f.pontosAtributoAtuais) || 0))}</span>
         </span>
@@ -21554,7 +21554,7 @@ function renderFichaMobile(f) {
 
       <div class="mf-grid-2">
         <div class="mf-field">
-          <div class="mf-box-med"><button class="btn" onclick="abrirModalProficiencias()">ProficiÃªncias</button></div>
+          <div class="mf-box-med"><button class="btn" onclick="abrirModalProficiencias()">Proficiências</button></div>
           <div class="mf-label">&nbsp;</div>
         </div>
         <div class="mf-field">
@@ -21566,7 +21566,7 @@ function renderFichaMobile(f) {
       </div>
 
       <div class="mf-section-gap"></div>
-      <button class="mf-banner mf-clickable" onclick="iniciarEvolucaoFicha()">Subir NÃ­vel</button>
+      <button class="mf-banner mf-clickable" onclick="iniciarEvolucaoFicha()">Subir Nível</button>
       `}
     </div>
   `;
@@ -21679,7 +21679,7 @@ function renderFicha() {
 
           <div class="row-4">
             <div class="panel">
-              <div class="panel-title">RaÃ§a</div>
+              <div class="panel-title">Raça</div>
               <div class="panel-body-centro">
                 <input style="text-align:center;"value="${escapeAttr(f.raca)}"disabled>              
               </div>
@@ -21737,7 +21737,7 @@ function renderFicha() {
 </div>
 
       <div class="panel">
-        <div class="panel-title">NÃ­vel total</div>
+        <div class="panel-title">Nível total</div>
         <div class="panel-body">
           <div style="display:flex; align-items:center; justify-content:center; min-height:38px;">
             <div style="min-width:48px; text-align:center; font-size:24px; font-weight:bold;">
@@ -21748,10 +21748,10 @@ function renderFicha() {
       </div>
 
       <div class="panel">
-        <div class="panel-title">EvoluÃ§Ã£o</div>
+        <div class="panel-title">Evolução</div>
         <div class="panel-body">
           <button class="btn" style="width:100%;" onclick="iniciarEvolucaoFicha()">
-            Subir NÃ­vel
+            Subir Nível
           </button>
         </div>
       </div>
@@ -21759,7 +21759,7 @@ function renderFicha() {
        
           <div style="height:14px"></div>
            <div class="notice" style="display:flex; align-items:center; justify-content:center; gap:10px;">
-  <span>Pontos disponÃ­veis: <strong>${f.pontosAtributoAtuais}</strong></span>
+  <span>Pontos disponíveis: <strong>${f.pontosAtributoAtuais}</strong></span>
 
   <button class="btn small" onclick="adicionarPontoAtributo()">
     +1 ponto
@@ -21787,7 +21787,7 @@ function renderFicha() {
                   <div class="panel-title">Pontos de vida</div>
                   <div class="panel-body small-grid">
                     <div class="field">
-                      <label>MÃ¡ximos</label>
+                      <label>Máximos</label>
                       <input type="number" style="text-align:center; "value="${escapeAttr(f.pvMax)}" onchange="updateFicha('pvMax', Number(this.value))">
                     </div>
                     <div class="field">
@@ -21801,7 +21801,7 @@ function renderFicha() {
                   <div class="panel-title">Pontos de mana</div>
                   <div class="panel-body small-grid">
                     <div class="field">
-                      <label>MÃ¡ximos</label>
+                      <label>Máximos</label>
                       <input type="number" style="text-align:center;"value="${escapeAttr(f.pmMax)}" onchange="updateFicha('pmMax', Number(this.value))">
                     </div>
                     <div class="field">
@@ -21849,7 +21849,7 @@ function renderFicha() {
                           <th>Ataque</th>
                           <th>Teste de ataque</th>
                           <th>Dano</th>
-                          <th>CrÃ­tico</th>
+                          <th>Crítico</th>
                           <th>Tipo</th>
                           <th>Alcance</th>
                           <th></th>
@@ -21951,7 +21951,7 @@ function renderFicha() {
 </div>
 
 <div class="panel">
-    <div class="panel-title">ProficiÃªncias</div>
+    <div class="panel-title">Proficiências</div>
     <div class="panel-body">
       <div class="field">
         <button class="btn" onclick="abrirModalProficiencias()">Ver / editar</button>
@@ -21979,7 +21979,7 @@ function renderFicha() {
                           <div style="height:14px"></div>
 
 <div class="panel">
-  <div class="panel-title">Habilidades de raÃ§a</div>
+  <div class="panel-title">Habilidades de raça</div>
   <div class="panel-body">
     ${habilidadesRaciaisVisiveis.length === 0
             ? `<div class="empty">Nenhuma habilidade racial cadastrada.</div>`
@@ -22024,7 +22024,7 @@ function renderFicha() {
     onclick="toggleSecaoFicha('poderes')"
   >
     <span>Poderes</span>
-    <span>${secaoFichaEstaAberta('poderes') ? "â–²" : "â–¼"}</span>
+    <span>${secaoFichaEstaAberta('poderes') ? "▲" : "▼"}</span>
   </div>
 
   ${secaoFichaEstaAberta('poderes') ? `
@@ -22107,7 +22107,7 @@ function renderFicha() {
     onclick="toggleSecaoFicha('magias')"
   >
     <span>Magias</span>
-    <span>${secaoFichaEstaAberta('magias') ? "â–²" : "â–¼"}</span>
+    <span>${secaoFichaEstaAberta('magias') ? "▲" : "▼"}</span>
   </div>
 
   ${secaoFichaEstaAberta('magias') ? `
@@ -22132,7 +22132,7 @@ function renderFicha() {
                       </button>
 
                       <div class="list-item-sub">
-                        CÃ­rculo: ${escapeHtml(m.circulo || "â€”")} â€¢ Custo: ${custoBase} PM
+                        Círculo: ${escapeHtml(m.circulo || "—")} • Custo: ${custoBase} PM
                       </div>
                     </div>
 
@@ -22165,7 +22165,7 @@ ${renderInventarioSimples(f)}
 <div style="height:14px"></div>
 
                <div class="panel">
-                  <div class="panel-title">AnotaÃ§Ãµes</div>
+                  <div class="panel-title">Anotações</div>
                   <div class="panel-body">
                     <textarea
   style="min-width:600px; min-height:100px;"
@@ -22177,7 +22177,7 @@ ${renderInventarioSimples(f)}
                        
                         <div>
               <div class="panel">
-                <div class="panel-title">PerÃ­cias</div>
+                <div class="panel-title">Perícias</div>
                 <div class="panel-body">
                   <div class="pericias-tabela">
                     <div class="pericias-head">
@@ -22229,7 +22229,7 @@ ${renderInventarioSimples(f)}
                         </div>
 
                         <div class="pericia-col pericia-col-treino">
-                          ${normalizarTextoRegra(p.nome) === normalizarTextoRegra("OfÃ­cio")
+                          ${normalizarTextoRegra(p.nome) === normalizarTextoRegra("Ofício")
                     ? `
                               <button
                                 class="btn ghost btn-oficios-pericia"
@@ -22237,7 +22237,7 @@ ${renderInventarioSimples(f)}
                                 style="margin-left: 10px;"
                                 onclick="abrirModalEspecializacoesOficioFicha(${i})"
                               >
-                                OfÃ­cios
+                                Ofícios
                               </button>
                             `
                     : `
@@ -22255,8 +22255,8 @@ ${renderInventarioSimples(f)}
                   </div>
 
                   <div style="margin-top:14px" class="notice">
-                    Metade do nÃ­vel: <strong>${getMetadeNivel(f)}</strong><br>
-                    BÃ´nus de treino atual: <strong>+${getBonusTreino(f)}</strong>
+                    Metade do nível: <strong>${getMetadeNivel(f)}</strong><br>
+                    Bônus de treino atual: <strong>+${getBonusTreino(f)}</strong>
                   </div>
                 </div>
               </div>
@@ -22418,7 +22418,7 @@ function renderDadosModal() {
         <div class="overlay-header">
           <div>
             <div class="overlay-title">Dados</div>
-            <div class="subtitle">Rolagem rÃ¡pida sem sair da ficha.</div>
+            <div class="subtitle">Rolagem rápida sem sair da ficha.</div>
           </div>
           <button class="btn ghost" onclick="fecharModal()">Fechar</button>
         </div>
@@ -22465,14 +22465,14 @@ function renderDadosModal() {
                 </div>
 
                 <div style="margin-top:14px" class="notice">
-                  FÃ³rmula atual: <strong>${state.dados.grupos.map(g => `${g.quantidade}${g.tipo}`).join(" + ")}</strong>
+                  Fórmula atual: <strong>${state.dados.grupos.map(g => `${g.quantidade}${g.tipo}`).join(" + ")}</strong>
                 </div>
               </div>
             </div>
 
             <div class="row-2">
               <div class="panel">
-                <div class="panel-title">Ãšltimo resultado</div>
+                <div class="panel-title">Último resultado</div>
                 <div class="panel-body">
                   ${!state.dados.ultimoResultado
             ? `<div class="empty">Nenhuma rolagem ainda.</div>`
@@ -22502,14 +22502,14 @@ function renderDadosModal() {
               </div>
 
               <div class="panel">
-                <div class="panel-title">HistÃ³rico</div>
+                <div class="panel-title">Histórico</div>
                 <div class="panel-body">
                   <div class="actions" style="margin-bottom:12px;">
-                    <button class="btn danger" onclick="limparHistoricoDados()">Limpar histÃ³rico</button>
+                    <button class="btn danger" onclick="limparHistoricoDados()">Limpar histórico</button>
                   </div>
 
                   ${state.dados.historico.length === 0
-            ? `<div class="empty">Sem histÃ³rico.</div>`
+            ? `<div class="empty">Sem histórico.</div>`
             : `
                         <div class="list">
                           ${state.dados.historico.map(item => `
@@ -22517,7 +22517,7 @@ function renderDadosModal() {
                               <div>
                                 <div class="list-item-title">${escapeHtml(item.formula)}</div>
                                 <div class="list-item-sub">
-                                  ${item.grupos.map(g => `${g.quantidade}${g.tipo}: ${g.resultados.join(" + ")}`).join(" â€¢ ")}
+                                  ${item.grupos.map(g => `${g.quantidade}${g.tipo}: ${g.resultados.join(" + ")}`).join(" ⬢ ")}
                                 </div>
                               </div>
                               <div style="font-weight:bold; font-size:20px;">${item.total}</div>
@@ -22560,7 +22560,7 @@ function renderEquipamentoModal() {
         <div class="overlay-body">
           <div class="sheet-grid">
             <div class="panel">
-              <div class="panel-title">InformaÃ§Ãµes bÃ¡sicas</div>
+              <div class="panel-title">Informações básicas</div>
               <div class="panel-body">
                 <div class="row-3">
                   <div class="field">
@@ -22595,7 +22595,7 @@ function renderEquipamentoModal() {
                 <div style="height:14px"></div>
 
                 <div class="field">
-                  <label>PreÃ§o</label>
+                  <label>Preço</label>
                   <input
                     value="${escapeAttr(equip.preco)}"
                     oninput="updateEquipamento('${equip.id}', 'preco', this.value)"
@@ -22605,7 +22605,7 @@ function renderEquipamentoModal() {
             </div>
 
             <div class="panel">
-              <div class="panel-title">DescriÃ§Ã£o</div>
+              <div class="panel-title">Descrição</div>
               <div class="panel-body">
                 <div class="field">
                   <textarea
@@ -22658,7 +22658,7 @@ function renderHabilidadeModal() {
         <div class="overlay-header">
           <div>
             <div class="overlay-title">Habilidade</div>
-            <div class="subtitle">DescriÃ§Ã£o e ediÃ§Ã£o</div>
+            <div class="subtitle">Descrição e edição</div>
           </div>
           <button class="btn ghost" onclick="fecharModal()">Fechar</button>
         </div>
@@ -22666,7 +22666,7 @@ function renderHabilidadeModal() {
         <div class="overlay-body">
           <div class="sheet-grid">
             <div class="panel">
-              <div class="panel-title">InformaÃ§Ãµes bÃ¡sicas</div>
+              <div class="panel-title">Informações básicas</div>
               <div class="panel-body">
                 <div class="row-2">
                   <div class="field">
@@ -22691,7 +22691,7 @@ function renderHabilidadeModal() {
             </div>
 
             <div class="panel">
-              <div class="panel-title">DescriÃ§Ã£o</div>
+              <div class="panel-title">Descrição</div>
               <div class="panel-body">
                 <div class="field">
                   <textarea
@@ -22916,7 +22916,7 @@ function renderMagiaModalMobile(magia, ficha, resumo) {
                 </div>
 
                 <div class="mf-magia-detail-field">
-                  <label>DescriÃ§Ã£o do incremento</label>
+                  <label>Descrição do incremento</label>
                   <textarea
                     class="mf-magia-detail-textarea mf-magia-detail-textarea-sm"
                     oninput="updateIncrementoMagia('${magia.id}', '${inc.id}', 'descricao', this.value)"
@@ -22932,7 +22932,7 @@ function renderMagiaModalMobile(magia, ficha, resumo) {
         <div class="overlay-header mf-add-habilidade-header">
           <div>
             <div class="overlay-title">${escapeHtml(magia.nome || "Magia")}</div>
-            <div class="subtitle">CÃ­rculo ${escapeHtml(String(magia.circulo || "â€”"))} â€¢ Detalhes, incrementos e uso</div>
+            <div class="subtitle">Círculo ${escapeHtml(String(magia.circulo || "—"))} • Detalhes, incrementos e uso</div>
           </div>
           <button class="mf-add-habilidade-btn mf-add-habilidade-btn-fechar" onclick="fecharModal()">Fechar</button>
         </div>
@@ -22944,8 +22944,8 @@ function renderMagiaModalMobile(magia, ficha, resumo) {
 
             <div class="mf-magia-detail-resumo ${alerta ? "is-danger" : ""}">
               PM atual: <strong>${pmAtual}</strong>
-              &nbsp;â€¢&nbsp; Custo base: <strong>${custoBase}</strong>
-              &nbsp;â€¢&nbsp; Custo total: <strong>${custoTotal}</strong>
+              &nbsp;⬢&nbsp; Custo base: <strong>${custoBase}</strong>
+              &nbsp;⬢&nbsp; Custo total: <strong>${custoTotal}</strong>
             </div>
 
             <div class="mf-magia-detail-actions">
@@ -22960,7 +22960,7 @@ function renderMagiaModalMobile(magia, ficha, resumo) {
             </div>
 
             <div class="mf-magia-detail-card">
-              <div class="mf-magia-detail-card-title">InformaÃ§Ãµes bÃ¡sicas</div>
+              <div class="mf-magia-detail-card-title">Informações básicas</div>
 
               <div class="mf-magia-detail-field">
                 <label>Nome</label>
@@ -22969,7 +22969,7 @@ function renderMagiaModalMobile(magia, ficha, resumo) {
 
               <div class="mf-magia-detail-row2">
                 <div class="mf-magia-detail-field">
-                  <label>CÃ­rculo</label>
+                  <label>Círculo</label>
                   <input value="${escapeAttr(magia.circulo)}" oninput="updateMagia('${magia.id}', 'circulo', this.value)">
                 </div>
                 <div class="mf-magia-detail-field">
@@ -22980,7 +22980,7 @@ function renderMagiaModalMobile(magia, ficha, resumo) {
 
               <div class="mf-magia-detail-row2">
                 <div class="mf-magia-detail-field">
-                  <label>ExecuÃ§Ã£o</label>
+                  <label>Execução</label>
                   <input value="${escapeAttr(magia.execucao)}" oninput="updateMagia('${magia.id}', 'execucao', this.value)">
                 </div>
                 <div class="mf-magia-detail-field">
@@ -22991,23 +22991,23 @@ function renderMagiaModalMobile(magia, ficha, resumo) {
 
               <div class="mf-magia-detail-row2">
                 <div class="mf-magia-detail-field">
-                  <label>Ãrea</label>
+                  <label>Área</label>
                   <input value="${escapeAttr(magia.area)}" oninput="updateMagia('${magia.id}', 'area', this.value)">
                 </div>
                 <div class="mf-magia-detail-field">
-                  <label>DuraÃ§Ã£o</label>
+                  <label>Duração</label>
                   <input value="${escapeAttr(magia.duracao)}" oninput="updateMagia('${magia.id}', 'duracao', this.value)">
                 </div>
               </div>
 
               <div class="mf-magia-detail-field">
-                <label>ResistÃªncia</label>
+                <label>Resistência</label>
                 <input value="${escapeAttr(magia.resistencia)}" oninput="updateMagia('${magia.id}', 'resistencia', this.value)">
               </div>
             </div>
 
             <div class="mf-magia-detail-card">
-              <div class="mf-magia-detail-card-title">DescriÃ§Ã£o</div>
+              <div class="mf-magia-detail-card-title">Descrição</div>
               <textarea
                 class="mf-magia-detail-textarea"
                 oninput="updateMagia('${magia.id}', 'descricao', this.value)"
@@ -23076,7 +23076,7 @@ function renderMagiaModal() {
         <div class="overlay-body">
           <div class="sheet-grid">
             <div class="panel">
-              <div class="panel-title">InformaÃ§Ãµes bÃ¡sicas</div>
+              <div class="panel-title">Informações básicas</div>
               <div class="panel-body">
                 <div class="row-3">
                   <div class="field">
@@ -23088,7 +23088,7 @@ function renderMagiaModal() {
                   </div>
 
                   <div class="field">
-                    <label>CÃ­rculo</label>
+                    <label>Círculo</label>
                     <input
                       value="${escapeAttr(magia.circulo)}"
                       oninput="updateMagia('${magia.id}', 'circulo', this.value)"
@@ -23110,7 +23110,7 @@ function renderMagiaModal() {
 
                 <div class="row-3">
                   <div class="field">
-                    <label>ExecuÃ§Ã£o</label>
+                    <label>Execução</label>
                     <input
                       value="${escapeAttr(magia.execucao)}"
                       oninput="updateMagia('${magia.id}', 'execucao', this.value)"
@@ -23126,7 +23126,7 @@ function renderMagiaModal() {
                   </div>
 
                   <div class="field">
-                    <label>Ãrea</label>
+                    <label>Área</label>
                     <input
                       value="${escapeAttr(magia.area)}"
                       oninput="updateMagia('${magia.id}', 'area', this.value)"
@@ -23138,7 +23138,7 @@ function renderMagiaModal() {
 
                 <div class="row-2">
                   <div class="field">
-                    <label>DuraÃ§Ã£o</label>
+                    <label>Duração</label>
                     <input
                       value="${escapeAttr(magia.duracao)}"
                       oninput="updateMagia('${magia.id}', 'duracao', this.value)"
@@ -23146,7 +23146,7 @@ function renderMagiaModal() {
                   </div>
 
                   <div class="field">
-                    <label>ResistÃªncia</label>
+                    <label>Resistência</label>
                     <input
                       value="${escapeAttr(magia.resistencia)}"
                       oninput="updateMagia('${magia.id}', 'resistencia', this.value)"
@@ -23157,7 +23157,7 @@ function renderMagiaModal() {
             </div>
 
             <div class="panel">
-              <div class="panel-title">DescriÃ§Ã£o</div>
+              <div class="panel-title">Descrição</div>
               <div class="panel-body">
                 <div class="field">
                   <textarea
@@ -23200,7 +23200,7 @@ function renderMagiaModal() {
                   </div>
 
                   <div class="field" style="margin-top:8px;">
-                    <label>DescriÃ§Ã£o do incremento</label>
+                    <label>Descrição do incremento</label>
                     <textarea
                       oninput="updateIncrementoMagia('${magia.id}', '${inc.id}', 'descricao', this.value)"
                     >${escapeHtml(inc.descricao || "")}</textarea>
@@ -23290,7 +23290,7 @@ function aplicarFiltroModalAdicionarHabilidade(valor = "") {
         mensagem.style.display = totalVisivel === 0 ? "block" : "none";
         mensagem.textContent = termo
             ? "Nenhum poder encontrado para essa busca."
-            : "Nenhum poder disponÃ­vel no banco.";
+            : "Nenhum poder disponível no banco.";
     }
 }
 
@@ -23327,7 +23327,7 @@ function renderModalAdicionarHabilidade() {
         <div class="overlay-header ${mobile ? "mf-add-habilidade-header" : ""}">
           <div>
             <div class="overlay-title">Adicionar habilidade</div>
-            <div class="subtitle">VocÃª pode cadastrar manualmente ou escolher poderes gerais e de classe.</div>
+            <div class="subtitle">Você pode cadastrar manualmente ou escolher poderes gerais e de classe.</div>
           </div>
           <button class="${mobile ? "mf-add-habilidade-btn mf-add-habilidade-btn-fechar" : "btn ghost"}" onclick="fecharModal()">Fechar</button>
         </div>
@@ -23362,7 +23362,7 @@ function renderModalAdicionarHabilidade() {
           ${mobile ? `<div class="t20-divider"></div>` : ""}
 
           ${registros.length === 0
-            ? `<div class="empty">Nenhum poder disponÃ­vel no banco.</div>`
+            ? `<div class="empty">Nenhum poder disponível no banco.</div>`
             : `
               <div id="mensagem-sem-habilidades-banco" class="empty" style="display:none; margin-bottom:12px;">Nenhum poder encontrado para essa busca.</div>
 
@@ -23434,7 +23434,7 @@ function aplicarFiltroModalAdicionarMagia(valor = "") {
         mensagem.style.display = totalVisivel === 0 ? "block" : "none";
         mensagem.textContent = termo
             ? "Nenhuma magia encontrada para essa busca."
-            : "Nenhuma magia disponÃ­vel para este personagem.";
+            : "Nenhuma magia disponível para este personagem.";
     }
 }
 
@@ -23471,7 +23471,7 @@ function renderModalAdicionarMagia() {
         <div class="overlay-header ${mobile ? "mf-add-habilidade-header" : ""}">
           <div>
             <div class="overlay-title">Adicionar magia</div>
-            <div class="subtitle">Lista de magias disponÃ­veis para o personagem por cÃ­rculo.</div>
+            <div class="subtitle">Lista de magias disponíveis para o personagem por círculo.</div>
           </div>
           <button class="${mobile ? "mf-add-habilidade-btn mf-add-habilidade-btn-fechar" : "btn ghost"}" onclick="fecharModal()">Fechar</button>
         </div>
@@ -23506,7 +23506,7 @@ function renderModalAdicionarMagia() {
           ${mobile ? `<div class="t20-divider"></div>` : ""}
 
           ${registros.length === 0
-            ? `<div class="empty">Nenhuma magia disponÃ­vel para este personagem.</div>`
+            ? `<div class="empty">Nenhuma magia disponível para este personagem.</div>`
             : `
               <div id="mensagem-sem-magias-banco" class="empty" style="display:none; margin-bottom:12px;">Nenhuma magia encontrada para essa busca.</div>
 
@@ -23525,9 +23525,9 @@ function renderModalAdicionarMagia() {
                     <div class="${mobile ? "mf-add-habilidade-info" : ""}" ${mobile ? "" : `style="flex:1;"`}>
                       <div class="${mobile ? "mf-add-habilidade-nome" : "list-item-title"}">${escapeHtml(registro.nome || "Sem nome")}</div>
                       <div class="${mobile ? "mf-add-habilidade-origem" : "list-item-sub"}">
-                        CÃ­rculo ${escapeHtml(String(registro.circulo || "â€”"))}
-                        ${registro.tradicao ? ` â€¢ ${escapeHtml(registro.tradicao)}` : ""}
-                        ${registro.escola ? ` â€¢ ${escapeHtml(registro.escola)}` : ""}
+                        Círculo ${escapeHtml(String(registro.circulo || "—"))}
+                        ${registro.tradicao ? ` ⬢ ${escapeHtml(registro.tradicao)}` : ""}
+                        ${registro.escola ? ` ⬢ ${escapeHtml(registro.escola)}` : ""}
                       </div>
                     </div>
 
@@ -23616,7 +23616,7 @@ function rolarTodosDados() {
     const totalDados = getTotalDadosSelecionados();
 
     if (totalDados > 50) {
-        alert(`VocÃª sÃ³ pode rolar no mÃ¡ximo 50 dados no total. Atual: ${totalDados}.`);
+        alert(`Você só pode rolar no máximo 50 dados no total. Atual: ${totalDados}.`);
         return;
     }
 
@@ -23647,7 +23647,7 @@ function rolarTodosDados() {
 }
 
 function limparHistoricoDados() {
-    const ok = confirm("Limpar histÃ³rico de rolagens?");
+    const ok = confirm("Limpar histórico de rolagens?");
     if (!ok) return;
 
     state.dados.historico = [];
