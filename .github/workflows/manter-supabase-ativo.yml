@@ -13,32 +13,35 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Verificar atividade do Supabase
+      - name: Verificar tabela characters
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        shell: bash
         run: |
           set -euo pipefail
 
-          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "Configure os Secrets do Supabase no GitHub."
+          if [[ -z "$SUPABASE_URL" || -z "$SUPABASE_ANON_KEY" ]]; then
+            echo "::error::SUPABASE_URL ou SUPABASE_ANON_KEY não configurado."
             exit 1
           fi
 
-          URL="${SUPABASE_URL%/}"
+          URL="${SUPABASE_URL%/}/rest/v1/characters?select=*&limit=1"
 
-          STATUS=$(curl --silent --show-error \
-            --output /dev/null \
+          HTTP_CODE=$(curl --silent --show-error \
+            --output response.txt \
             --write-out "%{http_code}" \
             --max-time 30 \
-            "$URL/rest/v1/" \
-            -H "apikey: $SUPABASE_ANON_KEY")
+            "$URL" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY")
 
-          echo "HTTP recebido: $STATUS"
+          echo "Código HTTP: $HTTP_CODE"
 
-          if [ "$STATUS" -lt 200 ] || [ "$STATUS" -ge 300 ]; then
-            echo "A consulta não foi concluída com sucesso."
+          if [[ "$HTTP_CODE" != "200" ]]; then
+            echo "::error::A consulta falhou. Verifique a tabela, a chave e as permissões RLS."
+            cat response.txt
             exit 1
           fi
 
-          echo "Consulta concluída com sucesso."
+          echo "Consulta à tabela characters realizada com sucesso."
