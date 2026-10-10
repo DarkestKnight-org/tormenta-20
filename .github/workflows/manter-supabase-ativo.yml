@@ -4,6 +4,7 @@ name: Manter Supabase ativo
 on:
   schedule:
     - cron: "17 9 * * *"
+    - cron: "17 21 * * *"
   workflow_dispatch:
 
 permissions:
